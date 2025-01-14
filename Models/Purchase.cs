@@ -1,0 +1,39 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
+using System.Text.Json.Serialization;
+
+namespace InventoryTrackApi.Models
+{
+    public class Purchase
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int PurchaseId { get; set; }
+
+        [DefaultValue("DateTime.Now")]
+        public DateTime PurchaseDate { get; set; } = DateTime.Now;
+        
+        [Required]
+        public decimal TvaAmount { get; set; } = 0m;
+        [Required]
+        public decimal TotalAmount { get; set; } = 0m;
+        [Required]
+        public decimal AmountPaid { get; set; } = 0m;
+
+        public decimal OutstandingBalance => TotalAmount - AmountPaid;
+            
+        [Required]
+        public int SupplierId { get; set; }
+        [Required]
+        public int EmployeeId { get; set; }
+
+        [JsonIgnore]
+        public virtual Supplier? Supplier { get; set; }
+        [JsonIgnore]
+        public virtual Employee? Employee { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<PurchaseItem> PurchaseItems { get; set; }
+        public virtual ICollection<PurchasePayment> PurchasePayments { get; set; }
+    }
+}
