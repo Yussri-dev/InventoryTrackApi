@@ -9,6 +9,7 @@ namespace InventoryTrackApi.Repositories
         Task<IEnumerable<T>> GetByNameAsync(Expression<Func<T, bool>> predicate);
         Task<IEnumerable<T>> GetByBarCodeAsync(Expression<Func<T, bool>> predicate);
         Task<IEnumerable<T>> GetAllAsync(int pageNumber = 1, int pageSize = 10);
+        Task<IEnumerable<T>> GetAllByDateRangeAsync(DateTime startDate,DateTime endDate,int pageNumber,int pageSize);
         Task CreateAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(int id);

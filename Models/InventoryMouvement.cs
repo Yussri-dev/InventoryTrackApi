@@ -33,6 +33,8 @@ namespace InventoryTrackApi.Models
         [DefaultValue("DateTime.Now")]
         public DateTime MouvementDate { get; set; } = DateTime.Now;
 
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         /// <summary>
         /// List of Mouvement Related To Products
         /// List of Mouvement Related To Locations

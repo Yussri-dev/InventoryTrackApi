@@ -45,6 +45,7 @@ namespace InventoryTrackApi.Models
         [DefaultValue("DateTime.Now")]
         public DateTime DateModified { get; set; } = DateTime.Now;
 
+
         public bool IsActivate { get; set; } = true;
 
         public virtual ICollection<Sale> Sales { get; set; }

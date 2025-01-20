@@ -30,6 +30,30 @@ namespace InventoryTrackApi.Repositories
                                .ToListAsync();
         }
 
+        public async Task<IEnumerable<T>> GetAllByDateRangeAsync(DateTime startDate, DateTime endDate, int pageNumber, int pageSize)
+        {
+            pageSize = pageSize > 0 ? pageSize : 10;
+            pageNumber = pageNumber > 0 ? pageNumber : 1;
+
+            // Check if the entity has a DateCreated property
+            var query = _dbSet.AsQueryable();
+            var parameter = Expression.Parameter(typeof(T), "entity");
+            var property = Expression.Property(parameter, "DateCreated");
+            var lambda = Expression.Lambda<Func<T, bool>>(
+                Expression.AndAlso(
+                    Expression.GreaterThanOrEqual(property, Expression.Constant(startDate)),
+                    Expression.LessThanOrEqual(property, Expression.Constant(endDate))
+                ),
+                parameter
+            );
+
+            query = query.Where(lambda);
+
+            return await query.Skip((pageNumber - 1) * pageSize)
+                              .Take(pageSize)
+                              .ToListAsync();
+        }
+
         // Gets a single record by ID, or throws a custom exception if not found
         public async Task<T> GetByIdAsync(int id)
         {
@@ -229,6 +253,8 @@ namespace InventoryTrackApi.Repositories
             // return entity QuantityStock
             return (entity as Product)?.QuantityStock ?? throw new InvalidOperationException("Invalid entity type for quantity retrieval.");
         }
+
+        
 
     }
 }

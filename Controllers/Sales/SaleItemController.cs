@@ -3,6 +3,7 @@ using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace InventoryTrackApi.Controllers.Sales
 {
@@ -12,7 +13,9 @@ namespace InventoryTrackApi.Controllers.Sales
     {
         private readonly SaleItemService _saleItemService;
         private readonly ILogger<SaleItemController> _logger;
-        public SaleItemController(SaleItemService saleItemService, ILogger<SaleItemController> logger)
+        public SaleItemController(
+            SaleItemService saleItemService,
+            ILogger<SaleItemController> logger)
         {
             _saleItemService = saleItemService;
             _logger = logger;
@@ -20,9 +23,32 @@ namespace InventoryTrackApi.Controllers.Sales
 
         // Get paged saleItems
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSaleItems(int pageNumber = 1, int pageSize = 10)
         {
-            var saleItems = await _saleItemService.GetPagedSaleItemsAsync(pageNumber, pageSize);
+            var saleItems = await _saleItemService.GetSaleItemsWithProductAsync(pageNumber, pageSize);
+            return Ok(saleItems);
+        }
+
+        // Get paged sale items by date range
+        //[HttpGet("pagedSaleitemsByDate")]
+        //public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSaleItemsByDateAsync(
+        //    DateTime startDate, DateTime endDate, int pageNumber = 1, int pageSize = 10)
+        //{
+        //    var saleItems = await _saleItemService.GetPagedSaleItemsByDateAsync(startDate, endDate, pageNumber, pageSize);
+        //    return Ok(saleItems);
+        //}
+
+        [HttpGet("pagedSaleitemsByDate")]
+        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSaleItemsByDateAsync(
+        [FromQuery] string startDate, [FromQuery] string endDate, int pageNumber = 1, int pageSize = 10)
+        {
+            if (!DateTime.TryParseExact(startDate, "MM-dd-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedStartDate) ||
+                !DateTime.TryParseExact(endDate, "MM-dd-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedEndDate))
+            {
+                return BadRequest("Invalid date format. Please use MM-dd-yyyy.");
+            }
+
+            var saleItems = await _saleItemService.GetPagedSaleItemsByDateAsync(parsedStartDate, parsedEndDate, pageNumber, pageSize);
             return Ok(saleItems);
         }
 

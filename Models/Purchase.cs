@@ -22,7 +22,10 @@ namespace InventoryTrackApi.Models
         public decimal AmountPaid { get; set; } = 0m;
 
         public decimal OutstandingBalance => TotalAmount - AmountPaid;
-            
+
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+
         [Required]
         public int SupplierId { get; set; }
         [Required]

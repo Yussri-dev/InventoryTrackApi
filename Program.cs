@@ -32,7 +32,6 @@ builder.Services.AddScoped<SaleService>();
 builder.Services.AddScoped<SaleItemService>();
 builder.Services.AddScoped<SalePaymentService>();
 builder.Services.AddScoped<SupplierService>();
-builder.Services.AddScoped<SaleItemProductService>();
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 

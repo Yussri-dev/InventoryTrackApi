@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -19,6 +20,8 @@ namespace InventoryTrackApi.Models
         public decimal TaxAmount { get; set; } = decimal.Zero;
         public decimal Total { get; set; } = decimal.Zero;
 
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public virtual Sale? Sale { get; set; }
         [JsonIgnore]

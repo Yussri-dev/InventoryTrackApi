@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryTrackApi.Models
@@ -11,7 +12,8 @@ namespace InventoryTrackApi.Models
         [Required]
         [StringLength(50, ErrorMessage = "Unit name cannot exceed 50 characters.")]
         public string Name { get; set; } = string.Empty;
-
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         /// <summary>
         /// List of products Related to Unit
         /// </summary>

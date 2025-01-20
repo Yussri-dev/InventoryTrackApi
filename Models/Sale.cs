@@ -26,6 +26,8 @@ namespace InventoryTrackApi.Models
 
         public decimal OutstandingBalance => TotalAmount - AmountPaid;
         public decimal DiscountPercentage { get; set; } = decimal.Zero;
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public virtual Customer? Customer { get; set; }
         [JsonIgnore]

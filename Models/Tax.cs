@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryTrackApi.Models
@@ -11,7 +12,8 @@ namespace InventoryTrackApi.Models
 
         [Required]
         public decimal TaxRate { get; set; } = decimal.Zero;
-
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         /// <summary>
         /// List of products related to the tax rate.
         /// </summary>

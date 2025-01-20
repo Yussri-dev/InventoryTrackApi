@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -15,6 +16,8 @@ namespace InventoryTrackApi.Models
         public decimal Amount { get; set; } = decimal.Zero;
         public DateTime TransactionTime { get; set; } = DateTime.UtcNow;
         public string Description { get; set; } = string.Empty;
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         [JsonIgnore]
         public virtual CashShift? CashShift { get; set; }

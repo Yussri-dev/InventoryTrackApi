@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using System.ComponentModel;
 
 namespace InventoryTrackApi.Models
 {
@@ -15,7 +16,8 @@ namespace InventoryTrackApi.Models
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
         public decimal Amount { get; set; } = decimal.Zero;
         public string PaymentType { get; set; } = string.Empty;
-
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public virtual Purchase? Purchase { get; set; }
     }

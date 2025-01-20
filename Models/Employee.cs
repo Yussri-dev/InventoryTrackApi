@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryTrackApi.Models
@@ -27,6 +28,8 @@ namespace InventoryTrackApi.Models
         public string Email { get; set; } = string.Empty;
         [Required]
         public string PasswordHash { get; set; } = string.Empty;
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         public virtual ICollection<Sale> Sales { get; set; }
         public virtual ICollection<Purchase> Purchases { get; set; }

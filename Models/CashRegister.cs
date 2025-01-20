@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -17,7 +18,8 @@ namespace InventoryTrackApi.Models
         public int LocationId { get; set; }
         [Required]
         public int EmployeeId { get; set; }
-
+        [DefaultValue("DateTime.Now")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         [JsonIgnore]
         public virtual Location? Location { get; set; }
