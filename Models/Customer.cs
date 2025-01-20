@@ -49,6 +49,7 @@ namespace InventoryTrackApi.Models
         public bool IsActivate { get; set; } = true;
 
         public virtual ICollection<Sale> Sales { get; set; }
+        public virtual ICollection<Return> Returns { get; set; }
 
     }
 }

@@ -32,6 +32,7 @@ namespace InventoryTrackApi.Models
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         public virtual ICollection<Sale> Sales { get; set; }
+        public virtual ICollection<Return> Returns { get; set; }
         public virtual ICollection<Purchase> Purchases { get; set; }
         public virtual ICollection<CashShift> CashShifts { get; set; }
         public virtual ICollection<CashRegister> CashRegisters { get; set; }

@@ -79,6 +79,7 @@ namespace InventoryTrackApi.Models
         public virtual ICollection<InventoryMouvement> InventoryMouvements { get; set; }
         public virtual ICollection<SaleItem> SaleItems { get; set; }
         public virtual ICollection<PurchaseItem> PurchaseItems { get; set; }
+        public virtual ICollection<ReturnItem> ReturnItems { get; set; }
 
     }
 

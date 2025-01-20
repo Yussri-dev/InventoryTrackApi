@@ -214,6 +214,46 @@ namespace InventoryTrackApi.Data
 
             #endregion
 
+            #region Return
+            // Sale
+            modelBuilder.Entity<Return>()
+                .HasOne(s => s.Customer)
+                .WithMany(c => c.Returns)
+                .HasForeignKey(f => f.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
+            modelBuilder.Entity<Return>()
+                    .HasOne(s => s.Employee)
+                    .WithMany(e => e.Returns)
+                    .HasForeignKey(f => f.EmployeeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+            // Sale -> SaleItem
+            modelBuilder.Entity<ReturnItem>()
+                .HasOne(si => si.Return)
+                .WithMany(s => s.returnItems)
+                .HasForeignKey(si => si.ReturnId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Product -> SaleItem
+            modelBuilder.Entity<ReturnItem>()
+                .HasOne(si => si.Product)
+                .WithMany(p => p.ReturnItems)
+                .HasForeignKey(si => si.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
+            // Sale Payment
+            modelBuilder.Entity<ReturnPayment>()
+                .HasOne(sp => sp.Return)
+                .WithMany(s => s.ReturnPayments)
+                .HasForeignKey(f => f.ReturnId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            #endregion
             // Seeding data from ModelBuilderExtensions (if defined)
             modelBuilder.Seed();
         }
