@@ -22,7 +22,7 @@ namespace InventoryTrackApi.Controllers.Sales
 
         // Get paged sales
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedSales(int pageNumber = 1, int pageSize = 10)
         {
             var sales = await _saleService.GetPagedSalesAsync(pageNumber, pageSize);
             return Ok(sales);

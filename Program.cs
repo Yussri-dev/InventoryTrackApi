@@ -23,15 +23,22 @@ builder.Services.AddScoped<CashShiftService>();
 builder.Services.AddScoped<CashTransactionService>();
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddScoped<SupplierService>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<InventoryMouvementService>();
+
 builder.Services.AddScoped<PurchaseService>();
 builder.Services.AddScoped<PurchaseItemService>();
 builder.Services.AddScoped<PurchasePaymentService>();
+
+
 builder.Services.AddScoped<SaleService>();
 builder.Services.AddScoped<SaleItemService>();
 builder.Services.AddScoped<SalePaymentService>();
-builder.Services.AddScoped<SupplierService>();
+
+builder.Services.AddScoped<ReturnService>();
+builder.Services.AddScoped<ReturnItemService>();
+//builder.Services.AddScoped<ReturnPaymentService>();
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 

@@ -4,6 +4,7 @@ using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace InventoryTrackApi.Controllers.Sales
 {
@@ -29,6 +30,7 @@ namespace InventoryTrackApi.Controllers.Sales
             return Ok(saleItems);
         }
 
+
         // Get paged sale items by date range
         //[HttpGet("pagedSaleitemsByDate")]
         //public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSaleItemsByDateAsync(
@@ -37,18 +39,32 @@ namespace InventoryTrackApi.Controllers.Sales
         //    var saleItems = await _saleItemService.GetPagedSaleItemsByDateAsync(startDate, endDate, pageNumber, pageSize);
         //    return Ok(saleItems);
         //}
-
-        [HttpGet("pagedSaleitemsByDate")]
-        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSaleItemsByDateAsync(
-        [FromQuery] string startDate, [FromQuery] string endDate, int pageNumber = 1, int pageSize = 10)
+        [HttpGet("SaleItemsDateRange")]
+        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSaleItemsByDateRangeAsync(
+                    [FromQuery] string startDate, [FromQuery] string endDate)
         {
-            if (!DateTime.TryParseExact(startDate, "MM-dd-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedStartDate) ||
-                !DateTime.TryParseExact(endDate, "MM-dd-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedEndDate))
+            // Parse the start date
+            if (!DateTime.TryParseExact(
+                    startDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out var startSalesDate))
             {
-                return BadRequest("Invalid date format. Please use MM-dd-yyyy.");
+                return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
             }
 
-            var saleItems = await _saleItemService.GetPagedSaleItemsByDateAsync(parsedStartDate, parsedEndDate, pageNumber, pageSize);
+            // Parse the end date
+            if (!DateTime.TryParseExact(
+                    endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out var endSalesDate))
+            {
+                return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
+            }
+
+            // Ensure the end date is inclusive of the entire day
+            endSalesDate = endSalesDate.AddDays(1).AddSeconds(-1);
+
+            // Fetch sale items within the date range
+            var saleItems = await _saleItemService.GetPagedSaleItemsByDateRangeAsync(startSalesDate, endSalesDate);
+
             return Ok(saleItems);
         }
 
@@ -63,6 +79,27 @@ namespace InventoryTrackApi.Controllers.Sales
             }
             return Ok(saleItem);
         }
+
+        //// Get product by ID
+        [HttpGet("ByBarCode/{id}")]
+        public async Task<ActionResult<SaleItemDTO>> GetProductByBarCode(int id)
+        {
+            try
+            {
+                var product = await _saleItemService.GetPagedSaleItemsByIdAsync(id);
+                return Ok(product);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving product by name");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
 
         // Create a new saleItem
         [HttpPost]
@@ -82,7 +119,9 @@ namespace InventoryTrackApi.Controllers.Sales
                     Price = saleItemDto.Price,
                     Discount = saleItemDto.Discount,
                     TaxAmount = saleItemDto.TaxAmount,
-                    Total = saleItemDto.Total
+                    Total = saleItemDto.Total,
+                    ProfitMarge = saleItemDto.ProfitMarge,
+                    PurchasePrice = saleItemDto.PurchasePrice
                 };
                 await _saleItemService.CreateSaleItemAsync(saleItem);
 
@@ -94,7 +133,9 @@ namespace InventoryTrackApi.Controllers.Sales
                     Price = saleItem.Price,
                     Discount = saleItem.Discount,
                     TaxAmount = saleItem.TaxAmount,
-                    Total = saleItem.Total
+                    Total = saleItem.Total,
+                    ProfitMarge = saleItem.ProfitMarge,
+                    PurchasePrice = saleItem.PurchasePrice
                 };
                 return CreatedAtAction(nameof(GetSaleItem), new { id = saleItem.SaleItemId }, saleItemDto);
             }
@@ -128,7 +169,9 @@ namespace InventoryTrackApi.Controllers.Sales
                 Price = saleItemDto.Price,
                 Discount = saleItemDto.Discount,
                 TaxAmount = saleItemDto.TaxAmount,
-                Total = saleItemDto.Total
+                Total = saleItemDto.Total,
+                ProfitMarge = saleItemDto.ProfitMarge,
+                PurchasePrice = saleItemDto.PurchasePrice
             };
 
             await _saleItemService.UpdateSaleItemAsync(saleItem);
@@ -142,6 +185,31 @@ namespace InventoryTrackApi.Controllers.Sales
             await _saleItemService.DeleteSaleItemAsync(id);
             return NoContent();
         }
+
+        [HttpGet("profits")]
+        public async Task<ActionResult<decimal>> CalculateProfits([FromQuery] string startDate)
+        {
+            try
+            {
+                if (!DateTime.TryParseExact(
+                    startDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out var parsedStartDate))
+                {
+                    return BadRequest("Invalid date format. Use dd/MM/yyyy.");
+                }
+
+                var totalProfits = await _saleItemService.CalculateProfitsAsync(parsedStartDate);
+
+                //Return the decimal value directly instead of JSON
+                return Ok(totalProfits);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
 
     }
 }

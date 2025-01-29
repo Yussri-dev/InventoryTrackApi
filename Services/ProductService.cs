@@ -56,7 +56,6 @@ namespace InventoryTrackApi.Services
             return quantityStock;
         }
 
-
         //Get a product by Name
         public async Task<IEnumerable<Product>> GetProductByBarCodeAsync(string barCode)
         {

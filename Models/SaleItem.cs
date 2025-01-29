@@ -16,12 +16,15 @@ namespace InventoryTrackApi.Models
         public int ProductId { get; set; }
         public decimal Quantity { get; set; } = 0m;
         public decimal Price { get; set; } = 0m;
+        public decimal ProfitMarge { get; set; } = 0m;
+        public decimal PurchasePrice { get; set; } = 0m;
         public decimal Discount { get; set; } = decimal.Zero;
         public decimal TaxAmount { get; set; } = decimal.Zero;
         public decimal Total { get; set; } = decimal.Zero;
 
         [DefaultValue("DateTime.Now")]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        //public DateOnly DateOfSale { get; set; }
         [JsonIgnore]
         public virtual Sale? Sale { get; set; }
         [JsonIgnore]

@@ -57,6 +57,13 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             //Sale Payment
             CreateMap<SalePayment, SalePaymentDTO>().ReverseMap() ;
 
+            //Sale
+            CreateMap<Return, ReturnDTO>().ReverseMap();
+            //Sale Item
+            CreateMap<ReturnItem, ReturnItemDTO>().ReverseMap();
+            //Sale Payment
+            CreateMap<ReturnPayment, ReturnPaymentDTO>().ReverseMap();
+
             //Supplier
             CreateMap<Supplier, SupplierDTO>().ReverseMap() ;
 

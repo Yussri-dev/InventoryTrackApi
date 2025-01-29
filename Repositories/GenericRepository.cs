@@ -254,7 +254,60 @@ namespace InventoryTrackApi.Repositories
             return (entity as Product)?.QuantityStock ?? throw new InvalidOperationException("Invalid entity type for quantity retrieval.");
         }
 
-        
+        //CalculateSum method
+        //public async Task<decimal> CalculateSumAsync(Expression<Func<T, decimal>> selector)
+        //{
+        //    if (selector == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(selector), "The selector expression cannot be null.");
+        //    }
 
+        //    return await _dbSet.SumAsync(selector);
+        //}
+
+        public async Task<decimal> CalculateSumAsync(
+                Expression<Func<T, bool>> filter,
+                Expression<Func<T, decimal>> selector)
+        {
+            if (filter == null)
+            {
+                throw new ArgumentNullException(nameof(filter), "The filter expression cannot be null.");
+            }
+
+            if (selector == null)
+            {
+                throw new ArgumentNullException(nameof(selector), "The selector expression cannot be null.");
+            }
+
+            return await _dbSet.Where(filter).SumAsync(selector);
+        }
+
+        public async Task<IEnumerable<T>> GetDataByDateRange(Expression<Func<T, bool>> filter)
+        {
+            if (filter == null)
+            {
+                throw new ArgumentNullException(nameof(filter), "The filter expression cannot be null.");
+            }
+
+            return await _dbSet.Where(filter).ToListAsync();
+
+
+        }
+
+        public async Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> filter, params string[] includeProperties)
+        {
+            IQueryable<T> query = _dbSet;
+
+            // Include related entities
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
+            }
+
+            // Apply the filter
+            query = query.Where(filter);
+
+            return await query.ToListAsync();
+        }
     }
 }

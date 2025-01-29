@@ -3,6 +3,8 @@ using InventoryTrackApi.Models;
 using InventoryTrackApi.Queries;
 using InventoryTrackApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace InventoryTrackApi.Services
 {
@@ -29,10 +31,94 @@ namespace InventoryTrackApi.Services
         }
 
         // Get saleItems between two dates with pagination
-        public async Task<IEnumerable<SaleItem>> GetPagedSaleItemsByDateAsync(DateTime startDate, DateTime endDate, int pageNumber, int pageSize)
+        //public async Task<IEnumerable<SaleItem>> GetPagedSaleItemsByDateAsync(DateTime startDate, DateTime endDate, int pageNumber, int pageSize)
+        //{
+        //    // Fetch filtered and paginated data from the repository
+        //    return await _saleItemRepository.GetAllByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
+        //}
+
+        //public async Task<IEnumerable<SaleItemDTO>> GetPagedSaleItemsByDateRangeAsync(DateTime startDate, DateTime endDate)
+        //{
+        //    Expression<Func<SaleItemDTO, bool>> dateFilter = saleItem => saleItem.DateCreated.Date >= startDate.Date &&
+        //                                                              saleItem.DateCreated.Date <= endDate.Date;
+        //    return await _saleItemRepository.GetDataByDateRange(dateFilter);
+        //}
+        /*
+        public async Task<IEnumerable<SaleItemDTO>> GetPagedSaleItemsByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
-            // Fetch filtered and paginated data from the repository
-            return await _saleItemRepository.GetAllByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
+            // Define the filter using the entity type (SaleItem)
+            Expression<Func<SaleItem, bool>> dateFilter = saleItem =>
+                saleItem.DateCreated.Date >= startDate.Date &&
+                saleItem.DateCreated.Date <= endDate.Date;
+
+            // Fetch data from the repository using the entity type
+            var saleItems = await _saleItemRepository.GetDataByDateRange(dateFilter);
+
+            // Map SaleItem entities to SaleItemDTO objects
+            var saleItemDTOs = saleItems.Select(s => new SaleItemDTO
+            {
+                SaleItemId = s.SaleItemId,
+                SaleId = s.SaleId,
+                ProductId = s.ProductId,
+                ProductName = s.Product.Name, // Use null-conditional operator to avoid NullReferenceException
+                Quantity = s.Quantity,
+                Price = s.Price,
+                ProfitMarge = s.ProfitMarge,
+                PurchasePrice = s.PurchasePrice,
+                Discount = s.Discount,
+                TaxAmount = s.TaxAmount,
+                Total = s.Total,
+                DateCreated = s.DateCreated
+            });
+
+            return saleItemDTOs;
+        }
+        */
+
+        public async Task<IEnumerable<SaleItemDTO>> GetPagedSaleItemsByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            // Define the filter using the entity type (SaleItem)
+            Expression<Func<SaleItem, bool>> dateFilter = saleItem =>
+                saleItem.DateCreated.Date >= startDate.Date &&
+                saleItem.DateCreated.Date <= endDate.Date;
+
+            // Fetch SaleItem entities from the repository
+            var saleItems = await _saleItemRepository.GetByConditionAsync(dateFilter);
+
+            // Fetch Product entities for the SaleItems
+            var productIds = saleItems.Select(s => s.ProductId).Distinct();
+            var products = await _productRepository.GetByConditionAsync(p => productIds.Contains(p.ProductId));
+
+            // Create a dictionary for quick lookup of Product by ProductId
+            var productDictionary = products.ToDictionary(p => p.ProductId, p => p);
+
+            // Map SaleItem entities to SaleItemDTO objects
+            var saleItemDTOs = saleItems.Select(s => new SaleItemDTO
+            {
+                SaleItemId = s.SaleItemId,
+                SaleId = s.SaleId,
+                ProductId = s.ProductId,
+                ProductName = productDictionary.TryGetValue(s.ProductId, out var product) ? product.Name : null, // Get ProductName from the dictionary
+                Quantity = s.Quantity,
+                Price = s.Price,
+                ProfitMarge = s.ProfitMarge,
+                PurchasePrice = s.PurchasePrice,
+                Discount = s.Discount,
+                TaxAmount = s.TaxAmount,
+                Total = s.Total,
+                DateCreated = s.DateCreated
+            });
+
+            return saleItemDTOs;
+        }
+
+        public async Task<decimal> CalculateProfitsAsync(DateTime startDate)
+        {
+            Expression<Func<SaleItem, decimal>> profitSelector = saleItem => saleItem.ProfitMarge;
+            Expression<Func<SaleItem, bool>> dateFilter = saleItem => saleItem.DateCreated.Date.Equals(startDate.Date);
+            //&& saleItem.DateCreated <= endDate;
+
+            return await _saleItemRepository.CalculateSumAsync(dateFilter, profitSelector);
         }
 
         // Get a saleItem by ID
@@ -72,6 +158,42 @@ namespace InventoryTrackApi.Services
             await _saleItemRepository.DeleteAsync(id);
         }
 
+        // Get all saleItems with pagination
+        public async Task<IEnumerable<SaleItemDTO>> GetPagedSaleItemsByIdAsync(int idCode)
+        {
+            // Fetch sale items by barcode or ID
+            var saleItems = await _saleItemRepository.GetByBarCodeAsync(p => p.SaleId.Equals(idCode));
+
+            // Get product IDs from the fetched sale items
+            var productIds = saleItems.Select(s => s.ProductId).ToList();
+
+            // Fetch product data
+            var products = await _productRepository.GetAllAsync();
+            var productMap = products.ToDictionary(p => p.ProductId);
+
+            // Combine SaleItem and Product into SaleItemDTO
+            var saleItemDtoList = saleItems.Select(saleItem =>
+            {
+                var product = productMap.ContainsKey(saleItem.ProductId) ? productMap[saleItem.ProductId] : null;
+
+                return new SaleItemDTO
+                {
+                    SaleItemId = saleItem.SaleItemId,
+                    SaleId = saleItem.SaleId,
+                    ProductId = saleItem.ProductId,
+                    Quantity = saleItem.Quantity,
+                    Price = saleItem.Price,
+                    Discount = saleItem.Discount,
+                    TaxAmount = saleItem.TaxAmount,
+                    Total = saleItem.Total,
+                    ProductName = product?.Name ?? "Unknown", // Add ProductName
+                };
+            });
+
+            return saleItemDtoList;
+        }
+
+
         public async Task<IEnumerable<SaleItemDTO>> GetSaleItemsWithProductAsync(int pageNumber, int pageSize)
         {
             var saleItems = await _saleItemRepository.GetAllAsync(pageNumber, pageSize);
@@ -104,36 +226,6 @@ namespace InventoryTrackApi.Services
 
             return saleItemWithProductList;
         }
-
-        //public async Task<IEnumerable<SaleItemDTO>> GetDataReferencesWithSaleItemAsync(int pageNumber, int pageSize)
-        //{
-        //    // Fetch paged sale items
-        //    var saleItems = await _saleItemRepository.GetAllAsync(pageNumber, pageSize);
-
-        //    // Fetch related data
-        //    var products = await _productRepository.GetAllAsync(); // Assuming a repository for products
-
-        //    // Create a dictionary for efficient lookups
-        //    var productMap = products.ToDictionary(p => p.ProductId, p => p.Name);
-
-        //    // Map sale items to SaleItemDTO including references
-        //    var saleItemDtoList = saleItems.Select(saleItem => new SaleItemDTO
-        //    {
-        //        SaleItemId = saleItem.SaleItemId,
-        //        SaleId = saleItem.SaleId,
-        //        ProductId = saleItem.ProductId,
-        //        Quantity = saleItem.Quantity,
-        //        Price = saleItem.Price,
-        //        Discount = saleItem.Discount,
-        //        TaxAmount = saleItem.TaxAmount,
-        //        Total = saleItem.Total,
-        //        ProductName = productMap.ContainsKey(saleItem.ProductId) ? productMap[saleItem.ProductId] : "Unknown"
-
-        //    });
-
-        //    return saleItemDtoList;
-        //}
-
 
     }
 }

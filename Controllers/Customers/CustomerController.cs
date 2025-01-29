@@ -156,8 +156,6 @@ namespace InventoryTrackApi.Controllers.Customers
             }
         }
 
-
-
         // Delete a customer
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)

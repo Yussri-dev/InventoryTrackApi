@@ -257,7 +257,7 @@ namespace InventoryTrackApi.Data
             // Seeding data from ModelBuilderExtensions (if defined)
             modelBuilder.Seed();
         }
-
+        
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Shelf> Shelfs { get; set; }
