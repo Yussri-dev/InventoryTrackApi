@@ -16,6 +16,8 @@ namespace InventoryTrackApi.Models
 
         public decimal CreditLimit { get; set; } = 1000m;
         public decimal AccountBalance { get; set; } = 0m;
+        public decimal AmountPaid { get; set; } = 0m;
+        public decimal BalancePaid => AccountBalance - AmountPaid;
 
         [Required]
         [MaxLength(15, ErrorMessage = "Number cannot exceed 15 characters.")]

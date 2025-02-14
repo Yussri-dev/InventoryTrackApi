@@ -1,87 +1,126 @@
-﻿using InventoryTrackApi.Models;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
+using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace InventoryTrackApi.Services
 {
     public class CustomerService
     {
         private readonly IGenericRepository<Customer> _customerRepository;
+        private readonly IMapper _mapper;
+        private const int idCustomer = 1;
+        private const string validating = "Yes";
 
-        public CustomerService(IGenericRepository<Customer> customerRepository)
+        public CustomerService(IGenericRepository<Customer> customerRepository, IMapper mapper)
         {
             _customerRepository = customerRepository;
+            _mapper = mapper;
         }
 
-        // Get All Customers
         public async Task<IEnumerable<Customer>> GetPagedCustomersAsync(int pageNumber, int pageSize)
         {
             return await _customerRepository.GetAllAsync(pageNumber, pageSize);
         }
 
-        //Get a Customer by Id
         public async Task<Customer> GetCustomerByIdAsync(int id)
         {
             return await _customerRepository.GetByIdAsync(id);
         }
 
-        //Create a new Customer
         public async Task CreateCustomerAsync(Customer customer)
         {
             await _customerRepository.CreateAsync(customer);
         }
 
-        //Update a Customer
         public async Task UpdateCustomerAsync(Customer customer)
         {
-            var existingCustomer = await _customerRepository.GetByIdAsync(customer.CustomerId);
-
-            if (existingCustomer == null)
+            if (customer == null)
             {
-                throw new InvalidOperationException("Customer not Found.");
+                throw new ArgumentNullException(nameof(customer), "Customer cannot be null.");
             }
 
-            existingCustomer.Name = customer.Name;
-            existingCustomer.CreditLimit = customer.CreditLimit;
-            existingCustomer.AccountBalance = customer.AccountBalance;
-            existingCustomer.PhoneNumber1 = customer.PhoneNumber1;
-            existingCustomer.PhoneNumber2 = customer.PhoneNumber2;
-            existingCustomer.Email = customer.Email;
-            existingCustomer.Adresse = customer.Adresse;
-            existingCustomer.City = customer.City;
-            existingCustomer.Land = customer.Land;
-            existingCustomer.IsActivate = customer.IsActivate;
-
-            await _customerRepository.UpdateAsync(existingCustomer);
-        }
-
-        public async Task<Customer> UpdateCustomerThresHoldAsync(int id, decimal Threshold)
-        {
-            var existingProduct = await _customerRepository.GetByIdAsync(id);
-
-            if (existingProduct == null)
+            var existingCustomer = await _customerRepository.GetByIdAsync(customer.CustomerId);
+            if (existingCustomer == null)
             {
                 throw new InvalidOperationException("Customer not found.");
             }
 
-            existingProduct.CreditLimit += Threshold;
-
-            await _customerRepository.UpdateAsync(existingProduct);
-
-            return existingProduct; // Return the updated product.
+            _mapper.Map(customer, existingCustomer);
+            await _customerRepository.UpdateAsync(existingCustomer);
         }
 
+        public async Task<Customer> UpdateCustomerThresHoldAsync(int id, decimal amount, decimal amountPaid, string validate)
+        {
+            var existingCustomer = await _customerRepository.GetByIdAsync(id);
+            if (existingCustomer == null)
+            {
+                throw new InvalidOperationException("Customer not found.");
+            }
+
+            if (id != idCustomer && validate == validating)
+            {
+                existingCustomer.CreditLimit += amount;
+                existingCustomer.AccountBalance += amount;
+                existingCustomer.AmountPaid += amountPaid;
+            }
+
+            await _customerRepository.UpdateAsync(existingCustomer);
+            return existingCustomer;
+        }
+
+        public async Task<Customer> UpdateAccountBalanceAsync(int id, decimal amount)
+        {
+            if (amount == 0)
+            {
+                throw new ArgumentException("Amount must be non-zero.", nameof(amount));
+            }
+
+            var existingCustomer = await _customerRepository.GetByIdAsync(id);
+            if (existingCustomer == null)
+            {
+                throw new InvalidOperationException("Customer not found.");
+            }
+
+            if (id != idCustomer)
+            {
+                existingCustomer.AmountPaid += amount;
+            }
+
+            await _customerRepository.UpdateAsync(existingCustomer);
+            return existingCustomer;
+        }
 
         public async Task DeleteCustomerAsync(int id)
         {
             await _customerRepository.DeleteAsync(id);
         }
 
-        //Get a Customer by Name
         public async Task<IEnumerable<Customer>> GetCustomerByNameAsync(string name)
         {
-            //return await _productRepository.GetByNameAsync(p => EF.Functions.Like(p.Name, name));
-            return await _customerRepository.GetByNameAsync(p => p.Name.Contains(name));
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Name cannot be null or empty.", nameof(name));
+            }
+
+            Expression<Func<Customer, bool>> nameFilter = customer =>
+                EF.Functions.Like(customer.Name, $"%{name}%");
+
+            return await _customerRepository.GetByConditionAsync(nameFilter);
         }
 
+        public async Task<IEnumerable<CustomerDTO>> GetSpecificCustomersAsync()
+        {
+            Expression<Func<Customer, bool>> 
+                customerIdFilter = customer 
+                => customer.CustomerId != idCustomer 
+                && (customer.AccountBalance - customer.AmountPaid) != 0;
+
+            var customers = await _customerRepository.GetByConditionAsync(customerIdFilter);
+            var customerDTOs = _mapper.Map<IEnumerable<CustomerDTO>>(customers);
+            return customerDTOs;
+        }
     }
 }

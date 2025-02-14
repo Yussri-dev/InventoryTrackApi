@@ -1,9 +1,12 @@
 ﻿using InventoryTrackApi.DTOs;
+using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.Linq.Expressions;
+using System.Net;
 
 namespace InventoryTrackApi.Controllers.Sales
 {
@@ -16,8 +19,10 @@ namespace InventoryTrackApi.Controllers.Sales
 
         public SaleController(SaleService saleService, ILogger<SaleController> logger)
         {
-            _saleService = saleService;
-            _logger = logger;
+            _saleService = saleService ?? throw new ArgumentNullException(nameof(saleService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            //_saleService = saleService;
+            //_logger = logger;
         }
 
         // Get paged sales
@@ -140,6 +145,130 @@ namespace InventoryTrackApi.Controllers.Sales
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        /*
+        [HttpGet("SalesDateRange")]
+        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSalesByDateRangeAsync(
+                    [FromQuery] string startDate, [FromQuery] string endDate)
+        {
+            // Parse the start date
+            if (!DateTime.TryParseExact(
+                    startDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out var startSalesDate))
+            {
+                return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
+            }
+
+            // Parse the end date
+            if (!DateTime.TryParseExact(
+                    endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out var endSalesDate))
+            {
+                return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
+            }
+
+            // Ensure the end date is inclusive of the entire day
+            endSalesDate = endSalesDate.AddDays(1).AddSeconds(-1);
+
+            // Fetch sale items within the date range
+            var saleItems = await _saleService.GetPagedSalesByDateRangeAsync(startSalesDate, endSalesDate);
+
+            return Ok(saleItems);
+        }
+        */
+
+        [HttpGet("SalesDateRange")]
+        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedSalesByDateRangeAsync(
+                [FromQuery] string startDate, [FromQuery] string endDate)
+        {
+            if (!DateHelper.TryParseDate(startDate, out var startSalesDate))
+            {
+                return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
+            }
+
+            if (!DateHelper.TryParseDate(endDate, out var endSalesDate))
+            {
+                return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
+            }
+
+            // Fetch sales within the date range
+            var sales = await _saleService.GetPagedSalesByDateRangeAsync(startSalesDate, endSalesDate);
+
+            return Ok(sales);
+        }
+
+        [HttpGet("CustomerSales")]
+        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetCustomerSalesAsync(
+                [FromQuery] int customerId)
+        {
+            // Fetch sales within the date range
+            var Customersales = await _saleService.GetCustomerSalesAsync(customerId);
+
+            return Ok(Customersales);
+        }
+
+        [HttpPut("apply-payment/{customerId}")]
+        public async Task<IActionResult> ApplyPaymentToInvoices([FromRoute] int customerId, [FromQuery]decimal paymentAmount)
+        {
+            try
+            {
+                if (paymentAmount <= 0)
+                {
+                    return BadRequest("Payment amount must be greater than zero.");
+                }
+
+                await _saleService.ApplyPaymentToInvoicesAsync(customerId, paymentAmount);
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid input provided.");
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while applying payment.");
+                return StatusCode(500, "An unexpected error occurred.");
+            }
+        }
+        //[HttpPut("apply-payment")]
+        ////[ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        ////[ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        ////[ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        //public async Task<IActionResult> ApplyPaymentToInvoices(int customerId, decimal paymentAmount)
+        //{
+        //    try
+        //    {
+        //        // Validate input
+        //        if (customerId <= 0)
+        //        {
+        //            return BadRequest(new { Message = "Customer ID must be greater than zero." });
+        //        }
+
+        //        if (paymentAmount <= 0)
+        //        {
+        //            return BadRequest(new { Message = "Payment amount must be greater than zero." });
+        //        }
+
+        //        await _saleService.ApplyPaymentToInvoicesAsync(customerId, paymentAmount);
+
+        //        return Ok(await _saleService.GetCustomerSalesAsync(customerId));
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        // Handle invalid input exceptions
+        //        _logger.LogWarning(ex, "Invalid input provided.");
+        //        return BadRequest(new { Message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log and handle unexpected errors
+        //        _logger.LogError(ex, "An unexpected error occurred while applying payment.");
+        //        return StatusCode((int)HttpStatusCode.InternalServerError, new { Message = "An unexpected error occurred." });
+        //    }
+        //}
+
+
 
     }
 }

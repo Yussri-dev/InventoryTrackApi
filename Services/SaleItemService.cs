@@ -1,4 +1,5 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Queries;
 using InventoryTrackApi.Repositories;
@@ -12,16 +13,17 @@ namespace InventoryTrackApi.Services
     {
         private readonly IGenericRepository<SaleItem> _saleItemRepository;
         private readonly IGenericRepository<Product> _productRepository;
-
+        private readonly IMapper _mapper;
         private readonly DiscountCalculator _discountCalculator;
 
         // Constructor to inject the repository
         public SaleItemService(IGenericRepository<SaleItem> saleItemRepository,
-            IGenericRepository<Product> productRepository)
+            IGenericRepository<Product> productRepository, IMapper mapper)
         {
             _saleItemRepository = saleItemRepository;
             _productRepository = productRepository;
             _discountCalculator = new DiscountCalculator();
+            _mapper = mapper;
         }
 
         // Get all saleItems with pagination
@@ -30,57 +32,11 @@ namespace InventoryTrackApi.Services
             return await _saleItemRepository.GetAllAsync(pageNumber, pageSize);
         }
 
-        // Get saleItems between two dates with pagination
-        //public async Task<IEnumerable<SaleItem>> GetPagedSaleItemsByDateAsync(DateTime startDate, DateTime endDate, int pageNumber, int pageSize)
-        //{
-        //    // Fetch filtered and paginated data from the repository
-        //    return await _saleItemRepository.GetAllByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
-        //}
-
-        //public async Task<IEnumerable<SaleItemDTO>> GetPagedSaleItemsByDateRangeAsync(DateTime startDate, DateTime endDate)
-        //{
-        //    Expression<Func<SaleItemDTO, bool>> dateFilter = saleItem => saleItem.DateCreated.Date >= startDate.Date &&
-        //                                                              saleItem.DateCreated.Date <= endDate.Date;
-        //    return await _saleItemRepository.GetDataByDateRange(dateFilter);
-        //}
-        /*
         public async Task<IEnumerable<SaleItemDTO>> GetPagedSaleItemsByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             // Define the filter using the entity type (SaleItem)
             Expression<Func<SaleItem, bool>> dateFilter = saleItem =>
-                saleItem.DateCreated.Date >= startDate.Date &&
-                saleItem.DateCreated.Date <= endDate.Date;
-
-            // Fetch data from the repository using the entity type
-            var saleItems = await _saleItemRepository.GetDataByDateRange(dateFilter);
-
-            // Map SaleItem entities to SaleItemDTO objects
-            var saleItemDTOs = saleItems.Select(s => new SaleItemDTO
-            {
-                SaleItemId = s.SaleItemId,
-                SaleId = s.SaleId,
-                ProductId = s.ProductId,
-                ProductName = s.Product.Name, // Use null-conditional operator to avoid NullReferenceException
-                Quantity = s.Quantity,
-                Price = s.Price,
-                ProfitMarge = s.ProfitMarge,
-                PurchasePrice = s.PurchasePrice,
-                Discount = s.Discount,
-                TaxAmount = s.TaxAmount,
-                Total = s.Total,
-                DateCreated = s.DateCreated
-            });
-
-            return saleItemDTOs;
-        }
-        */
-
-        public async Task<IEnumerable<SaleItemDTO>> GetPagedSaleItemsByDateRangeAsync(DateTime startDate, DateTime endDate)
-        {
-            // Define the filter using the entity type (SaleItem)
-            Expression<Func<SaleItem, bool>> dateFilter = saleItem =>
-                saleItem.DateCreated.Date >= startDate.Date &&
-                saleItem.DateCreated.Date <= endDate.Date;
+                saleItem.DateCreated.Date >= startDate.Date && saleItem.DateCreated.Date <= endDate.Date;
 
             // Fetch SaleItem entities from the repository
             var saleItems = await _saleItemRepository.GetByConditionAsync(dateFilter);
@@ -227,5 +183,40 @@ namespace InventoryTrackApi.Services
             return saleItemWithProductList;
         }
 
+        //public async Task<IEnumerable<SaleItemDTO>> GetSalesItemByIdAsync(int saleId)
+        //{
+        //    // Define the filter using the entity type (Sale)
+        //    Expression<Func<SaleItem, bool>> saleIdFilter = sale => sale.SaleId == saleId;
+
+        //    // Fetch sales with customer names
+        //    //var saleItems = await _saleItemRepository.GetByConditionAsync(saleIdFilter, "Sale");
+        //    // Fetch sale items with related Sale and Product entities
+        //    var saleItems = await _saleItemRepository.GetByConditionAsync(
+        //        filter: saleIdFilter,
+        //        includeProperties: "Sale,Product" // Include Sale and Product entities
+        //    );
+
+        //    // Map to DTO using AutoMapper
+        //    var saleItemsDTOs = _mapper.Map<IEnumerable<SaleItemDTO>>(saleItems);
+
+        //    return saleItemsDTOs;
+        //}
+
+        public async Task<IEnumerable<SaleItemDTO>> GetSalesItemByIdAsync(int saleId)
+        {
+            // Define the filter using the entity type (SaleItem)
+            Expression<Func<SaleItem, bool>> saleIdFilter = saleItem => saleItem.SaleId == saleId;
+
+            // Fetch sale items with related Sale and Product entities
+            var saleItems = await _saleItemRepository.GetByConditionAsync(
+                filter: saleIdFilter,
+                includeProperties: "Product" // Correct navigation properties
+            );
+
+            // Map to DTO using AutoMapper
+            var saleItemsDTOs = _mapper.Map<IEnumerable<SaleItemDTO>>(saleItems);
+
+            return saleItemsDTOs;
+        }
     }
 }

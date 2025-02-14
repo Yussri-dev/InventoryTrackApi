@@ -1,4 +1,5 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,12 @@ namespace InventoryTrackApi.Services
         private readonly IGenericRepository<Line> _lineRepository;
         private readonly IGenericRepository<Unit> _unitRepository;
         private readonly IGenericRepository<Tax> _taxRepository;
+        private readonly IMapper _mapper;
 
         // Constructor to inject the repository
         public ProductService(IGenericRepository<Product> productRepository, IGenericRepository<Shelf> shelfRepository,
                     IGenericRepository<Category> categoryRepository, IGenericRepository<Line> lineRepository,
-                    IGenericRepository<Unit> unitRepository, IGenericRepository<Tax> taxRepository
+                    IGenericRepository<Unit> unitRepository, IGenericRepository<Tax> taxRepository, IMapper mapper
             )
         {
             _productRepository = productRepository;
@@ -27,6 +29,7 @@ namespace InventoryTrackApi.Services
             _lineRepository = lineRepository;
             _unitRepository = unitRepository;
             _taxRepository = taxRepository;
+            _mapper = mapper;
         }
 
         // Get all products with pagination
@@ -60,7 +63,6 @@ namespace InventoryTrackApi.Services
         public async Task<IEnumerable<Product>> GetProductByBarCodeAsync(string barCode)
         {
             return await _productRepository.GetByBarCodeAsync(p => p.Barcode.Contains(barCode));
-
         }
 
         // Create a new product
@@ -116,6 +118,23 @@ namespace InventoryTrackApi.Services
             return existingProduct; // Return the updated product.
         }
 
+        //Update Quantity In Products
+        public async Task<Product> UpdateDiscountOfProduct(int id, decimal discountPourcentage)
+        {
+            var existingProduct = await _productRepository.GetByIdAsync(id);
+
+            if (existingProduct == null)
+            {
+                throw new InvalidOperationException("Product not found.");
+            }
+
+            existingProduct.DiscountPercentage = discountPourcentage;
+
+            await _productRepository.UpdateAsync(existingProduct);
+
+            return existingProduct; // Return the updated product.
+        }
+
         // Delete a product by ID
         public async Task DeleteProductAsync(int id)
         {
@@ -125,16 +144,12 @@ namespace InventoryTrackApi.Services
         //Get Product Price
         public async Task<decimal> GetProductPriceAsync(int idProduit, string priceType)
         {
-            // Retrieve all prices for the product
             var prices = await _productRepository.GetPricesAsync(idProduit);
 
-            // Ensure the priceType exists in the retrieved dictionary
             if (prices.TryGetValue(priceType, out var price))
             {
                 return price;
             }
-
-            // If the priceType is invalid or not found, throw an exception or return a default value
             throw new KeyNotFoundException($"Price type '{priceType}' not found for product ID {idProduit}.");
         }
 
@@ -144,11 +159,11 @@ namespace InventoryTrackApi.Services
             var products = await _productRepository.GetAllAsync(pageNumber, pageSize);
 
             // Fetch related data
-            var shelves = await _shelfRepository.GetAllAsync(); // Assuming a repository for shelves
-            var categories = await _categoryRepository.GetAllAsync(); // Assuming a repository for categories
-            var units = await _unitRepository.GetAllAsync(); // Assuming a repository for units
-            var taxes = await _taxRepository.GetAllAsync(); // Assuming a repository for taxes
-            var lines = await _lineRepository.GetAllAsync(); // Assuming a repository for lines
+            var shelves = await _shelfRepository.GetAllAsync(); 
+            var categories = await _categoryRepository.GetAllAsync();
+            var units = await _unitRepository.GetAllAsync(); 
+            var taxes = await _taxRepository.GetAllAsync(); 
+            var lines = await _lineRepository.GetAllAsync();
 
             // Create dictionaries for efficient lookups
             var shelfMap = shelves.ToDictionary(s => s.ShelfId, s => s.Name);
@@ -210,6 +225,21 @@ namespace InventoryTrackApi.Services
         public async Task<int> CountProductsAsync()
         {
             return await _productRepository.CountAsync();
+        }
+
+        public async Task<IEnumerable<ProductDTO>> GetPagedProductsByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            // Define the filter using the entity type (Product)
+            Expression<Func<Product, bool>> dateFilter = Product =>
+                Product.DateCreated.Date >= startDate.Date && Product.DateCreated.Date <= endDate.Date;
+
+            // Fetch Products with customer names
+            var Products = await _productRepository.GetByConditionAsync(dateFilter);
+
+            // Map to DTO using AutoMapper
+            var ProductDTOs = _mapper.Map<IEnumerable<ProductDTO>>(Products);
+
+            return ProductDTOs;
         }
     }
 }

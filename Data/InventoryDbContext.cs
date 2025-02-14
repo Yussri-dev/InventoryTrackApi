@@ -1,5 +1,6 @@
 ﻿using InventoryTrackApi.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace InventoryTrackApi.Data
 {

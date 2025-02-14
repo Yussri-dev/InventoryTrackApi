@@ -1,8 +1,11 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryTrackApi.Controllers.Customers
 {
@@ -12,13 +15,14 @@ namespace InventoryTrackApi.Controllers.Customers
     {
         private readonly CustomerService _customerService;
         private readonly ILogger<CustomerController> _logger;
-        public CustomerController(CustomerService customerService, ILogger<CustomerController> logger)
+        private readonly IMapper _mapper;
+        public CustomerController(CustomerService customerService, ILogger<CustomerController> logger, IMapper mapper)
         {
             _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper;
         }
 
-        // Get paged customers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
         {
@@ -26,7 +30,6 @@ namespace InventoryTrackApi.Controllers.Customers
             return Ok(customers);
         }
 
-        // Get customer by ID
         [HttpGet("{id}")]
         public async Task<ActionResult<CustomerDTO>> GetCustomer(int id)
         {
@@ -38,7 +41,35 @@ namespace InventoryTrackApi.Controllers.Customers
             return Ok(customer);
         }
 
-        // Create a new customer
+        [HttpPost]
+        public async Task<ActionResult<CustomerDTO>> CreatePurchase(CustomerDTO customerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for CreatePurchase.");
+                return ValidationProblem(ModelState);
+            }
+            try
+            {
+                var customer = _mapper.Map<Customer>(customerDto);
+                await _customerService.CreateCustomerAsync(customer);
+
+                var respondDto = _mapper.Map<CustomerDTO>(customer);
+                return CreatedAtAction(nameof(GetCustomer), new { id = customer.CustomerId }, respondDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Creating Purchase: {Message}", ex.Message);
+                return Problem(
+                    title: "An error occurred while creating the purchase.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
+        }
+
+
+        /*
         [HttpPost]
         public async Task<ActionResult<CustomerDTO>> CreateCustomer(CustomerDTO customerDto)
         {
@@ -90,73 +121,117 @@ namespace InventoryTrackApi.Controllers.Customers
 
 
         }
-
-        // Update a customer
+        */
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCustomer(int id, CustomerDTO customerDto)
+        public async Task<IActionResult> UpdateCustomer([FromRoute] int id, CustomerDTO customerDto)
         {
             if (id != customerDto.CustomerId)
             {
                 return BadRequest("Customer ID mismatch.");
             }
 
-            var existingEmployee = await _customerService.GetCustomerByIdAsync(id);
-            if (existingEmployee == null)
+            var existingCustomer = await _customerService.GetCustomerByIdAsync(id);
+            if (existingCustomer == null)
             {
                 return NotFound("Customer not found.");
             }
 
-            var customer = new Customer
-            {
-                CustomerId = id,
-                Name = customerDto.Name,
-                CreditLimit = customerDto.CreditLimit,
-                AccountBalance = customerDto.AccountBalance,
-                PhoneNumber1 = customerDto.PhoneNumber1,
-                PhoneNumber2 = customerDto.PhoneNumber2,
-                Email = customerDto.Email,
-                Adresse = customerDto.Adresse,
-                City = customerDto.City,
-                Land = customerDto.Land,
-                IsActivate = customerDto.IsActivate,
-                ModifiedBy = customerDto.ModifiedBy,
-                DateModified = DateTime.UtcNow
-            };
-
+            var customer = _mapper.Map<Customer>(customerDto);
             await _customerService.UpdateCustomerAsync(customer);
-            return NoContent();
+
+            return Ok(customer);
         }
 
-        [HttpPut("CreditLimit/{id}")]
-        public async Task<IActionResult> UpdateCustomerCreditLimit(int id, decimal threshold)
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchCustomer([FromRoute] int id, [FromBody] JsonPatchDocument<CustomerDTO> patchCustomer)
         {
-            if (threshold == 0)
+            if (patchCustomer == null)
             {
-                return BadRequest("Threshold must be a non-zero value.");
+                return BadRequest("Invalid patch document.");
+            }
+
+            var existingCustomer = await _customerService.GetCustomerByIdAsync(id);
+            if (existingCustomer == null)
+            {
+                return NotFound("Customer not found.");
+            }
+
+            var customerDto = _mapper.Map<CustomerDTO>(existingCustomer);
+
+            patchCustomer.ApplyTo(customerDto, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _mapper.Map(customerDto, existingCustomer);
+
+            await _customerService.UpdateCustomerAsync(existingCustomer);
+
+            //return Ok(_mapper.Map<CustomerDTO>(existingCustomer));
+            return NoContent();
+
+        }
+
+
+
+
+        [HttpPut("CreditLimit/{id}")]
+        public async Task<IActionResult> UpdateCustomerCreditLimit(int id, decimal amount, decimal amountPaid, string validate)
+        {
+            //if (amount == 0)
+            //{
+            //    return BadRequest("Threshold must be a non-zero value.");
+            //}
+            try
+            {
+                var updatedProduct = await _customerService.UpdateCustomerThresHoldAsync(id, amount, amountPaid, validate);
+                if (updatedProduct == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+                return Ok(updatedProduct);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while updating the customer {ex}.");
+            }
+        }
+
+        [HttpPut("AccountBalance")]
+        public async Task<IActionResult> UpdateAccountBalance(int id, decimal amount)
+        {
+            if (amount == 0)
+            {
+                return BadRequest("Amount must be a non-zero value.");
             }
 
             try
             {
-                var updatedProduct = await _customerService.UpdateCustomerThresHoldAsync(id, threshold);
+                var updatedProduct = await _customerService.UpdateAccountBalanceAsync(id, amount);
                 if (updatedProduct == null)
                 {
                     return NotFound("Customer not found.");
                 }
 
-                return Ok(updatedProduct); // Return the updated product for client confirmation.
+                return Ok(updatedProduct);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message); // Handle specific service-layer exceptions.
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                // Log the exception (if logging is configured) and return a generic error message.
                 return StatusCode(500, "An error occurred while updating the product.");
             }
         }
 
-        // Delete a customer
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
@@ -164,8 +239,6 @@ namespace InventoryTrackApi.Controllers.Customers
             return NoContent();
         }
 
-
-        //// Get Customer by Name
         [HttpGet("ByName/{name}")]
         public async Task<ActionResult<CustomerDTO>> GetCustomerByName(string name)
         {
@@ -184,6 +257,14 @@ namespace InventoryTrackApi.Controllers.Customers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpGet("Credit")]
+        public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetSpecificCustomers()
+        {
+            var customers = await _customerService.GetSpecificCustomersAsync();
+            return Ok(customers);
+        }
+
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using InventoryTrackApi.DTOs;
+using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -117,6 +118,29 @@ namespace InventoryTrackApi.Controllers.Purchases
         {
             await _purchaseItemService.DeletePurchaseItemAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("PurchaseItemsDateRange")]
+        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedPurchaseItemsByDateRangeAsync(
+            [FromQuery] string startDate, [FromQuery] string endDate)
+        {
+            if (!DateHelper.TryParseDate(startDate, out var startPurchasesDate))
+            {
+                return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
+            }
+
+            if (!DateHelper.TryParseDate(endDate, out var endPurchasesDate))
+            {
+                return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
+            }
+
+            // Ensure the end date is inclusive of the entire day
+            endPurchasesDate = endPurchasesDate.AddDays(1).AddSeconds(-1);
+
+            // Fetch purchases within the date range
+            var purchases = await _purchaseItemService.GetPagedPurchaseItemsByDateRangeAsync(startPurchasesDate, endPurchasesDate);
+
+            return Ok(purchases);
         }
     }
 }

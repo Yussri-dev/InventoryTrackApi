@@ -103,13 +103,6 @@ namespace InventoryTrackApi.Repositories
             }
         }
 
-        // Update an existing entity in the database
-        //public async Task UpdateAsync(T entity)
-        //{
-        //    _context.Set<T>().Update(entity);
-        //    await _context.SaveChangesAsync();
-
-        //}
         public async Task UpdateAsync(T entity)
         {
             try
@@ -130,42 +123,6 @@ namespace InventoryTrackApi.Repositories
             }
         }
 
-
-        //public async Task UpdateAsync(T entity)
-        //{
-        //    try
-        //    {
-        //        // Check if the entity is already tracked
-        //        var trackedEntity = _dbSet.Local.FirstOrDefault(e => e == entity ||
-        //            _context.Entry(e).Property("Id").CurrentValue == _context.Entry(entity).Property("Id").CurrentValue);
-
-        //        if (trackedEntity != null)
-        //        {
-        //            // Update the tracked entity
-        //            _context.Entry(trackedEntity).CurrentValues.SetValues(entity);
-        //        }
-        //        else
-        //        {
-        //            // Attach and mark the entity as modified
-        //            _dbSet.Attach(entity);
-        //            _context.Entry(entity).State = EntityState.Modified;
-        //        }
-
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException ex)
-        //    {
-        //        // Handle concurrency issues (log, retry, etc.)
-        //        throw new InvalidOperationException("Concurrency error during update", ex);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // General error handling
-        //        throw new InvalidOperationException("Error updating entity", ex);
-        //    }
-        //}
-
-        // Deletes an entity by ID (soft delete can be implemented here if needed)
         public async Task DeleteAsync(int id)
         {
             try
@@ -254,17 +211,7 @@ namespace InventoryTrackApi.Repositories
             return (entity as Product)?.QuantityStock ?? throw new InvalidOperationException("Invalid entity type for quantity retrieval.");
         }
 
-        //CalculateSum method
-        //public async Task<decimal> CalculateSumAsync(Expression<Func<T, decimal>> selector)
-        //{
-        //    if (selector == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(selector), "The selector expression cannot be null.");
-        //    }
-
-        //    return await _dbSet.SumAsync(selector);
-        //}
-
+        
         public async Task<decimal> CalculateSumAsync(
                 Expression<Func<T, bool>> filter,
                 Expression<Func<T, decimal>> selector)
@@ -308,6 +255,11 @@ namespace InventoryTrackApi.Repositories
             query = query.Where(filter);
 
             return await query.ToListAsync();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

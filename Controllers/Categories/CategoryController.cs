@@ -102,5 +102,25 @@ namespace InventoryTrackApi.Controllers.Categories
             await _categoryService.DeleteCategoryAsync(id);
             return NoContent();
         }
+
+        //// Get product by Name
+        [HttpGet("ByName/{name}")]
+        public async Task<ActionResult<LineDTO>> GetCategoryByName(string name)
+        {
+            try
+            {
+                var unit = await _categoryService.GetCategoryByNameAsync(name);
+                return Ok(unit);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving unit by name");
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

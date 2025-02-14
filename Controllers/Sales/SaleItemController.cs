@@ -209,7 +209,15 @@ namespace InventoryTrackApi.Controllers.Sales
             }
         }
 
+        //GetCustomerSalesAsync(int customerId)
+        [HttpGet("SaleItems/{id}")]
+        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetCustomerSalesAsync(int id)
+        {
+            // Fetch sales within the date range
+            var saleItems = await _saleItemService.GetSalesItemByIdAsync(id);
 
+            return Ok(saleItems);
+        }
 
     }
 }

@@ -15,15 +15,12 @@ namespace InventoryTrackApi.Middlewares
         {
             try
             {
-                // Call the next middleware in the pipeline
                 await _next(context);
             }
             catch (Exception ex)
             {
-                // Log the exception (optional)
+                
                 Console.WriteLine($"Unhandled Exception: {ex.Message}");
-
-                // Handle the exception
                 await HandleExceptionAsync(context);
             }
         }

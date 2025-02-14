@@ -31,7 +31,6 @@ builder.Services.AddScoped<PurchaseService>();
 builder.Services.AddScoped<PurchaseItemService>();
 builder.Services.AddScoped<PurchasePaymentService>();
 
-
 builder.Services.AddScoped<SaleService>();
 builder.Services.AddScoped<SaleItemService>();
 builder.Services.AddScoped<SalePaymentService>();
@@ -42,8 +41,13 @@ builder.Services.AddScoped<ReturnItemService>();
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+builder.Services.AddLogging();
 
-builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(Program));
+
+//builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -52,7 +56,7 @@ builder.Services.AddSwaggerGen();
 //{
 //    options.UseInMemoryDatabase("InventoryTrackApiDB");
 
-//    //i've used Query No Tracking To Avoid the Problem In Updating Data Entries In Db Context
+//    //i ve used Query No Tracking To Avoid the Problem In Updating Data Entries In Db Context
 //    //options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 //});
 

@@ -1,4 +1,5 @@
 ﻿using InventoryTrackApi.DTOs;
+using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -250,6 +251,35 @@ namespace InventoryTrackApi.Controllers.Products
             }
         }
 
+        [HttpPut("Discount/{id}")]
+        public async Task<IActionResult> UpdateDiscountOfProduct(int id, decimal discount)
+        {
+            if (discount == 0)
+            {
+                return BadRequest("Quantity must be a non-zero value.");
+            }
+
+            try
+            {
+                var ProductDiscount = await _productService.UpdateDiscountOfProduct(id, discount);
+                if (ProductDiscount == null)
+                {
+                    return NotFound("Product not found.");
+                }
+
+                return Ok(ProductDiscount); // Return the updated product for client confirmation.
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message); // Handle specific service-layer exceptions.
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (if logging is configured) and return a generic error message.
+                return StatusCode(500, "An error occurred while updating the product.");
+            }
+        }
+
         // Delete a product
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
@@ -322,5 +352,27 @@ namespace InventoryTrackApi.Controllers.Products
             }
         }
 
+        [HttpGet("ProductsDateRange")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetPagedSalesByDateRangeAsync(
+                [FromQuery] string startDate, [FromQuery] string endDate)
+        {
+            if (!DateHelper.TryParseDate(startDate, out var startProductsDate))
+            {
+                return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
+            }
+
+            if (!DateHelper.TryParseDate(endDate, out var endProductsDate))
+            {
+                return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
+            }
+
+            // Ensure the end date is inclusive of the entire day
+            //endSalesDate = DateHelper.TryParseDate(endSalesDate);
+
+            // Fetch sales within the date range
+            var products = await _productService.GetPagedProductsByDateRangeAsync(startProductsDate, endProductsDate);
+
+            return Ok(products);
+        }
     }
 }

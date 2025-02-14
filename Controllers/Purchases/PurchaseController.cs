@@ -1,8 +1,12 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
+using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+
 
 namespace InventoryTrackApi.Controllers.Purchases
 {
@@ -12,19 +16,41 @@ namespace InventoryTrackApi.Controllers.Purchases
     {
         private readonly PurchaseService _purchaseService;
         private readonly ILogger<PurchaseController> _logger;
-        public PurchaseController(PurchaseService purchaseService, ILogger<PurchaseController> logger)
+        private readonly IMapper _mapper;
+        public PurchaseController(PurchaseService purchaseService, ILogger<PurchaseController> logger, IMapper mapper)
         {
             _purchaseService = purchaseService;
             _logger = logger;
+            _mapper = mapper;
         }
 
         // Get paged purchases
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PurchaseDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<PurchaseDTO>>> GetPagedPurchases(int pageNumber = 1, int pageSize = 10)
         {
             var purchases = await _purchaseService.GetPagedPurchasesAsync(pageNumber, pageSize);
             return Ok(purchases);
         }
+
+
+        /*
+        [HttpGet]
+        public async Task<ActionResult<PagedResponse<PurchaseDTO>>> GetPagedPurchases(int pageNumber = 1, int pageSize = 10)
+        {
+            var (purchases, totalCount) = await _purchaseService.GetPagedPurchasesWithCountAsync(pageNumber, pageSize);
+
+            var response = new PagedResponse<PurchaseDTO>
+            {
+                Data = purchases,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
+
+            return Ok(response);
+        }
+         */
+
 
         // Get purchase by ID
         [HttpGet("{id}")]
@@ -33,6 +59,7 @@ namespace InventoryTrackApi.Controllers.Purchases
             var purchase = await _purchaseService.GetPurchaseByIdAsync(id);
             if (purchase == null)
             {
+                _logger.LogWarning("Purchase with ID {Id} not found.", id);
                 return NotFound();
             }
             return Ok(purchase);
@@ -44,40 +71,28 @@ namespace InventoryTrackApi.Controllers.Purchases
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                _logger.LogWarning("Invalid model state for CreatePurchase.");
+                return ValidationProblem(ModelState);
             }
             try
             {
-                var purchase = new Purchase
-                {
-                    PurchaseDate = purchaseDto.PurchaseDate,
-                    SupplierId = purchaseDto.SupplierId,
-                    EmployeeId = purchaseDto.EmployeeId,
-                    TvaAmount = purchaseDto.TvaAmount,
-                    TotalAmount = purchaseDto.TotalAmount,
-                    AmountPaid = purchaseDto.AmountPaid
-                };
+                var purchase = _mapper.Map<Purchase>(purchaseDto);
                 await _purchaseService.CreatePurchaseAsync(purchase);
 
-                var respondDto = new PurchaseDTO
-                {
-                    PurchaseDate = purchase.PurchaseDate,
-                    SupplierId = purchase.SupplierId,
-                    EmployeeId = purchase.EmployeeId,
-                    TvaAmount = purchase.TvaAmount,
-                    TotalAmount = purchase.TotalAmount,
-                    AmountPaid = purchase.AmountPaid
-                };
-                return CreatedAtAction(nameof(GetPurchase), new { id = purchase.PurchaseId }, purchaseDto);
+                var respondDto = _mapper.Map<PurchaseDTO>(purchase);
+                return CreatedAtAction(nameof(GetPurchase), new { id = purchase.PurchaseId }, respondDto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error Creating Purchase");
-                return StatusCode(500, $"Internal Server Error {ex.Message}");
+                _logger.LogError(ex, "Error Creating Purchase: {Message}", ex.Message);
+                return Problem(
+                    title: "An error occurred while creating the purchase.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
             }
-
         }
-
+        
         // Update a purchase
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePurchase(int id, PurchaseDTO purchaseDto)
@@ -93,18 +108,7 @@ namespace InventoryTrackApi.Controllers.Purchases
                 return NotFound("Purchase not found.");
             }
 
-            var purchase = new Purchase
-            {
-                PurchaseId = id,
-                PurchaseDate = purchaseDto.PurchaseDate,
-                SupplierId = purchaseDto.SupplierId,
-                EmployeeId = purchaseDto.EmployeeId,
-                TvaAmount = purchaseDto.TvaAmount,
-                TotalAmount = purchaseDto.TotalAmount,
-                AmountPaid = purchaseDto.AmountPaid
-            };
-
-
+            var purchase = _mapper.Map<Purchase>(purchaseDto);
             await _purchaseService.UpdatePurchaseAsync(purchase);
             return NoContent();
         }
@@ -127,9 +131,60 @@ namespace InventoryTrackApi.Controllers.Purchases
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogError(ex, "Error getting purchase count.");
+                return Problem(
+                    title: "An error occurred while getting the purchase count.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
             }
         }
 
+        [HttpGet("PurchasesDateRange")]
+        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedPurchasesByDateRangeAsync(
+            [FromQuery] string startDate, [FromQuery] string endDate)
+        {
+            if (!DateHelper.TryParseDate(startDate, out var startPurchasesDate))
+            {
+                return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
+            }
+
+            if (!DateHelper.TryParseDate(endDate, out var endPurchasesDate))
+            {
+                return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
+            }
+
+            // Ensure the end date is inclusive of the entire day
+            endPurchasesDate = endPurchasesDate.AddDays(1).AddSeconds(-1);
+
+            // Fetch purchases within the date range
+            var purchases = await _purchaseService.GetPagedPurchasesByDateRangeAsync(startPurchasesDate, endPurchasesDate);
+
+            return Ok(purchases);
+        }
+        
+        //[HttpGet("PurchasesDateRange")]
+        //public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedPurchasesByDateRangeAsync(
+        //[FromQuery] string startDate, [FromQuery] string endDate)
+        //{
+        //    if (!TryParseDate(startDate, out var startPurchasesDate))
+        //    {
+        //        return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
+        //    }
+
+        //    if (!TryParseDate(endDate, out var endPurchasesDate))
+        //    {
+        //        return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
+        //    }
+
+        //    // Ensure the end date is inclusive of the entire day
+        //    endPurchasesDate = endPurchasesDate.AddDays(1).AddSeconds(-1);
+
+        //    // Fetch purchases within the date range
+        //    var purchases = await _purchaseService.GetPagedPurchasesByDateRangeAsync(startPurchasesDate, endPurchasesDate);
+
+        //    return Ok(purchases);
+        //}
+        
     }
 }
