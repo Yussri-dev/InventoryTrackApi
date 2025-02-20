@@ -6,7 +6,7 @@ namespace InventoryTrackApi.DTOs
     public class SupplierDTO
     {
         public int SupplierId { get; set; }
-        public string Name { get; set; } = string.Empty;
+        public string SupplierName { get; set; } = string.Empty;
         public string PhoneNumber1 { get; set; } = string.Empty;
         public string PhoneNumber2 { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

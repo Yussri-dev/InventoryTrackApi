@@ -2,14 +2,34 @@ using InventoryTrackApi.Data;
 using InventoryTrackApi.Middlewares;
 using InventoryTrackApi.Repositories;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 
+var key = Encoding.UTF8.GetBytes("My_Secret_Key_For_Inventory_Track_Api_My_Secret_Key_For_Inventory_Track_Api");
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true
+        };
+    });
+
+//-------------------------------------------
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ProductBatchService>();
 builder.Services.AddScoped<CategoryService>();
@@ -37,9 +57,17 @@ builder.Services.AddScoped<SalePaymentService>();
 
 builder.Services.AddScoped<ReturnService>();
 builder.Services.AddScoped<ReturnItemService>();
+
+builder.Services.AddScoped<UserService>();
+
+
+
 //builder.Services.AddScoped<ReturnPaymentService>();
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+
+
 
 builder.Services.AddLogging();
 
@@ -51,6 +79,9 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//enabling Authorization
+builder.Services.AddAuthorization();
 
 //builder.Services.AddDbContext<InventoryDbContext>(options =>
 //{
@@ -78,11 +109,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Configure Kestrel endpoints
+//builder.WebHost.ConfigureKestrel(serverOptions =>
+//{
+//    serverOptions.ListenAnyIP(5000); // HTTP
+//    serverOptions.ListenAnyIP(5001, listenOptions =>
+//    {
+//        listenOptions.UseHttps(); // HTTPS
+//    });
+//});
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
 
 app.Run();

@@ -2,6 +2,7 @@
 using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,7 @@ namespace InventoryTrackApi.Controllers.Customers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CustomerController : ControllerBase
     {
         private readonly CustomerService _customerService;
@@ -20,10 +22,12 @@ namespace InventoryTrackApi.Controllers.Customers
         {
             _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _mapper = mapper;
+            _mapper = mapper?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpGet]
+        //[AllowAnonymous]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
         {
             var customers = await _customerService.GetPagedCustomersAsync(pageNumber, pageSize);
@@ -31,6 +35,7 @@ namespace InventoryTrackApi.Controllers.Customers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<CustomerDTO>> GetCustomer(int id)
         {
             var customer = await _customerService.GetCustomerByIdAsync(id);
@@ -42,11 +47,12 @@ namespace InventoryTrackApi.Controllers.Customers
         }
 
         [HttpPost]
-        public async Task<ActionResult<CustomerDTO>> CreatePurchase(CustomerDTO customerDto)
+        [Authorize]
+        public async Task<ActionResult<CustomerDTO>> CreateCustomer(CustomerDTO customerDto)
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Invalid model state for CreatePurchase.");
+                _logger.LogWarning("Invalid model state for Creating Customer.");
                 return ValidationProblem(ModelState);
             }
             try
@@ -59,9 +65,9 @@ namespace InventoryTrackApi.Controllers.Customers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error Creating Purchase: {Message}", ex.Message);
+                _logger.LogError(ex, $"Error Creating Customer: {ex.Message}");
                 return Problem(
-                    title: "An error occurred while creating the purchase.",
+                    title: "An error occurred while creating the Customer.",
                     detail: ex.Message,
                     statusCode: StatusCodes.Status500InternalServerError
                 );
@@ -122,7 +128,9 @@ namespace InventoryTrackApi.Controllers.Customers
 
         }
         */
+
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateCustomer([FromRoute] int id, CustomerDTO customerDto)
         {
             if (id != customerDto.CustomerId)
@@ -142,8 +150,8 @@ namespace InventoryTrackApi.Controllers.Customers
             return Ok(customer);
         }
 
-
         [HttpPatch("{id}")]
+        [Authorize]
         public async Task<IActionResult> PatchCustomer([FromRoute] int id, [FromBody] JsonPatchDocument<CustomerDTO> patchCustomer)
         {
             if (patchCustomer == null)
@@ -175,10 +183,8 @@ namespace InventoryTrackApi.Controllers.Customers
 
         }
 
-
-
-
         [HttpPut("CreditLimit/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateCustomerCreditLimit(int id, decimal amount, decimal amountPaid, string validate)
         {
             //if (amount == 0)
@@ -205,6 +211,7 @@ namespace InventoryTrackApi.Controllers.Customers
         }
 
         [HttpPut("AccountBalance")]
+        [Authorize]
         public async Task<IActionResult> UpdateAccountBalance(int id, decimal amount)
         {
             if (amount == 0)
@@ -228,11 +235,12 @@ namespace InventoryTrackApi.Controllers.Customers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while updating the product.");
+                return StatusCode(500, $"An error occurred while updating the product. {ex}");
             }
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
             await _customerService.DeleteCustomerAsync(id);
@@ -240,6 +248,7 @@ namespace InventoryTrackApi.Controllers.Customers
         }
 
         [HttpGet("ByName/{name}")]
+        [Authorize]
         public async Task<ActionResult<CustomerDTO>> GetCustomerByName(string name)
         {
             try
@@ -259,6 +268,7 @@ namespace InventoryTrackApi.Controllers.Customers
         }
 
         [HttpGet("Credit")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetSpecificCustomers()
         {
             var customers = await _customerService.GetSpecificCustomersAsync();

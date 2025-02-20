@@ -106,7 +106,7 @@ namespace InventoryTrackApi.Data
                 .WithOne(c => c.Location)
                 .HasForeignKey(f => f.LocationId);
 
-            
+
 
             modelBuilder.Entity<CashRegister>()
                 .HasMany(cr => cr.CashShifts)
@@ -172,7 +172,7 @@ namespace InventoryTrackApi.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             #endregion
-            
+
 
             #region Sale
             // Sale
@@ -181,8 +181,6 @@ namespace InventoryTrackApi.Data
                 .WithMany(c => c.Sales)
                 .HasForeignKey(f => f.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-
 
             modelBuilder.Entity<Sale>()
                     .HasOne(s => s.Employee)
@@ -258,7 +256,7 @@ namespace InventoryTrackApi.Data
             // Seeding data from ModelBuilderExtensions (if defined)
             modelBuilder.Seed();
         }
-        
+
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Shelf> Shelfs { get; set; }
@@ -280,7 +278,7 @@ namespace InventoryTrackApi.Data
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleItem> SaleItems { get; set; }
         public DbSet<SalePayment> SalePayments { get; set; }
-
+        public DbSet<User> Users { get; set; }
 
     }
 }

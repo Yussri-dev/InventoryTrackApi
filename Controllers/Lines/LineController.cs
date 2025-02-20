@@ -1,6 +1,8 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,15 +14,18 @@ namespace InventoryTrackApi.Controllers.Lines
     {
         private readonly LineService _lineService;
         private readonly ILogger<LineController> _logger;
-
-        public LineController(LineService lineService, ILogger<LineController> logger)
+        private readonly IMapper _mapper;
+        public LineController(LineService lineService, 
+            ILogger<LineController> logger, IMapper mapper)
         {
-            _lineService = lineService;
-            _logger = logger;
+            _lineService = lineService ?? throw new ArgumentNullException(nameof(lineService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // Get paged categories
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<LineDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
         {
             var categories = await _lineService.GetPagedLines(pageNumber, pageSize);
@@ -29,6 +34,7 @@ namespace InventoryTrackApi.Controllers.Lines
 
         //// Get product by Name
         [HttpGet("ByName/{name}")]
+        [Authorize]
         public async Task<ActionResult<LineDTO>> GetLineByName(string name)
         {
             try
@@ -49,6 +55,7 @@ namespace InventoryTrackApi.Controllers.Lines
 
         // Get line by ID
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<LineDTO>> GetLine(int id)
         {
             var line = await _lineService.GetLineByIdAsync(id);
@@ -61,38 +68,36 @@ namespace InventoryTrackApi.Controllers.Lines
 
         // Create a new line
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<LineDTO>> CreateLine(LineDTO lineDto)
         {
+
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                _logger.LogWarning("Invalid model state for create Line");
             }
-
             try
             {
-                var line = new Line
-                {
-                    Name = lineDto.Name,
-                };
-
+                var line = _mapper.Map<Line>(lineDto);
                 await _lineService.CreateLineAsync(line);
 
-                var responseDto = new LineDTO
-                {
-                    Name = line.Name
-                };
-
+                var responseDto = _mapper.Map<LineDTO>(line);
                 return CreatedAtAction(nameof(GetLine), new { id = line.LineId }, responseDto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating line");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogError(ex, $"Error Creating Line: {ex.Message}");
+                return Problem(
+                    title: "An error occurred while creating the Line.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
             }
         }
 
         // Update a line
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateLine(int id, LineDTO lineDto)
         {
             if (id != lineDto.LineId)
@@ -100,24 +105,21 @@ namespace InventoryTrackApi.Controllers.Lines
                 return BadRequest("Line ID mismatch.");
             }
 
-            var existingEmployee = await _lineService.GetLineByIdAsync(id);
-            if (existingEmployee == null)
+            var existingLine = await _lineService.GetLineByIdAsync(id);
+            if (existingLine == null)
             {
                 return NotFound("Line not found.");
             }
 
-            var line = new Line
-            {
-                LineId = id,
-                Name = lineDto.Name
-            };
-
+            var line = _mapper.Map<Line>(lineDto);
             await _lineService.UpdateLineAsync(line);
-            return NoContent();
+
+            return Ok(line);
         }
 
         // Delete a line
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteLine(int id)
         {
             await _lineService.DeleteLineAsync(id);

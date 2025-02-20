@@ -22,10 +22,27 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             CreateMap<Location, LocationDTO>().ReverseMap() ;
             //Lines
             CreateMap<Line, LineDTO>().ReverseMap() ;
+
+            #region
+
             //Products
             CreateMap<Product, ProductDTO>().ReverseMap() ;
+
+            CreateMap<Product, ProductDTO>()
+           .ForMember(shelf => shelf.ShelfName, opt => opt.MapFrom(src => src.Shelf.Name))
+           .ForMember(category => category.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+           .ForMember(unit => unit.UnitName, opt => opt.MapFrom(src => src.Unit.Name))
+           .ForMember(tax => tax.TaxRate, opt => opt.MapFrom(src => src.Tax.TaxRate))
+           .ForMember(line => line.LineName, opt => opt.MapFrom(src => src.Line.Name))
+           ;
+           
             //Product Batch
             CreateMap<ProductBatch, ProductBatchDTO>().ReverseMap() ;
+
+            #endregion
+
+
+
 
             //CashRegister
             CreateMap<CashRegister, CashRegisterDTO>().ReverseMap() ;
@@ -46,7 +63,10 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             //CreateMap<CustomerDTO, Customer>().ReverseMap();
 
             //Employee
-            CreateMap<Employee, EmployeeDTO>().ReverseMap() ;
+            CreateMap<EmployeeDTO, Employee>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Employee, EmployeeDTO>().ReverseMap();
 
             //Inventory
             CreateMap<Inventory, InventoryDTO>().ReverseMap() ;
@@ -57,27 +77,30 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             //CreateMap<Purchase, PurchaseDTO>().ReverseMap() ;
             CreateMap<PurchaseDTO, Purchase>().ReverseMap();
             // Map Customer.Name to CustomerName
+
             CreateMap<Purchase, PurchaseDTO>()
-            .ForMember(supplier => supplier.SupplierName, opt => opt.MapFrom(src => src.Supplier.Name));
+            .ForMember(dest => dest.SupplierId, opt => opt.Ignore())  // Prevents creating a new Customer
+            .ForMember(dest => dest.SupplierId, opt => opt.MapFrom(src => src.SupplierId))
+            .ForMember(supplier => supplier.SupplierName, opt => opt.MapFrom(src => src.Supplier.Name)).ReverseMap();
 
             //Purchase Item
             CreateMap<PurchaseItem, PurchaseItemDTO>().ReverseMap() ;
            
             // Map Product.Name to ProductName
             CreateMap<PurchaseItem, PurchaseItemDTO>()
-            .ForMember(supplier => supplier.ProductName, opt => opt.MapFrom(src => src.Product.Name)).ReverseMap();
+            .ForMember(product => product.ProductName, opt => opt.MapFrom(src => src.Product.Name)).ReverseMap();
 
             //Purchase Payement
             CreateMap<PurchasePayment, PurchasePaymentDTO>().ReverseMap() ;
 
             //Sale
-            CreateMap<Sale, SaleDTO>().ReverseMap() ;
+            //CreateMap<Sale, SaleDTO>().ReverseMap() ;
 
-            // Map Customer.Name to CustomerName
             CreateMap<Sale, SaleDTO>()
+            .ForMember(dest => dest.CustomerId, opt => opt.Ignore())  // Prevents creating a new Customer
+            .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.CustomerId))
             .ForMember(customer => customer.CustomerName, opt => opt.MapFrom(src => src.Customer.Name)).ReverseMap();
 
-            
             //Sale Item
             CreateMap<SaleItem, SaleItemDTO>().ReverseMap() ;
 
@@ -98,6 +121,8 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             //Supplier
             CreateMap<Supplier, SupplierDTO>().ReverseMap() ;
 
+            //User
+            CreateMap<User, UserDTO>().ReverseMap();
         }
     }
 }

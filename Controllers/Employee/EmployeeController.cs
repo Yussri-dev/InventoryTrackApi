@@ -1,6 +1,8 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,19 +10,23 @@ namespace InventoryTrackApi.Controllers.Employee
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EmployeeController : ControllerBase
     {
         private readonly EmployeeService _employeeService;
         private readonly ILogger<EmployeeController> _logger;
+        private readonly IMapper _mapper;
 
-        public EmployeeController(EmployeeService employeeService, ILogger<EmployeeController> logger)
+        public EmployeeController(EmployeeService employeeService, ILogger<EmployeeController> logger, IMapper mapper)
         {
             _employeeService = employeeService ?? throw new ArgumentNullException(nameof(employeeService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // Get paged employees
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetPagedEmployees(int pageNumber = 1, int pageSize = 10)
         {
             var pagedEmployees = await _employeeService.GetPagedEmployeeAsync(pageNumber, pageSize);
@@ -29,6 +35,7 @@ namespace InventoryTrackApi.Controllers.Employee
 
         // Get employee by ID
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<EmployeeDTO>> GetEmployee(int id)
         {
             var employee = await _employeeService.GetEmployeeByIdAsync(id);
@@ -38,39 +45,35 @@ namespace InventoryTrackApi.Controllers.Employee
             }
             return Ok(employee);
         }
-        /*
+
         // Create a new employee
         [HttpPost]
-
+        [Authorize]
         public async Task<ActionResult<EmployeeDTO>> CreateEmployee(EmployeeDTO employeeDto)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for CreatePurchase.");
+                return ValidationProblem(ModelState);
+            }
             try
             {
-                var employee = new Employee
-                {
-                    FirstName = employeeDto.FirstName,
-                    LastName = employeeDto.LastName,
-                    Role = employeeDto.Role,
-                    Phone = employeeDto.Phone,
-                    Email = employeeDto.Email,
-                    PasswordHash = employeeDto.PasswordHash
-                };
-
+                var employee = _mapper.Map<Models.Employee>(employeeDto);
                 await _employeeService.CreateEmployeeAsync(employee);
 
-                return CreatedAtAction(nameof(GetEmployee), new { id = employee.EmployeeId }, employeeDto);
+                var respondDto = _mapper.Map<EmployeeDTO>(employee);
+                return CreatedAtAction(nameof(GetEmployee), new { id = employee }, respondDto);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogError(ex, $"Error Creating Purchase: {ex.Message}");
+                return Problem(
+                    title: "An error occurred while creating the purchase.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
             }
-        }
-        */
-
-        // Create a new employee
-        [HttpPost]
-        public async Task<ActionResult<EmployeeDTO>> CreateEmployee(EmployeeDTO employeeDto)
-        {
+            /*
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -108,11 +111,13 @@ namespace InventoryTrackApi.Controllers.Employee
                 _logger.LogError(ex, "Error creating employee");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+            */
         }
 
 
         // Update an existing employee
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateEmployee(int id, EmployeeDTO employeeDto)
         {
             if (id != employeeDto.EmployeeId)
@@ -143,6 +148,7 @@ namespace InventoryTrackApi.Controllers.Employee
 
         // Delete an employee
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             var existingEmployee = await _employeeService.GetEmployeeByIdAsync(id);

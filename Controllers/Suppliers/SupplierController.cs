@@ -89,7 +89,7 @@ namespace InventoryTrackApi.Controllers.Suppliers
             var supplier = new Supplier
             {
                 SupplierId = id,
-                Name = supplierDto.Name,
+                Name = supplierDto.SupplierName,
                 PhoneNumber1 = supplierDto.PhoneNumber1,
                 PhoneNumber2 = supplierDto.PhoneNumber2,
                 Email = supplierDto.Email,

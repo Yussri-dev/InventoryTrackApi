@@ -1,4 +1,5 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
@@ -16,13 +17,16 @@ namespace InventoryTrackApi.Controllers.Sales
     {
         private readonly SaleService _saleService;
         private readonly ILogger<SaleController> _logger;
+        private readonly IMapper _mapper;
 
-        public SaleController(SaleService saleService, ILogger<SaleController> logger)
+        public SaleController(
+            SaleService saleService,
+            ILogger<SaleController> logger,
+            IMapper mapper)
         {
             _saleService = saleService ?? throw new ArgumentNullException(nameof(saleService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            //_saleService = saleService;
-            //_logger = logger;
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // Get paged sales
@@ -44,11 +48,35 @@ namespace InventoryTrackApi.Controllers.Sales
             }
             return Ok(sale);
         }
-
+        
         // Create a new sale
         [HttpPost]
         public async Task<ActionResult<SaleDTO>> CreateSale(SaleDTO saleDto)
         {
+            //if (!ModelState.IsValid)
+            //{
+            //    _logger.LogWarning("Invalid model state for Create Sale.");
+            //    return ValidationProblem(ModelState);
+            //}
+            //try
+            //{
+            //    var sale = _mapper.Map<Sale>(saleDTO);
+            //    await _saleService.CreateSaleAsync(sale);
+
+            //    var respondDto = _mapper.Map<SaleDTO>(sale);
+            //    return CreatedAtAction(nameof(GetSale), new { id = sale.SaleId }, respondDto);
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.LogError(ex, "Error Creating Sale: {Message}", ex.Message);
+            //    return Problem(
+            //        title: "An error occurred while creating the sale.",
+            //        detail: ex.Message,
+            //        statusCode: StatusCodes.Status500InternalServerError
+            //    );
+            //}
+
+            ///*
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -90,7 +118,7 @@ namespace InventoryTrackApi.Controllers.Sales
                 return StatusCode(500, $"Internal Server Error : {ex.Message}");
             }
 
-
+            //*/
 
         }
 
@@ -207,7 +235,7 @@ namespace InventoryTrackApi.Controllers.Sales
         }
 
         [HttpPut("apply-payment/{customerId}")]
-        public async Task<IActionResult> ApplyPaymentToInvoices([FromRoute] int customerId, [FromQuery]decimal paymentAmount)
+        public async Task<IActionResult> ApplyPaymentToInvoices([FromRoute] int customerId, [FromQuery] decimal paymentAmount)
         {
             try
             {

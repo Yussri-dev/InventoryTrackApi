@@ -1,4 +1,5 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
@@ -14,10 +15,13 @@ namespace InventoryTrackApi.Controllers.Products
     {
         private readonly ProductService _productService;
         private readonly ILogger<ProductController> _logger;
-        public ProductController(ProductService productService, ILogger<ProductController> logger)
+        private readonly IMapper _mapper;
+
+        public ProductController(ProductService productService, ILogger<ProductController> logger, IMapper mapper)
         {
-            _productService = productService;
-            _logger = logger;
+            _productService = productService ?? throw new ArgumentNullException(nameof(productService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // Get paged products
@@ -106,6 +110,30 @@ namespace InventoryTrackApi.Controllers.Products
         [HttpPost]
         public async Task<ActionResult<ProductDTO>> CreateProduct(ProductDTO productDto)
         {
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for Creating P.");
+                return ValidationProblem(ModelState);
+            }
+            try
+            {
+                var product = _mapper.Map<Product>(productDto);
+                await _productService.CreateProductAsync(product);
+
+                var respondDto = _mapper.Map<ProductDTO>(product);
+                return CreatedAtAction(nameof(GetProduct), new { id = product.ProductId }, respondDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Creating Purchase: {Message}", ex.Message);
+                return Problem(
+                    title: "An error occurred while creating the purchase.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
+            /*
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -169,6 +197,7 @@ namespace InventoryTrackApi.Controllers.Products
                 _logger.LogError(ex, "Error creating location");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+            */
         }
 
         // Update a product
@@ -181,44 +210,43 @@ namespace InventoryTrackApi.Controllers.Products
             }
 
             var existingProduct = await _productService.GetProductByIdAsync(id);
-            //Console.WriteLine("------------------------------");
-            //Console.WriteLine(existingProduct);
-            //Console.WriteLine("------------------------------");
             if (existingProduct == null)
             {
                 return NotFound("Product not found.");
             }
 
-            var product = new Product
-            {
-                ProductId = id,
-                ProductUnitId = productDto.ProductUnitId,
-                Name = productDto.Name,
-                MinStock = productDto.MinStock,
-                MaxStock = productDto.MaxStock,
-                PackUnitType = productDto.PackUnitType,
-                QuantityStock = productDto.QuantityStock,
-                QuantityPack = productDto.QuantityPack,
-                Barcode = productDto.Barcode,
-                PurchasePrice = productDto.PurchasePrice,
-                SalePrice1 = productDto.SalePrice1,
-                SalePrice2 = productDto.SalePrice2,
-                SalePrice3 = productDto.SalePrice3,
-                ImageUrl = productDto.ImageUrl,
-                ModifiedBy = productDto.ModifiedBy,
-                DateModified = productDto.DateModified,
-                IsActivate = productDto.IsActivate,
-                ShelfId = productDto.ShelfId,
-                CategoryId = productDto.CategoryId,
-                UnitId = productDto.UnitId,
-                TaxId = productDto.TaxId,
-                LineId = productDto.LineId,
-                IsSecondItemDiscountEligible = productDto.IsSecondItemDiscountEligible,
-                IsBuyThreeForFiveEligible = productDto.IsBuyThreeForFiveEligible
-            };
+            var product = _mapper.Map<Product>(productDto);
+            //var product = new Product
+            //{
+            //    ProductId = id,
+            //    ProductUnitId = productDto.ProductUnitId,
+            //    Name = productDto.Name,
+            //    MinStock = productDto.MinStock,
+            //    MaxStock = productDto.MaxStock,
+            //    PackUnitType = productDto.PackUnitType,
+            //    QuantityStock = productDto.QuantityStock,
+            //    QuantityPack = productDto.QuantityPack,
+            //    Barcode = productDto.Barcode,
+            //    PurchasePrice = productDto.PurchasePrice,
+            //    SalePrice1 = productDto.SalePrice1,
+            //    SalePrice2 = productDto.SalePrice2,
+            //    SalePrice3 = productDto.SalePrice3,
+            //    ImageUrl = productDto.ImageUrl,
+            //    ModifiedBy = productDto.ModifiedBy,
+            //    DateModified = productDto.DateModified,
+            //    IsActivate = productDto.IsActivate,
+            //    ShelfId = productDto.ShelfId,
+            //    CategoryId = productDto.CategoryId,
+            //    UnitId = productDto.UnitId,
+            //    TaxId = productDto.TaxId,
+            //    LineId = productDto.LineId,
+            //    IsSecondItemDiscountEligible = productDto.IsSecondItemDiscountEligible,
+            //    IsBuyThreeForFiveEligible = productDto.IsBuyThreeForFiveEligible
+            //};
 
             await _productService.UpdateProductAsync(product);
-            return NoContent();
+
+            return Ok(product);
         }
 
 
@@ -247,7 +275,7 @@ namespace InventoryTrackApi.Controllers.Products
             catch (Exception ex)
             {
                 // Log the exception (if logging is configured) and return a generic error message.
-                return StatusCode(500, "An error occurred while updating the product.");
+                return StatusCode(500, $"An error occurred while updating the product. {ex}");
             }
         }
 
@@ -275,8 +303,7 @@ namespace InventoryTrackApi.Controllers.Products
             }
             catch (Exception ex)
             {
-                // Log the exception (if logging is configured) and return a generic error message.
-                return StatusCode(500, "An error occurred while updating the product.");
+                return StatusCode(500, $"An error occurred while updating the product. {ex}");
             }
         }
 

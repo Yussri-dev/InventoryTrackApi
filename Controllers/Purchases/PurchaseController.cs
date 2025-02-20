@@ -19,9 +19,9 @@ namespace InventoryTrackApi.Controllers.Purchases
         private readonly IMapper _mapper;
         public PurchaseController(PurchaseService purchaseService, ILogger<PurchaseController> logger, IMapper mapper)
         {
-            _purchaseService = purchaseService;
-            _logger = logger;
-            _mapper = mapper;
+            _purchaseService = purchaseService ?? throw new ArgumentNullException(nameof(purchaseService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // Get paged purchases
