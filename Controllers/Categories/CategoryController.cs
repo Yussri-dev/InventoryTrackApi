@@ -1,6 +1,8 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,18 +10,24 @@ namespace InventoryTrackApi.Controllers.Categories
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly CategoryService _categoryService;
         private readonly ILogger<CategoryController> _logger;
-        public CategoryController(CategoryService categoryService, ILogger<CategoryController> logger)
+        private readonly IMapper _mapper;
+        public CategoryController(CategoryService categoryService, 
+            ILogger<CategoryController> logger,
+            IMapper mapper)
         {
-            _categoryService = categoryService;
-            _logger = logger;
+            _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // Get paged categories
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
         {
             var categories = await _categoryService.GetPagedCategoriesAsync(pageNumber, pageSize);
@@ -28,6 +36,7 @@ namespace InventoryTrackApi.Controllers.Categories
 
         // Get category by ID
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
@@ -40,38 +49,49 @@ namespace InventoryTrackApi.Controllers.Categories
 
         // Create a new category
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<CategoryDTO>> CreateCategory(CategoryDTO categoryDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                _logger.LogWarning("Invalid model state for creating Category");
+                return ValidationProblem(ModelState);
             }
 
             try
             {
-                var category = new Category
-                {
-                    Name = categoryDto.Name,
-                };
-
+                var category = _mapper.Map<Category>(categoryDto);
                 await _categoryService.CreateCategoryAsync(category);
 
-                var responseDto = new CategoryDTO
-                {
-                    Name = category.Name,
-                };
+                var responseDto = _mapper.Map<CategoryDTO>(category);
+                //var category = new Category
+                //{
+                //    Name = categoryDto.Name,
+                //};
+
+                //await _categoryService.CreateCategoryAsync(category);
+
+                //var responseDto = new CategoryDTO
+                //{
+                //    Name = category.Name,
+                //};
 
                 return CreatedAtAction(nameof(GetCategory), new { id = category.CategoryId }, responseDto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating employee");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogError(ex, $"Error Creating Category: {ex.Message}");
+                return Problem(
+                    title: "An error occurred while creating the purchase.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
             }
         }
 
         // Update a category
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateCategory(int id, CategoryDTO categoryDto)
         {
             if (id != categoryDto.CategoryId)
@@ -97,6 +117,7 @@ namespace InventoryTrackApi.Controllers.Categories
 
         // Delete a category
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             await _categoryService.DeleteCategoryAsync(id);
@@ -105,6 +126,7 @@ namespace InventoryTrackApi.Controllers.Categories
 
         //// Get product by Name
         [HttpGet("ByName/{name}")]
+        [Authorize]
         public async Task<ActionResult<LineDTO>> GetCategoryByName(string name)
         {
             try
