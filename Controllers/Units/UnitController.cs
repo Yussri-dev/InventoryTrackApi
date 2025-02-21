@@ -1,4 +1,5 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -12,11 +13,13 @@ namespace InventoryTrackApi.Controllers.Units
     {
         private readonly UnitService _unitService;
         private readonly ILogger<UnitController> _logger;
+        private readonly IMapper _mapper;
 
-        public UnitController(UnitService unitService, ILogger<UnitController> logger)
+        public UnitController(UnitService unitService, ILogger<UnitController> logger, IMapper mapper)
         {
             _unitService = unitService ?? throw new ArgumentNullException(nameof(unitService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // Get paged units
@@ -97,22 +100,26 @@ namespace InventoryTrackApi.Controllers.Units
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                _logger.LogWarning("Invalid model state for creating Unit");
             }
-
-            var unit = new Unit
+            try
             {
-                Name = unitDto.Name,
-            };
+                var unit = _mapper.Map<Unit>(unitDto);
+                await _unitService.CreateUnitAsync(unit);
 
-            await _unitService.CreateUnitAsync(unit);
+                var responsDto = _mapper.Map<UnitDTO>(unitDto);
+                return CreatedAtAction(nameof(GetUnit), new { id = unit }, responsDto);
 
-            var responseDto = new UnitDTO
+            }
+            catch (Exception ex)
             {
-                Name = unit.Name
-            };
-
-            return CreatedAtAction(nameof(GetUnit), new { id = unit.UnitId }, responseDto);
+                _logger.LogError(ex, $"Error Creating Unit: {ex.Message}");
+                return Problem(
+                    title: "An error occurred while creating the unit.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
         }
         // Update a unit
         [HttpPut("{id}")]
@@ -123,20 +130,34 @@ namespace InventoryTrackApi.Controllers.Units
                 return BadRequest("Unit ID mismatch.");
             }
 
-            var existingUnit = await _unitService.GetUnitByIdAsync(id);
-            if (existingUnit == null)
+            var existingEmployee = await _unitService.GetUnitByIdAsync(id);
+            if (existingEmployee == null)
             {
                 return NotFound("Unit not found.");
             }
 
-            var unit = new Unit
-            {
-                UnitId = id,
-                Name = unitDto.Name,
-            };
-
-            await _unitService.UpdateUnitAsync(unit);
+            var purchase = _mapper.Map<Unit>(unitDto);
+            await _unitService.UpdateUnitAsync(purchase);
             return NoContent();
+            //if (id != unitDto.UnitId)
+            //{
+            //    return BadRequest("Unit ID mismatch.");
+            //}
+
+            //var existingUnit = await _unitService.GetUnitByIdAsync(id);
+            //if (existingUnit == null)
+            //{
+            //    return NotFound("Unit not found.");
+            //}
+
+            //var unit = new Unit
+            //{
+            //    UnitId = id,
+            //    Name = unitDto.Name,
+            //};
+
+            //await _unitService.UpdateUnitAsync(unit);
+            //return NoContent();
         }
 
         // Delete a unit

@@ -266,15 +266,14 @@ namespace InventoryTrackApi.Controllers.Products
                     return NotFound("Product not found.");
                 }
 
-                return Ok(updatedProduct); // Return the updated product for client confirmation.
+                return Ok(updatedProduct);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message); // Handle specific service-layer exceptions.
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                // Log the exception (if logging is configured) and return a generic error message.
                 return StatusCode(500, $"An error occurred while updating the product. {ex}");
             }
         }
@@ -295,11 +294,11 @@ namespace InventoryTrackApi.Controllers.Products
                     return NotFound("Product not found.");
                 }
 
-                return Ok(ProductDiscount); // Return the updated product for client confirmation.
+                return Ok(ProductDiscount);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message); // Handle specific service-layer exceptions.
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -321,10 +320,8 @@ namespace InventoryTrackApi.Controllers.Products
         {
             try
             {
-                // Retrieve all prices using the service
                 var prices = await _productService.GetProductPriceAsync(id, priceType);
 
-                // If no prices are found, return NotFound
                 if (prices.ToString() == null)
                 {
                     return NotFound("No prices found for the given product.");
@@ -393,10 +390,6 @@ namespace InventoryTrackApi.Controllers.Products
                 return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
             }
 
-            // Ensure the end date is inclusive of the entire day
-            //endSalesDate = DateHelper.TryParseDate(endSalesDate);
-
-            // Fetch sales within the date range
             var products = await _productService.GetPagedProductsByDateRangeAsync(startProductsDate, endProductsDate);
 
             return Ok(products);

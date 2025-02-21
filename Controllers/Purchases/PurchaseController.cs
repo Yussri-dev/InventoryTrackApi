@@ -32,26 +32,6 @@ namespace InventoryTrackApi.Controllers.Purchases
             return Ok(purchases);
         }
 
-
-        /*
-        [HttpGet]
-        public async Task<ActionResult<PagedResponse<PurchaseDTO>>> GetPagedPurchases(int pageNumber = 1, int pageSize = 10)
-        {
-            var (purchases, totalCount) = await _purchaseService.GetPagedPurchasesWithCountAsync(pageNumber, pageSize);
-
-            var response = new PagedResponse<PurchaseDTO>
-            {
-                Data = purchases,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                TotalCount = totalCount
-            };
-
-            return Ok(response);
-        }
-         */
-
-
         // Get purchase by ID
         [HttpGet("{id}")]
         public async Task<ActionResult<PurchaseDTO>> GetPurchase(int id)
@@ -162,29 +142,6 @@ namespace InventoryTrackApi.Controllers.Purchases
 
             return Ok(purchases);
         }
-        
-        //[HttpGet("PurchasesDateRange")]
-        //public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedPurchasesByDateRangeAsync(
-        //[FromQuery] string startDate, [FromQuery] string endDate)
-        //{
-        //    if (!TryParseDate(startDate, out var startPurchasesDate))
-        //    {
-        //        return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
-        //    }
-
-        //    if (!TryParseDate(endDate, out var endPurchasesDate))
-        //    {
-        //        return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
-        //    }
-
-        //    // Ensure the end date is inclusive of the entire day
-        //    endPurchasesDate = endPurchasesDate.AddDays(1).AddSeconds(-1);
-
-        //    // Fetch purchases within the date range
-        //    var purchases = await _purchaseService.GetPagedPurchasesByDateRangeAsync(startPurchasesDate, endPurchasesDate);
-
-        //    return Ok(purchases);
-        //}
         
     }
 }

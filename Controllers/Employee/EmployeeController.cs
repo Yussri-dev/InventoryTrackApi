@@ -53,7 +53,7 @@ namespace InventoryTrackApi.Controllers.Employee
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Invalid model state for CreatePurchase.");
+                _logger.LogWarning("Invalid model state for Creating Employee.");
                 return ValidationProblem(ModelState);
             }
             try
@@ -68,7 +68,7 @@ namespace InventoryTrackApi.Controllers.Employee
             {
                 _logger.LogError(ex, $"Error Creating Purchase: {ex.Message}");
                 return Problem(
-                    title: "An error occurred while creating the purchase.",
+                    title: "An error occurred while creating the employee.",
                     detail: ex.Message,
                     statusCode: StatusCodes.Status500InternalServerError
                 );
@@ -122,27 +122,17 @@ namespace InventoryTrackApi.Controllers.Employee
         {
             if (id != employeeDto.EmployeeId)
             {
-                return BadRequest("Employee ID mismatch.");
+                return BadRequest("Purchase ID mismatch.");
             }
 
             var existingEmployee = await _employeeService.GetEmployeeByIdAsync(id);
             if (existingEmployee == null)
             {
-                return NotFound("Employee not found.");
+                return NotFound("Purchase not found.");
             }
 
-            var employee = new Models.Employee
-            {
-                EmployeeId = id,
-                FirstName = employeeDto.FirstName,
-                LastName = employeeDto.LastName,
-                Role = employeeDto.Role,
-                Phone = employeeDto.Phone,
-                Email = employeeDto.Email,
-                PasswordHash = employeeDto.PasswordHash
-            };
-
-            await _employeeService.UpdateEmployeeAsync(employee);
+            var purchase = _mapper.Map<Models.Employee>(employeeDto);
+            await _employeeService.UpdateEmployeeAsync(purchase);
             return NoContent();
         }
 
