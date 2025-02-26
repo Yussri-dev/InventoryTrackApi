@@ -10,6 +10,20 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
     {
         public MappingProfiles()
         {
+            #region Mapping Finished
+            //-------------Employee----------------
+            CreateMap<EmployeeDTO, Employee>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Employee, EmployeeDTO>().ReverseMap();
+
+            //-------------Location----------------
+            CreateMap<LocationDTO, Location>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Location, LocationDTO>().ReverseMap();
+            #endregion
+
             //Categories
             CreateMap<Category, CategoryDTO>().ReverseMap();
             //Shelfs
@@ -18,14 +32,12 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             CreateMap<Tax, TaxDTO>().ReverseMap();
 
             ////Units
-            //Employee
             CreateMap<UnitDTO, Unit>()
            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<Unit, UnitDTO>().ReverseMap();
 
-            //Location
-            CreateMap<Location, LocationDTO>().ReverseMap();
+            
             //Lines
             CreateMap<Line, LineDTO>().ReverseMap();
 
@@ -64,11 +76,7 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             CreateMap<Operation<CustomerDTO>, Operation<Customer>>();
             //CreateMap<CustomerDTO, Customer>().ReverseMap();
 
-            //Employee
-            CreateMap<EmployeeDTO, Employee>()
-           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<Employee, EmployeeDTO>().ReverseMap();
 
             //Inventory
             CreateMap<Inventory, InventoryDTO>().ReverseMap();

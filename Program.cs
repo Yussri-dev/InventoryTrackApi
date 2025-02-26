@@ -98,6 +98,16 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
     options.ConfigureWarnings(warnings =>
         warnings.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
+
+
+// Explicitly configure Kestrel to listen on all network interfaces
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5000); // HTTP
+    serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // HTTPS
+});
+
+
 var app = builder.Build();
 
 // Add the custom exception handling middleware
@@ -109,23 +119,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Configure Kestrel endpoints
-//builder.WebHost.ConfigureKestrel(serverOptions =>
-//{
-//    serverOptions.ListenAnyIP(5000); // HTTP
-//    serverOptions.ListenAnyIP(5001, listenOptions =>
-//    {
-//        listenOptions.UseHttps(); // HTTPS
-//    });
-//});
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
-
-
 app.Run();

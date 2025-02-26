@@ -36,7 +36,7 @@ namespace InventoryTrackApi.Controllers.Employee
         // Get employee by ID
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<EmployeeDTO>> GetEmployee(int id)
+        public async Task<ActionResult<EmployeeDTO>> GetEmployee([FromRoute]int id)
         {
             var employee = await _employeeService.GetEmployeeByIdAsync(id);
             if (employee == null)
@@ -118,7 +118,7 @@ namespace InventoryTrackApi.Controllers.Employee
         // Update an existing employee
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateEmployee(int id, EmployeeDTO employeeDto)
+        public async Task<IActionResult> UpdateEmployee([FromRoute]int id, EmployeeDTO employeeDto)
         {
             if (id != employeeDto.EmployeeId)
             {

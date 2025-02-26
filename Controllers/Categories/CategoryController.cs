@@ -52,40 +52,29 @@ namespace InventoryTrackApi.Controllers.Categories
         [Authorize]
         public async Task<ActionResult<CategoryDTO>> CreateCategory(CategoryDTO categoryDto)
         {
+            _logger.LogInformation($"Create Category request for Category: {categoryDto}");
+
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning("Invalid model state for creating Category");
-                return ValidationProblem(ModelState);
             }
-
             try
             {
                 var category = _mapper.Map<Category>(categoryDto);
                 await _categoryService.CreateCategoryAsync(category);
 
                 var responseDto = _mapper.Map<CategoryDTO>(category);
-                //var category = new Category
-                //{
-                //    Name = categoryDto.Name,
-                //};
-
-                //await _categoryService.CreateCategoryAsync(category);
-
-                //var responseDto = new CategoryDTO
-                //{
-                //    Name = category.Name,
-                //};
-
                 return CreatedAtAction(nameof(GetCategory), new { id = category.CategoryId }, responseDto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error Creating Category: {ex.Message}");
+                _logger.LogError(ex, $"Error creating Category : {ex.Message}");
                 return Problem(
-                    title: "An error occurred while creating the purchase.",
+                    title: "An error occured while creating the category",
                     detail: ex.Message,
                     statusCode: StatusCodes.Status500InternalServerError
-                );
+                    );
+                throw;
             }
         }
 
@@ -94,25 +83,33 @@ namespace InventoryTrackApi.Controllers.Categories
         [Authorize]
         public async Task<IActionResult> UpdateCategory(int id, CategoryDTO categoryDto)
         {
+            _logger.LogInformation($"Update Category request received for Id : {id}");
             if (id != categoryDto.CategoryId)
             {
-                return BadRequest("Category ID mismatch.");
+                _logger.LogWarning($"Category ID mismatch : Route Id {id} does not match DTO ID {categoryDto.CategoryId}");
+                return BadRequest("Category ID mismatch");
             }
-
-            var existingEmployee = await _categoryService.GetCategoryByIdAsync(id);
-            if (existingEmployee == null)
+            try
             {
-                return NotFound("Category not found.");
+                var existingCategory = await _categoryService.GetCategoryByIdAsync(id);
+                if (existingCategory == null)
+                {
+                    _logger.LogWarning($"Category with ID : {id} not fount");
+                    return NotFound("Category Not Found");
+                }
+
+                _logger.LogInformation($"Updating category with Id {id}");
+                var category = _mapper.Map<Category>(categoryDto);
+                await _categoryService.UpdateCategoryAsync(category);
+
+                _logger.LogInformation($"category with ID {id} successfully updated");
+                return Ok(category);
             }
-
-            var category = new Category
+            catch (Exception ex)
             {
-                CategoryId = id,
-                Name = categoryDto.Name
-            };
-
-            await _categoryService.UpdateCategoryAsync(category);
-            return NoContent();
+                _logger.LogError(ex, $"Error occurred while updating Category with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         // Delete a category

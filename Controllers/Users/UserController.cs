@@ -1,5 +1,7 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,16 +9,22 @@ namespace InventoryTrackApi.Controllers.Users
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize]
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly ILogger<UserController> _logger;
+        private readonly IMapper _mapper;
 
-        public UserController(UserService userService)
+        public UserController(UserService userService, ILogger<UserController> logger, IMapper mapper)
         {
-            _userService = userService;
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpPost("register")]
+        [Authorize]
         public async Task<IActionResult> Register(UserDTO userDto, string password)
         {
             var user = await _userService.CreateUserAsync(userDto, password);
@@ -24,6 +32,7 @@ namespace InventoryTrackApi.Controllers.Users
         }
 
         [HttpGet]
+        //[Authorize]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers(int pageNumber = 1, int pageSize = 10)
         {
             var users = await _userService.GetAllUsersAsync(pageNumber, pageSize);

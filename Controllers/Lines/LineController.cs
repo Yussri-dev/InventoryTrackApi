@@ -10,11 +10,13 @@ namespace InventoryTrackApi.Controllers.Lines
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class LineController : ControllerBase
     {
         private readonly LineService _lineService;
         private readonly ILogger<LineController> _logger;
         private readonly IMapper _mapper;
+
         public LineController(LineService lineService, 
             ILogger<LineController> logger, IMapper mapper)
         {
@@ -33,9 +35,9 @@ namespace InventoryTrackApi.Controllers.Lines
         }
 
         //// Get product by Name
-        [HttpGet("ByName/{name}")]
+        [HttpGet("Name/{name}")]
         [Authorize]
-        public async Task<ActionResult<LineDTO>> GetLineByName(string name)
+        public async Task<ActionResult<LineDTO>> GetLineByName([FromRoute]string name)
         {
             try
             {
@@ -56,7 +58,7 @@ namespace InventoryTrackApi.Controllers.Lines
         // Get line by ID
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<LineDTO>> GetLine(int id)
+        public async Task<ActionResult<LineDTO>> GetLine([FromRoute]int id)
         {
             var line = await _lineService.GetLineByIdAsync(id);
             if (line == null)
@@ -98,29 +100,44 @@ namespace InventoryTrackApi.Controllers.Lines
         // Update a line
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateLine(int id, LineDTO lineDto)
+        public async Task<IActionResult> UpdateLine([FromRoute]int id, LineDTO lineDto)
         {
+            _logger.LogInformation($"UpdateLine request received for ID: {id}");
+
             if (id != lineDto.LineId)
             {
+                _logger.LogWarning($"Line ID mismatch: Route ID {id} does not match DTO ID {lineDto.LineId}");
                 return BadRequest("Line ID mismatch.");
             }
 
-            var existingLine = await _lineService.GetLineByIdAsync(id);
-            if (existingLine == null)
+            try
             {
-                return NotFound("Line not found.");
+                var existingLine = await _lineService.GetLineByIdAsync(id);
+                if (existingLine == null)
+                {
+                    _logger.LogWarning($"Line with ID {id} not found");
+                    return NotFound("Line not found.");
+                }
+
+                _logger.LogInformation($"Updating Line with ID {id}");
+                var line = _mapper.Map<Line>(lineDto);
+                await _lineService.UpdateLineAsync(line);
+
+                _logger.LogInformation($"Line with ID {id} successfully updated");
+                return Ok(line);
             }
-
-            var line = _mapper.Map<Line>(lineDto);
-            await _lineService.UpdateLineAsync(line);
-
-            return Ok(line);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while updating Line with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
+
 
         // Delete a line
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteLine(int id)
+        public async Task<IActionResult> DeleteLine([FromRoute] int id)
         {
             await _lineService.DeleteLineAsync(id);
             return NoContent();

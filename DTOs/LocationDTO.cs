@@ -12,5 +12,9 @@ namespace InventoryTrackApi.DTOs
         public string Adresse { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string Land { get; set; } = string.Empty;
+        public string ModifiedBy { get; set; }
+        public bool IsActivated { get; set; }
+
+
     }
 }

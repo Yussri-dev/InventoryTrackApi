@@ -1,0 +1,13 @@
+# Exclude unnecessary files and directories
+*.suo
+*.user
+*.vspscc
+TestProjectDesktop/
+WinFormTesting/
+bin/
+obj/
+.vs/
+.vscode/
+.git/
+/TestProjectDesktop/TestProjectDesktop.csproj
+/WinFormTesting/WinFormTesting.csproj

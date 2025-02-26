@@ -18,6 +18,12 @@ namespace InventoryTrackApi.Services
             return await _locationRepository.GetAllAsync(pageNumber, pageSize);
         }
 
+        //Get a Location by Name
+        public async Task<IEnumerable<Location>> GetLocationByNameAsync(string name)
+        {
+            return await _locationRepository.GetByNameAsync(p => p.Name.Contains(name));
+        }
+
         //Get a location By Id
         public async Task<Location> GetLocationByIdAsync(int id)
         {
