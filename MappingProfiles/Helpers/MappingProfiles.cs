@@ -21,11 +21,15 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             CreateMap<LocationDTO, Location>()
            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<Location, LocationDTO>().ReverseMap();
+            //-------------Category----------------
+            CreateMap<Category, CategoryDTO>().ReverseMap();
+
+            CreateMap<CategoryDTO, Category>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+
             #endregion
 
-            //Categories
-            CreateMap<Category, CategoryDTO>().ReverseMap();
             //Shelfs
             CreateMap<Shelf, ShelfDTO>().ReverseMap();
             //Taxes
