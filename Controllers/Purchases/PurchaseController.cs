@@ -3,6 +3,7 @@ using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
@@ -12,6 +13,7 @@ namespace InventoryTrackApi.Controllers.Purchases
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize]
     public class PurchaseController : ControllerBase
     {
         private readonly PurchaseService _purchaseService;
@@ -26,6 +28,7 @@ namespace InventoryTrackApi.Controllers.Purchases
 
         // Get paged purchases
         [HttpGet]
+        //[Authorize]
         public async Task<ActionResult<IEnumerable<PurchaseDTO>>> GetPagedPurchases(int pageNumber = 1, int pageSize = 10)
         {
             var purchases = await _purchaseService.GetPagedPurchasesAsync(pageNumber, pageSize);
@@ -34,6 +37,7 @@ namespace InventoryTrackApi.Controllers.Purchases
 
         // Get purchase by ID
         [HttpGet("{id}")]
+        //[Authorize]
         public async Task<ActionResult<PurchaseDTO>> GetPurchase(int id)
         {
             var purchase = await _purchaseService.GetPurchaseByIdAsync(id);
@@ -47,6 +51,7 @@ namespace InventoryTrackApi.Controllers.Purchases
 
         // Create a new purchase
         [HttpPost]
+        //[Authorize]
         public async Task<ActionResult<PurchaseDTO>> CreatePurchase(PurchaseDTO purchaseDto)
         {
             if (!ModelState.IsValid)
@@ -75,26 +80,41 @@ namespace InventoryTrackApi.Controllers.Purchases
         
         // Update a purchase
         [HttpPut("{id}")]
+        //[Authorize]
         public async Task<IActionResult> UpdatePurchase(int id, PurchaseDTO purchaseDto)
         {
+            _logger.LogInformation($"Update Purchase request received for Id : {id}");
             if (id != purchaseDto.PurchaseId)
             {
-                return BadRequest("Purchase ID mismatch.");
+                _logger.LogWarning($"Purchase ID mismatch : Route Id {id} does not match DTO ID {purchaseDto.PurchaseId}");
+                return BadRequest("Purchase ID mismatch");
             }
-
-            var existingPurchase = await _purchaseService.GetPurchaseByIdAsync(id);
-            if (existingPurchase == null)
+            try
             {
-                return NotFound("Purchase not found.");
-            }
+                var existingPurchase = await _purchaseService.GetPurchaseByIdAsync(id);
+                if (existingPurchase == null)
+                {
+                    _logger.LogWarning($"Purchase with ID : {id} not found");
+                    return NotFound("Purchase Not Found");
+                }
 
-            var purchase = _mapper.Map<Purchase>(purchaseDto);
-            await _purchaseService.UpdatePurchaseAsync(purchase);
-            return NoContent();
+                _logger.LogInformation($"Updating Purchase with Id {id}");
+                var purchase = _mapper.Map<Purchase>(purchaseDto);
+                await _purchaseService.UpdatePurchaseAsync(purchase);
+
+                _logger.LogInformation($"Purchase with ID {id} successfully updated");
+                return Ok(purchase);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while updating Purchase with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         // Delete a purchase
         [HttpDelete("{id}")]
+        //[Authorize]
         public async Task<IActionResult> DeletePurchase(int id)
         {
             await _purchaseService.DeletePurchaseAsync(id);
@@ -102,6 +122,7 @@ namespace InventoryTrackApi.Controllers.Purchases
         }
 
         [HttpGet("count")]
+        //[Authorize]
         public async Task<ActionResult<int>> GetPurchaseCount()
         {
             try
@@ -121,6 +142,7 @@ namespace InventoryTrackApi.Controllers.Purchases
         }
 
         [HttpGet("PurchasesDateRange")]
+        //[Authorize]
         public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedPurchasesByDateRangeAsync(
             [FromQuery] string startDate, [FromQuery] string endDate)
         {

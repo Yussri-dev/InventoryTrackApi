@@ -7,6 +7,6 @@
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
         public decimal Amount { get; set; } = decimal.Zero;
         public string PaymentType { get; set; } = string.Empty;
-
+        public int SaasClientId { get; set; }
     }
 }

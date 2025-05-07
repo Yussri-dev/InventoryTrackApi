@@ -27,6 +27,13 @@ namespace InventoryTrackApi.Services
         //Create new CashRegister
         public async Task CreateCashRegisterAsync(CashRegister cashRegister)
         {
+            bool exists = await _cashRegisterRepository.ExistsAsync(p => p.Name == cashRegister.Name);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Cash Register with the same name already exists.");
+            }
+
             await _cashRegisterRepository.CreateAsync(cashRegister);
         }
 

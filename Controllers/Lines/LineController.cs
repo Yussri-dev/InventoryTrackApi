@@ -10,7 +10,7 @@ namespace InventoryTrackApi.Controllers.Lines
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class LineController : ControllerBase
     {
         private readonly LineService _lineService;
@@ -27,8 +27,8 @@ namespace InventoryTrackApi.Controllers.Lines
 
         // Get paged categories
         [HttpGet]
-        [Authorize]
-        public async Task<ActionResult<IEnumerable<LineDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
+        //[Authorize]
+        public async Task<ActionResult<IEnumerable<LineDTO>>> GetPagedLines(int pageNumber = 1, int pageSize = 10)
         {
             var categories = await _lineService.GetPagedLines(pageNumber, pageSize);
             return Ok(categories);
@@ -36,7 +36,7 @@ namespace InventoryTrackApi.Controllers.Lines
 
         //// Get product by Name
         [HttpGet("Name/{name}")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<LineDTO>> GetLineByName([FromRoute]string name)
         {
             try
@@ -57,7 +57,7 @@ namespace InventoryTrackApi.Controllers.Lines
 
         // Get line by ID
         [HttpGet("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<LineDTO>> GetLine([FromRoute]int id)
         {
             var line = await _lineService.GetLineByIdAsync(id);
@@ -70,7 +70,7 @@ namespace InventoryTrackApi.Controllers.Lines
 
         // Create a new line
         [HttpPost]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<LineDTO>> CreateLine(LineDTO lineDto)
         {
 
@@ -99,7 +99,7 @@ namespace InventoryTrackApi.Controllers.Lines
 
         // Update a line
         [HttpPut("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> UpdateLine([FromRoute]int id, LineDTO lineDto)
         {
             _logger.LogInformation($"UpdateLine request received for ID: {id}");
@@ -136,7 +136,7 @@ namespace InventoryTrackApi.Controllers.Lines
 
         // Delete a line
         [HttpDelete("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> DeleteLine([FromRoute] int id)
         {
             await _lineService.DeleteLineAsync(id);

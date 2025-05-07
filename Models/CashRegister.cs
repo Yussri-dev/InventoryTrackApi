@@ -10,23 +10,34 @@ namespace InventoryTrackApi.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int CashRegisterId { get; set; }
+
         [Required]
         public string Name { get; set; } = string.Empty;
+
         public bool IsActive { get; set; } = true;
 
         [Required]
         public int LocationId { get; set; }
+
         [Required]
         public int EmployeeId { get; set; }
+
         [DefaultValue("DateTime.Now")]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         [JsonIgnore]
         public virtual Location? Location { get; set; }
+
         [JsonIgnore]
         public virtual Employee? Employee { get; set; }
 
+        [Required]
+        public int SaasClientId { get; set; }
+
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
+
         public ICollection<CashShift> CashShifts { get; set; }
-        public ICollection<CashRegister> CashRegisters { get; set; }
     }
+
 }

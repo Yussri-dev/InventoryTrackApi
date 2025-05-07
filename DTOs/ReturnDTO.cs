@@ -15,6 +15,8 @@ namespace InventoryTrackApi.DTOs
         public decimal RefundAmount { get; set; }
         public string ReturnMethod { get; set; }
         public DateTime DateCreated { get; set; }
+        public string? CustomerName { get; set; }
+        public int SaasClientId { get; set; }
 
     }
 }

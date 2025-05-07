@@ -32,6 +32,13 @@ namespace InventoryTrackApi.Services
 
         public async Task CreateCustomerAsync(Customer customer)
         {
+            bool exists = await _customerRepository.ExistsAsync(p => p.Name == customer.Name);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Customer with the same Rate already exists.");
+            }
+
             await _customerRepository.CreateAsync(customer);
         }
 

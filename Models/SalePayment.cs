@@ -20,5 +20,10 @@ namespace InventoryTrackApi.Models
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public virtual Sale? Sale { get; set; }
+        [Required]
+        public int SaasClientId { get; set; }
+
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
     }
 }

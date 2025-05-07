@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace InventoryTrackApi.Models
 {
@@ -45,6 +46,11 @@ namespace InventoryTrackApi.Models
 
         public bool IsActivated { get; set; } = true;
 
+        [Required]
+        public int SaasClientId { get; set; }
+
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
         public virtual ICollection<InventoryMouvement> InventoryMouvements { get; set; }
         public virtual ICollection<Inventory> Inventories { get; set; }
         public virtual ICollection<CashRegister> CashRegisters { get; set; }

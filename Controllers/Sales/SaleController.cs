@@ -53,30 +53,30 @@ namespace InventoryTrackApi.Controllers.Sales
         [HttpPost]
         public async Task<ActionResult<SaleDTO>> CreateSale(SaleDTO saleDto)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    _logger.LogWarning("Invalid model state for Create Sale.");
-            //    return ValidationProblem(ModelState);
-            //}
-            //try
-            //{
-            //    var sale = _mapper.Map<Sale>(saleDTO);
-            //    await _saleService.CreateSaleAsync(sale);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for Create Sale.");
+                return ValidationProblem(ModelState);
+            }
+            try
+            {
+                var sale = _mapper.Map<Sale>(saleDto);
+                await _saleService.CreateSaleAsync(sale);
 
-            //    var respondDto = _mapper.Map<SaleDTO>(sale);
-            //    return CreatedAtAction(nameof(GetSale), new { id = sale.SaleId }, respondDto);
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex, "Error Creating Sale: {Message}", ex.Message);
-            //    return Problem(
-            //        title: "An error occurred while creating the sale.",
-            //        detail: ex.Message,
-            //        statusCode: StatusCodes.Status500InternalServerError
-            //    );
-            //}
+                var respondDto = _mapper.Map<SaleDTO>(sale);
+                return CreatedAtAction(nameof(GetSale), new { id = sale.SaleId }, respondDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Creating Sale: {Message}", ex.Message);
+                return Problem(
+                    title: "An error occurred while creating the purchase.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
 
-            ///*
+            /*
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -89,7 +89,7 @@ namespace InventoryTrackApi.Controllers.Sales
                 var sale = new Sale
                 {
                     SaleDate = saleDto.SaleDate,
-                    CustomerId = saleDto.CustomerId,
+                    SaleId = saleDto.SaleId,
                     EmployeeId = saleDto.EmployeeId,
                     TvaAmount = saleDto.TvaAmount,
                     TotalAmount = discountedTotal,
@@ -101,7 +101,7 @@ namespace InventoryTrackApi.Controllers.Sales
                 var responseDto = new SaleDTO
                 {
                     SaleDate = sale.SaleDate,
-                    CustomerId = sale.CustomerId,
+                    SaleId = sale.SaleId,
                     EmployeeId = sale.EmployeeId,
                     TvaAmount = sale.TvaAmount,
                     TotalAmount = discountedTotal,
@@ -117,8 +117,8 @@ namespace InventoryTrackApi.Controllers.Sales
                 _logger.LogError(ex, "Error creating Sale");
                 return StatusCode(500, $"Internal Server Error : {ex.Message}");
             }
+            */
 
-            //*/
 
         }
 
@@ -126,30 +126,33 @@ namespace InventoryTrackApi.Controllers.Sales
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSale(int id, SaleDTO saleDto)
         {
+            _logger.LogInformation($"Update Sale request received for Id : {id}");
             if (id != saleDto.SaleId)
             {
-                return BadRequest("Sale ID mismatch.");
+                _logger.LogWarning($"Sale ID mismatch : Route Id {id} does not match DTO ID {saleDto.SaleId}");
+                return BadRequest("Sale ID mismatch");
             }
-
-            var existingSale = await _saleService.GetSaleByIdAsync(id);
-            if (existingSale == null)
+            try
             {
-                return NotFound("Sale not found.");
+                var existingSale = await _saleService.GetSaleByIdAsync(id);
+                if (existingSale == null)
+                {
+                    _logger.LogWarning($"Sale with ID : {id} not fount");
+                    return NotFound("Sale Not Found");
+                }
+
+                _logger.LogInformation($"Updating sale with Id {id}");
+                var sale = _mapper.Map<Sale>(saleDto);
+                await _saleService.UpdateSaleAsync(sale);
+
+                _logger.LogInformation($"sale with ID {id} successfully updated");
+                return Ok(sale);
             }
-
-            var sale = new Sale
+            catch (Exception ex)
             {
-                SaleId = id,
-                SaleDate = saleDto.SaleDate,
-                CustomerId = saleDto.CustomerId,
-                EmployeeId = saleDto.EmployeeId,
-                TvaAmount = saleDto.TvaAmount,
-                TotalAmount = saleDto.TotalAmount,
-                AmountPaid = saleDto.AmountPaid,
-            };
-
-            await _saleService.UpdateSaleAsync(sale);
-            return NoContent();
+                _logger.LogError(ex, $"Error occurred while updating Sale with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         // Delete a sale
@@ -173,36 +176,6 @@ namespace InventoryTrackApi.Controllers.Sales
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        /*
-        [HttpGet("SalesDateRange")]
-        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSalesByDateRangeAsync(
-                    [FromQuery] string startDate, [FromQuery] string endDate)
-        {
-            // Parse the start date
-            if (!DateTime.TryParseExact(
-                    startDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                    out var startSalesDate))
-            {
-                return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
-            }
-
-            // Parse the end date
-            if (!DateTime.TryParseExact(
-                    endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                    out var endSalesDate))
-            {
-                return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
-            }
-
-            // Ensure the end date is inclusive of the entire day
-            endSalesDate = endSalesDate.AddDays(1).AddSeconds(-1);
-
-            // Fetch sale items within the date range
-            var saleItems = await _saleService.GetPagedSalesByDateRangeAsync(startSalesDate, endSalesDate);
-
-            return Ok(saleItems);
-        }
-        */
 
         [HttpGet("SalesDateRange")]
         public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedSalesByDateRangeAsync(
@@ -226,16 +199,16 @@ namespace InventoryTrackApi.Controllers.Sales
 
         [HttpGet("CustomerSales")]
         public async Task<ActionResult<IEnumerable<SaleDTO>>> GetCustomerSalesAsync(
-                [FromQuery] int customerId)
+                [FromQuery] int saleId)
         {
             // Fetch sales within the date range
-            var Customersales = await _saleService.GetCustomerSalesAsync(customerId);
+            var Salesales = await _saleService.GetCustomerSalesAsync(saleId);
 
-            return Ok(Customersales);
+            return Ok(Salesales);
         }
 
-        [HttpPut("apply-payment/{customerId}")]
-        public async Task<IActionResult> ApplyPaymentToInvoices([FromRoute] int customerId, [FromQuery] decimal paymentAmount)
+        [HttpPut("apply-payment/{saleId}")]
+        public async Task<IActionResult> ApplyPaymentToInvoices([FromRoute] int saleId, [FromQuery] decimal paymentAmount)
         {
             try
             {
@@ -244,7 +217,7 @@ namespace InventoryTrackApi.Controllers.Sales
                     return BadRequest("Payment amount must be greater than zero.");
                 }
 
-                await _saleService.ApplyPaymentToInvoicesAsync(customerId, paymentAmount);
+                await _saleService.ApplyPaymentToInvoicesAsync(saleId, paymentAmount);
 
                 return NoContent();
             }
@@ -259,44 +232,6 @@ namespace InventoryTrackApi.Controllers.Sales
                 return StatusCode(500, "An unexpected error occurred.");
             }
         }
-        //[HttpPut("apply-payment")]
-        ////[ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        ////[ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        ////[ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        //public async Task<IActionResult> ApplyPaymentToInvoices(int customerId, decimal paymentAmount)
-        //{
-        //    try
-        //    {
-        //        // Validate input
-        //        if (customerId <= 0)
-        //        {
-        //            return BadRequest(new { Message = "Customer ID must be greater than zero." });
-        //        }
-
-        //        if (paymentAmount <= 0)
-        //        {
-        //            return BadRequest(new { Message = "Payment amount must be greater than zero." });
-        //        }
-
-        //        await _saleService.ApplyPaymentToInvoicesAsync(customerId, paymentAmount);
-
-        //        return Ok(await _saleService.GetCustomerSalesAsync(customerId));
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        // Handle invalid input exceptions
-        //        _logger.LogWarning(ex, "Invalid input provided.");
-        //        return BadRequest(new { Message = ex.Message });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log and handle unexpected errors
-        //        _logger.LogError(ex, "An unexpected error occurred while applying payment.");
-        //        return StatusCode((int)HttpStatusCode.InternalServerError, new { Message = "An unexpected error occurred." });
-        //    }
-        //}
-
-
 
     }
 }

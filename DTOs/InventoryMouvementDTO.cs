@@ -14,5 +14,11 @@ namespace InventoryTrackApi.DTOs
         public MouvementType MouvementType { get; set; } 
         public decimal Quantity { get; set; }
         public DateTime MouvementDate { get; set; } = DateTime.Now;
+
+        //public string ProductName { get; set; }
+        public string LocationName { get; set; }
+
+        public int SaasClientId { get; set; }
+
     }
 }

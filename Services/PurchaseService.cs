@@ -41,21 +41,7 @@ namespace InventoryTrackApi.Services
         // Update an existing purchase
         public async Task UpdatePurchaseAsync(Purchase purchase)
         {
-            //if (purchase == null)
-            //{
-            //    throw new ArgumentNullException(nameof(purchase), "purchase cannot be null.");
-            //}
-
-            //var existingPurchase = await _purchaseRepository.GetByIdAsync(purchase.PurchaseId);
-            //if (existingPurchase == null)
-            //{
-            //    throw new InvalidOperationException("Customer not found.");
-            //}
-
-            //_mapper.Map(purchase, existingPurchase);
-            //await _purchaseRepository.UpdateAsync(existingPurchase);
-
-            
+           
             if (purchase == null)
             {
                 throw new ArgumentNullException(nameof(purchase), "Purchase cannot be null");
@@ -68,7 +54,6 @@ namespace InventoryTrackApi.Services
                 throw new InvalidOperationException("Purchase Not Found");
             }
 
-
             //_mapper.Map(purchase, existingPurchase);
             existingPurchase.PurchaseDate = purchase.PurchaseDate;
             existingPurchase.TvaAmount = purchase.TvaAmount;
@@ -77,6 +62,7 @@ namespace InventoryTrackApi.Services
             //existingPurchase.OutstandingBalance = purchase.TotalAmount - purchase.AmountPaid;
             existingPurchase.SupplierId = purchase.SupplierId;
             existingPurchase.EmployeeId = purchase.EmployeeId;
+            existingPurchase.SaasClientId = purchase.SaasClientId;
 
             await _purchaseRepository.UpdateAsync(existingPurchase);
             

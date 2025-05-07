@@ -40,7 +40,7 @@ namespace InventoryTrackApi.Services
                 throw new InvalidOperationException("Return Not Found");
             }
             
-            existingReturn.returnDate = returnModel.returnDate;
+            existingReturn.ReturnDate = returnModel.ReturnDate;
             existingReturn.CustomerId = returnModel.CustomerId;
             existingReturn.EmployeeId = returnModel.EmployeeId;
             existingReturn.Reason = returnModel.Reason;

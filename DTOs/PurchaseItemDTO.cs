@@ -13,7 +13,8 @@ namespace InventoryTrackApi.DTOs
         public decimal TaxAmount { get; set; } = decimal.Zero;
         public decimal Total { get; set; } = decimal.Zero;
         public string? ProductName { get; set; }
-
+        public DateTime DateCreated { get; set; }
+        public int SaasClientId { get; set; }
 
     }
 }

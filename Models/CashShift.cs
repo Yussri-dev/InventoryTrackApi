@@ -28,9 +28,16 @@ namespace InventoryTrackApi.Models
         public int CashRegisterId { get; set; }
         [Required]
         public int EmployeeId { get; set; }
+        [Required]
+        public int SaasClientId { get; set; }
+
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
+
 
         [JsonIgnore]
         public virtual CashRegister CashRegister { get; set; }
+
         [JsonIgnore]
         public virtual Employee Employee { get; set; }
 

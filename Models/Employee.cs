@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace InventoryTrackApi.Models
 {
@@ -30,6 +31,12 @@ namespace InventoryTrackApi.Models
         public string PasswordHash { get; set; } = string.Empty;
         [DefaultValue("DateTime.Now")]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+
+        [Required]
+        public int SaasClientId { get; set; }
+
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
 
         public virtual ICollection<Sale> Sales { get; set; }
         public virtual ICollection<Return> Returns { get; set; }

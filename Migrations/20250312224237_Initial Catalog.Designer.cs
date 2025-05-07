@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InventoryTrackApi.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20250102232751_initialCatalog")]
-    partial class initialCatalog
+    [Migration("20250312224237_Initial Catalog")]
+    partial class InitialCatalog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,8 +48,8 @@ namespace InventoryTrackApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CashRegisterId"));
 
-                    b.Property<int?>("CashRegisterId1")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
@@ -64,33 +64,18 @@ namespace InventoryTrackApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("CashRegisterId");
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("CashRegisterId1");
+                    b.HasKey("CashRegisterId");
 
                     b.HasIndex("EmployeeId");
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("CashRegisters");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            CashRegisterId = 1,
-                            EmployeeId = 1,
-                            IsActive = true,
-                            LocationId = 1,
-                            Name = "Main Register"
-                        },
-                        new
-                        {
-                            CashRegisterId = 2,
-                            EmployeeId = 2,
-                            IsActive = true,
-                            LocationId = 2,
-                            Name = "Secondary Register"
-                        });
+                    b.ToTable("CashRegisters");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.CashShift", b =>
@@ -113,11 +98,17 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("ClosingBalance")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("OpeningBalance")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("ShiftDate")
                         .HasColumnType("datetime2");
@@ -140,37 +131,9 @@ namespace InventoryTrackApi.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("CashShifts");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            CashShiftId = 1,
-                            CashIn = 200m,
-                            CashOut = 100m,
-                            CashRegisterId = 1,
-                            ClosingBalance = 1200m,
-                            EmployeeId = 1,
-                            OpeningBalance = 1000m,
-                            ShiftDate = new DateTime(2025, 1, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ShiftStart = new DateTime(2025, 1, 2, 23, 27, 46, 934, DateTimeKind.Utc).AddTicks(3763),
-                            TotalRefunds = 100m,
-                            TotalSales = 1500m
-                        },
-                        new
-                        {
-                            CashShiftId = 2,
-                            CashIn = 300m,
-                            CashOut = 50m,
-                            CashRegisterId = 2,
-                            ClosingBalance = 1300m,
-                            EmployeeId = 2,
-                            OpeningBalance = 1100m,
-                            ShiftDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ShiftStart = new DateTime(2025, 1, 3, 23, 27, 46, 934, DateTimeKind.Utc).AddTicks(7034),
-                            TotalRefunds = 200m,
-                            TotalSales = 1600m
-                        });
+                    b.ToTable("CashShifts");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.CashTransaction", b =>
@@ -187,9 +150,15 @@ namespace InventoryTrackApi.Migrations
                     b.Property<int>("CashShiftId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("TransactionTime")
                         .HasColumnType("datetime2");
@@ -202,36 +171,9 @@ namespace InventoryTrackApi.Migrations
 
                     b.HasIndex("CashShiftId");
 
-                    b.ToTable("CashTransactions");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            CashTransactionId = 1,
-                            Amount = 150.00m,
-                            CashShiftId = 1,
-                            Description = "Product Sale Transaction",
-                            TransactionTime = new DateTime(2025, 1, 2, 23, 27, 46, 935, DateTimeKind.Utc).AddTicks(469),
-                            TransactionType = "Sale"
-                        },
-                        new
-                        {
-                            CashTransactionId = 2,
-                            Amount = -20.00m,
-                            CashShiftId = 1,
-                            Description = "Refund for Product X",
-                            TransactionTime = new DateTime(2025, 1, 2, 22, 57, 46, 935, DateTimeKind.Utc).AddTicks(1220),
-                            TransactionType = "Refund"
-                        },
-                        new
-                        {
-                            CashTransactionId = 3,
-                            Amount = 500.00m,
-                            CashShiftId = 2,
-                            Description = "Deposit of additional cash",
-                            TransactionTime = new DateTime(2025, 1, 2, 22, 27, 46, 935, DateTimeKind.Utc).AddTicks(1244),
-                            TransactionType = "Cash Deposit"
-                        });
+                    b.ToTable("CashTransactions");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Category", b =>
@@ -241,6 +183,9 @@ namespace InventoryTrackApi.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -258,61 +203,73 @@ namespace InventoryTrackApi.Migrations
                         new
                         {
                             CategoryId = 1,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(4681),
                             Name = "Electronics"
                         },
                         new
                         {
                             CategoryId = 2,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5084),
                             Name = "Clothing"
                         },
                         new
                         {
                             CategoryId = 3,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5085),
                             Name = "Groceries"
                         },
                         new
                         {
                             CategoryId = 4,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5086),
                             Name = "Furniture"
                         },
                         new
                         {
                             CategoryId = 5,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5087),
                             Name = "Books"
                         },
                         new
                         {
                             CategoryId = 6,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5088),
                             Name = "Sacs"
                         },
                         new
                         {
                             CategoryId = 7,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5089),
                             Name = "Data"
                         },
                         new
                         {
                             CategoryId = 8,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5089),
                             Name = "Bread"
                         },
                         new
                         {
                             CategoryId = 9,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5090),
                             Name = "Jacket"
                         },
                         new
                         {
                             CategoryId = 10,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5091),
                             Name = "T-Shirts"
                         },
                         new
                         {
                             CategoryId = 11,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5092),
                             Name = "Jeans"
                         },
                         new
                         {
                             CategoryId = 12,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5093),
                             Name = "Mobile"
                         });
                 });
@@ -331,6 +288,9 @@ namespace InventoryTrackApi.Migrations
                     b.Property<string>("Adresse")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("AmountPaid")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -379,50 +339,17 @@ namespace InventoryTrackApi.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
                     b.HasKey("CustomerId");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Customers");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            CustomerId = 1,
-                            AccountBalance = 200m,
-                            Adresse = "123 Main Street",
-                            City = "Metropolis",
-                            CreatedBy = "Admin",
-                            CreditLimit = 1500m,
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 933, DateTimeKind.Local).AddTicks(6574),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 933, DateTimeKind.Local).AddTicks(7261),
-                            Email = "john.doe@example.com",
-                            IsActivate = true,
-                            Land = "USA",
-                            ModifiedBy = "Admin",
-                            Name = "John Doe",
-                            PhoneNumber1 = "1234567890",
-                            PhoneNumber2 = "0987654321"
-                        },
-                        new
-                        {
-                            CustomerId = 2,
-                            AccountBalance = 0m,
-                            Adresse = "456 Elm Street",
-                            City = "Gotham",
-                            CreatedBy = "Admin",
-                            CreditLimit = 2000m,
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 933, DateTimeKind.Local).AddTicks(8400),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 933, DateTimeKind.Local).AddTicks(8405),
-                            Email = "jane.smith@example.com",
-                            IsActivate = true,
-                            Land = "USA",
-                            ModifiedBy = "Admin",
-                            Name = "Jane Smith",
-                            PhoneNumber1 = "5551234567",
-                            PhoneNumber2 = "5557654321"
-                        });
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Employee", b =>
@@ -432,6 +359,9 @@ namespace InventoryTrackApi.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeId"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -458,41 +388,14 @@ namespace InventoryTrackApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
                     b.HasKey("EmployeeId");
 
-                    b.ToTable("Employees");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            EmployeeId = 1,
-                            Email = "admin@example.com",
-                            FirstName = "Admin",
-                            LastName = "User",
-                            PasswordHash = "Admin@123",
-                            Phone = "123456789",
-                            Role = "Administrator"
-                        },
-                        new
-                        {
-                            EmployeeId = 2,
-                            Email = "john.doe@example.com",
-                            FirstName = "John",
-                            LastName = "Doe",
-                            PasswordHash = "Password@123",
-                            Phone = "987654321",
-                            Role = "Cashier"
-                        },
-                        new
-                        {
-                            EmployeeId = 3,
-                            Email = "jane.smith@example.com",
-                            FirstName = "Jane",
-                            LastName = "Smith",
-                            PasswordHash = "Manager@123",
-                            Phone = "1122334455",
-                            Role = "Manager"
-                        });
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Inventory", b =>
@@ -526,37 +429,18 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
                     b.HasKey("InventoryId");
 
                     b.HasIndex("LocationId");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Inventory");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            InventoryId = 1,
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 935, DateTimeKind.Local).AddTicks(3778),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 935, DateTimeKind.Local).AddTicks(4365),
-                            LocationId = 1,
-                            ModifiedBy = "Admin",
-                            ProductId = 1,
-                            Quantity = 50m
-                        },
-                        new
-                        {
-                            InventoryId = 2,
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 935, DateTimeKind.Local).AddTicks(5367),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 935, DateTimeKind.Local).AddTicks(5371),
-                            LocationId = 2,
-                            ModifiedBy = "Admin",
-                            ProductId = 2,
-                            Quantity = 20m
-                        });
+                    b.ToTable("Inventory");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.InventoryMouvement", b =>
@@ -567,15 +451,17 @@ namespace InventoryTrackApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventoryMouvementId"));
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("MouvementDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("MouvementType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("MouvementType")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -583,40 +469,16 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
                     b.HasKey("InventoryMouvementId");
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("InventoryMouvements");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            InventoryMouvementId = 1,
-                            LocationId = 1,
-                            MouvementDate = new DateTime(2025, 1, 3, 0, 27, 46, 935, DateTimeKind.Local).AddTicks(7757),
-                            MouvementType = "Purchase",
-                            ProductId = 1,
-                            Quantity = 100m
-                        },
-                        new
-                        {
-                            InventoryMouvementId = 2,
-                            LocationId = 1,
-                            MouvementDate = new DateTime(2025, 1, 3, 0, 27, 46, 935, DateTimeKind.Local).AddTicks(8306),
-                            MouvementType = "Sale",
-                            ProductId = 1,
-                            Quantity = 10m
-                        },
-                        new
-                        {
-                            InventoryMouvementId = 3,
-                            LocationId = 1,
-                            MouvementDate = new DateTime(2025, 1, 3, 0, 27, 46, 935, DateTimeKind.Local).AddTicks(8358),
-                            MouvementType = "Return",
-                            ProductId = 1,
-                            Quantity = 10m
-                        });
+                    b.ToTable("InventoryMouvements");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Line", b =>
@@ -627,6 +489,9 @@ namespace InventoryTrackApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LineId"));
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -634,32 +499,40 @@ namespace InventoryTrackApi.Migrations
 
                     b.HasKey("LineId");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Lines");
 
                     b.HasData(
                         new
                         {
                             LineId = 1,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(9672),
                             Name = "Electronics Line"
                         },
                         new
                         {
                             LineId = 2,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(9),
                             Name = "Clothing Line"
                         },
                         new
                         {
                             LineId = 3,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(10),
                             Name = "Grocery Line"
                         },
                         new
                         {
                             LineId = 4,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(11),
                             Name = "Furniture Line"
                         },
                         new
                         {
                             LineId = 5,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(12),
                             Name = "Toys Line"
                         });
                 });
@@ -720,46 +593,17 @@ namespace InventoryTrackApi.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
                     b.HasKey("LocationId");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Locations");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            LocationId = 1,
-                            Adresse = "123 Main Street",
-                            City = "Metropolis",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 932, DateTimeKind.Local).AddTicks(2363),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 932, DateTimeKind.Local).AddTicks(2891),
-                            Email = "headoffice@example.com",
-                            IsActivated = true,
-                            Land = "Country A",
-                            ModifiedBy = "Admin",
-                            Name = "Head Office",
-                            PhoneNumber1 = "123456789",
-                            PhoneNumber2 = "987654321"
-                        },
-                        new
-                        {
-                            LocationId = 2,
-                            Adresse = "456 Side Street",
-                            City = "Gotham",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 932, DateTimeKind.Local).AddTicks(3421),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 932, DateTimeKind.Local).AddTicks(3423),
-                            Email = "branchoffice@example.com",
-                            IsActivated = true,
-                            Land = "Country B",
-                            ModifiedBy = "Admin",
-                            Name = "Branch Office",
-                            PhoneNumber1 = "1122334455",
-                            PhoneNumber2 = "5566778899"
-                        });
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Product", b =>
@@ -880,8 +724,8 @@ namespace InventoryTrackApi.Migrations
                             Barcode = "1234567890123",
                             CategoryId = 1,
                             CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 931, DateTimeKind.Local).AddTicks(6733),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 931, DateTimeKind.Local).AddTicks(7263),
+                            DateCreated = new DateTime(2025, 3, 12, 23, 42, 33, 227, DateTimeKind.Local).AddTicks(9777),
+                            DateModified = new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(1),
                             DiscountPercentage = 0m,
                             ImageUrl = "https://example.com/productA.jpg",
                             IsActivate = true,
@@ -910,8 +754,8 @@ namespace InventoryTrackApi.Migrations
                             Barcode = "2234567890123",
                             CategoryId = 2,
                             CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 931, DateTimeKind.Local).AddTicks(8914),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 931, DateTimeKind.Local).AddTicks(8917),
+                            DateCreated = new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(624),
+                            DateModified = new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(626),
                             DiscountPercentage = 0m,
                             ImageUrl = "https://example.com/productB.jpg",
                             IsActivate = true,
@@ -940,8 +784,8 @@ namespace InventoryTrackApi.Migrations
                             Barcode = "3234567890123",
                             CategoryId = 3,
                             CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 931, DateTimeKind.Local).AddTicks(8960),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 931, DateTimeKind.Local).AddTicks(8963),
+                            DateCreated = new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(635),
+                            DateModified = new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(636),
                             DiscountPercentage = 0m,
                             ImageUrl = "https://example.com/productC.jpg",
                             IsActivate = true,
@@ -984,45 +828,23 @@ namespace InventoryTrackApi.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("PurchasePrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("ReceivedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("ProductBatchId");
 
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductBatchs");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductBatchId = 1,
-                            BatchNumber = "BATCH001",
-                            ExpirationDate = new DateTime(2025, 7, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(877),
-                            ProductId = 1,
-                            Quantity = 100m,
-                            ReceivedDate = new DateTime(2024, 12, 23, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(1420)
-                        },
-                        new
-                        {
-                            ProductBatchId = 2,
-                            BatchNumber = "BATCH002",
-                            ExpirationDate = new DateTime(2026, 1, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(1993),
-                            ProductId = 2,
-                            Quantity = 200m,
-                            ReceivedDate = new DateTime(2024, 12, 13, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(1995)
-                        },
-                        new
-                        {
-                            ProductBatchId = 3,
-                            BatchNumber = "BATCH003",
-                            ProductId = 1,
-                            Quantity = 50m,
-                            ReceivedDate = new DateTime(2024, 12, 28, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(1999)
-                        });
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Purchase", b =>
@@ -1036,11 +858,17 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("AmountPaid")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
@@ -1055,111 +883,11 @@ namespace InventoryTrackApi.Migrations
 
                     b.HasIndex("EmployeeId");
 
+                    b.HasIndex("SaasClientId");
+
                     b.HasIndex("SupplierId");
 
                     b.ToTable("Purchases");
-
-                    b.HasData(
-                        new
-                        {
-                            PurchaseId = 1,
-                            AmountPaid = 300.00m,
-                            EmployeeId = 1,
-                            PurchaseDate = new DateTime(2024, 12, 23, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(3495),
-                            SupplierId = 1,
-                            TotalAmount = 550.00m,
-                            TvaAmount = 50.00m
-                        },
-                        new
-                        {
-                            PurchaseId = 2,
-                            AmountPaid = 750.00m,
-                            EmployeeId = 2,
-                            PurchaseDate = new DateTime(2024, 12, 28, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(5868),
-                            SupplierId = 2,
-                            TotalAmount = 750.00m,
-                            TvaAmount = 75.00m
-                        },
-                        new
-                        {
-                            PurchaseId = 3,
-                            AmountPaid = 150.00m,
-                            EmployeeId = 3,
-                            PurchaseDate = new DateTime(2025, 1, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(5874),
-                            SupplierId = 1,
-                            TotalAmount = 325.00m,
-                            TvaAmount = 25.00m
-                        },
-                        new
-                        {
-                            PurchaseId = 4,
-                            AmountPaid = 150.00m,
-                            EmployeeId = 3,
-                            PurchaseDate = new DateTime(2025, 1, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(5879),
-                            SupplierId = 1,
-                            TotalAmount = 325.00m,
-                            TvaAmount = 25.00m
-                        },
-                        new
-                        {
-                            PurchaseId = 5,
-                            AmountPaid = 150.00m,
-                            EmployeeId = 3,
-                            PurchaseDate = new DateTime(2025, 1, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(5882),
-                            SupplierId = 1,
-                            TotalAmount = 325.00m,
-                            TvaAmount = 25.00m
-                        },
-                        new
-                        {
-                            PurchaseId = 6,
-                            AmountPaid = 150.00m,
-                            EmployeeId = 3,
-                            PurchaseDate = new DateTime(2025, 1, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(5933),
-                            SupplierId = 1,
-                            TotalAmount = 325.00m,
-                            TvaAmount = 25.00m
-                        },
-                        new
-                        {
-                            PurchaseId = 7,
-                            AmountPaid = 150.00m,
-                            EmployeeId = 3,
-                            PurchaseDate = new DateTime(2025, 1, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(5937),
-                            SupplierId = 1,
-                            TotalAmount = 325.00m,
-                            TvaAmount = 25.00m
-                        },
-                        new
-                        {
-                            PurchaseId = 8,
-                            AmountPaid = 150.00m,
-                            EmployeeId = 3,
-                            PurchaseDate = new DateTime(2025, 1, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(5941),
-                            SupplierId = 1,
-                            TotalAmount = 325.00m,
-                            TvaAmount = 25.00m
-                        },
-                        new
-                        {
-                            PurchaseId = 9,
-                            AmountPaid = 150.00m,
-                            EmployeeId = 3,
-                            PurchaseDate = new DateTime(2025, 1, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(5945),
-                            SupplierId = 1,
-                            TotalAmount = 325.00m,
-                            TvaAmount = 25.00m
-                        },
-                        new
-                        {
-                            PurchaseId = 10,
-                            AmountPaid = 150.00m,
-                            EmployeeId = 3,
-                            PurchaseDate = new DateTime(2025, 1, 2, 23, 27, 46, 936, DateTimeKind.Utc).AddTicks(5948),
-                            SupplierId = 1,
-                            TotalAmount = 325.00m,
-                            TvaAmount = 25.00m
-                        });
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.PurchaseItem", b =>
@@ -1169,6 +897,9 @@ namespace InventoryTrackApi.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PurchaseItemId"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(18,2)");
@@ -1185,6 +916,9 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("TaxAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -1197,42 +931,9 @@ namespace InventoryTrackApi.Migrations
 
                     b.HasIndex("PurchaseId");
 
-                    b.ToTable("PurchaseItems");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            PurchaseItemId = 1,
-                            Discount = 2.00m,
-                            Price = 20.00m,
-                            ProductId = 1,
-                            PurchaseId = 1,
-                            Quantity = 10m,
-                            TaxAmount = 1.80m,
-                            Total = 199.80m
-                        },
-                        new
-                        {
-                            PurchaseItemId = 2,
-                            Discount = 0m,
-                            Price = 50.00m,
-                            ProductId = 2,
-                            PurchaseId = 1,
-                            Quantity = 5m,
-                            TaxAmount = 5.00m,
-                            Total = 255.00m
-                        },
-                        new
-                        {
-                            PurchaseItemId = 3,
-                            Discount = 5.00m,
-                            Price = 15.00m,
-                            ProductId = 3,
-                            PurchaseId = 2,
-                            Quantity = 20m,
-                            TaxAmount = 4.50m,
-                            Total = 299.50m
-                        });
+                    b.ToTable("PurchaseItems");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.PurchasePayment", b =>
@@ -1246,6 +947,9 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
@@ -1256,93 +960,197 @@ namespace InventoryTrackApi.Migrations
                     b.Property<int>("PurchaseId")
                         .HasColumnType("int");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
                     b.HasKey("PurchasePaymentId");
 
                     b.HasIndex("PurchaseId");
 
-                    b.ToTable("purchasePayments");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            PurchasePaymentId = 1,
-                            Amount = 500.00m,
-                            PaymentDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "CreditCard",
-                            PurchaseId = 1
-                        },
-                        new
-                        {
-                            PurchasePaymentId = 2,
-                            Amount = 750.00m,
-                            PaymentDate = new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "Cash",
-                            PurchaseId = 2
-                        },
-                        new
-                        {
-                            PurchasePaymentId = 3,
-                            Amount = 1000.00m,
-                            PaymentDate = new DateTime(2024, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "BankTransfer",
-                            PurchaseId = 3
-                        },
-                        new
-                        {
-                            PurchasePaymentId = 4,
-                            Amount = 1250.00m,
-                            PaymentDate = new DateTime(2024, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "CreditCard",
-                            PurchaseId = 4
-                        },
-                        new
-                        {
-                            PurchasePaymentId = 5,
-                            Amount = 1500.00m,
-                            PaymentDate = new DateTime(2024, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "Cash",
-                            PurchaseId = 5
-                        },
-                        new
-                        {
-                            PurchasePaymentId = 6,
-                            Amount = 1750.00m,
-                            PaymentDate = new DateTime(2024, 1, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "BankTransfer",
-                            PurchaseId = 6
-                        },
-                        new
-                        {
-                            PurchasePaymentId = 7,
-                            Amount = 2000.00m,
-                            PaymentDate = new DateTime(2024, 1, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "CreditCard",
-                            PurchaseId = 7
-                        },
-                        new
-                        {
-                            PurchasePaymentId = 8,
-                            Amount = 2250.00m,
-                            PaymentDate = new DateTime(2024, 1, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "Cash",
-                            PurchaseId = 8
-                        },
-                        new
-                        {
-                            PurchasePaymentId = 9,
-                            Amount = 2500.00m,
-                            PaymentDate = new DateTime(2024, 1, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "BankTransfer",
-                            PurchaseId = 9
-                        },
-                        new
-                        {
-                            PurchasePaymentId = 10,
-                            Amount = 2750.00m,
-                            PaymentDate = new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PaymentType = "CreditCard",
-                            PurchaseId = 10
-                        });
+                    b.ToTable("purchasePayments");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.Return", b =>
+                {
+                    b.Property<int>("ReturnId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReturnId"));
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("RefundAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ReturnDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReturnMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ReturnId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("SaasClientId");
+
+                    b.HasIndex("SaleId");
+
+                    b.ToTable("Return");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.ReturnItem", b =>
+                {
+                    b.Property<int>("ReturnItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReturnItemId"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ProfitMarge")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PurchasePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("RefundAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ReturnId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("ReturnItemId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ReturnId");
+
+                    b.HasIndex("SaasClientId");
+
+                    b.ToTable("ReturnItem");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.ReturnPayment", b =>
+                {
+                    b.Property<int>("ReturnPaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReturnPaymentId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReturnId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReturnPaymentId");
+
+                    b.HasIndex("ReturnId");
+
+                    b.HasIndex("SaasClientId");
+
+                    b.ToTable("ReturnPayment");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.SaasClient", b =>
+                {
+                    b.Property<int>("SaasClientId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SaasClientId"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SubscriptionExpiration")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SubscriptionType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SaasClientId");
+
+                    b.ToTable("SaasClients");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Sale", b =>
@@ -1359,10 +1167,16 @@ namespace InventoryTrackApi.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("DiscountPercentage")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SaasClientId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("SaleDate")
@@ -1380,119 +1194,9 @@ namespace InventoryTrackApi.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("Sales");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            SaleId = 1,
-                            AmountPaid = 100.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 120.00m,
-                            TvaAmount = 20.00m
-                        },
-                        new
-                        {
-                            SaleId = 2,
-                            AmountPaid = 120.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 150.00m,
-                            TvaAmount = 30.00m
-                        },
-                        new
-                        {
-                            SaleId = 3,
-                            AmountPaid = 150.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 200.00m,
-                            TvaAmount = 25.00m
-                        },
-                        new
-                        {
-                            SaleId = 4,
-                            AmountPaid = 50.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 100.00m,
-                            TvaAmount = 15.00m
-                        },
-                        new
-                        {
-                            SaleId = 5,
-                            AmountPaid = 200.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 300.00m,
-                            TvaAmount = 50.00m
-                        },
-                        new
-                        {
-                            SaleId = 6,
-                            AmountPaid = 30.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 50.00m,
-                            TvaAmount = 10.00m
-                        },
-                        new
-                        {
-                            SaleId = 7,
-                            AmountPaid = 180.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 250.00m,
-                            TvaAmount = 40.00m
-                        },
-                        new
-                        {
-                            SaleId = 8,
-                            AmountPaid = 200.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 220.00m,
-                            TvaAmount = 35.00m
-                        },
-                        new
-                        {
-                            SaleId = 9,
-                            AmountPaid = 230.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 270.00m,
-                            TvaAmount = 45.00m
-                        },
-                        new
-                        {
-                            SaleId = 10,
-                            AmountPaid = 300.00m,
-                            CustomerId = 1,
-                            DiscountPercentage = 0m,
-                            EmployeeId = 1,
-                            SaleDate = new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalAmount = 320.00m,
-                            TvaAmount = 60.00m
-                        });
+                    b.ToTable("Sales");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.SaleItem", b =>
@@ -1503,6 +1207,9 @@ namespace InventoryTrackApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SaleItemId"));
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(18,2)");
 
@@ -1512,8 +1219,17 @@ namespace InventoryTrackApi.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("ProfitMarge")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PurchasePrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SaleId")
                         .HasColumnType("int");
@@ -1531,123 +1247,13 @@ namespace InventoryTrackApi.Migrations
 
                     b.HasIndex("ProductId");
 
+                    b.HasIndex("SaasClientId");
+
                     b.HasIndex("SaleId");
 
                     b.HasIndex("TaxId");
 
                     b.ToTable("SaleItems");
-
-                    b.HasData(
-                        new
-                        {
-                            SaleItemId = 1,
-                            Discount = 5.00m,
-                            Price = 50.00m,
-                            ProductId = 1,
-                            Quantity = 2m,
-                            SaleId = 1,
-                            TaxAmount = 2.50m,
-                            Total = 97.50m
-                        },
-                        new
-                        {
-                            SaleItemId = 2,
-                            Discount = 10.00m,
-                            Price = 100.00m,
-                            ProductId = 1,
-                            Quantity = 1m,
-                            SaleId = 1,
-                            TaxAmount = 5.00m,
-                            Total = 95.00m
-                        },
-                        new
-                        {
-                            SaleItemId = 3,
-                            Discount = 0.00m,
-                            Price = 30.00m,
-                            ProductId = 2,
-                            Quantity = 3m,
-                            SaleId = 2,
-                            TaxAmount = 4.50m,
-                            Total = 94.50m
-                        },
-                        new
-                        {
-                            SaleItemId = 4,
-                            Discount = 10.00m,
-                            Price = 20.00m,
-                            ProductId = 2,
-                            Quantity = 5m,
-                            SaleId = 2,
-                            TaxAmount = 2.00m,
-                            Total = 92.00m
-                        },
-                        new
-                        {
-                            SaleItemId = 5,
-                            Discount = 20.00m,
-                            Price = 200.00m,
-                            ProductId = 1,
-                            Quantity = 1m,
-                            SaleId = 3,
-                            TaxAmount = 10.00m,
-                            Total = 190.00m
-                        },
-                        new
-                        {
-                            SaleItemId = 6,
-                            Discount = 15.00m,
-                            Price = 150.00m,
-                            ProductId = 1,
-                            Quantity = 2m,
-                            SaleId = 3,
-                            TaxAmount = 12.00m,
-                            Total = 297.00m
-                        },
-                        new
-                        {
-                            SaleItemId = 7,
-                            Discount = 5.00m,
-                            Price = 25.00m,
-                            ProductId = 1,
-                            Quantity = 4m,
-                            SaleId = 4,
-                            TaxAmount = 5.00m,
-                            Total = 105.00m
-                        },
-                        new
-                        {
-                            SaleItemId = 8,
-                            Discount = 0.00m,
-                            Price = 10.00m,
-                            ProductId = 1,
-                            Quantity = 6m,
-                            SaleId = 4,
-                            TaxAmount = 3.00m,
-                            Total = 63.00m
-                        },
-                        new
-                        {
-                            SaleItemId = 9,
-                            Discount = 10.00m,
-                            Price = 15.00m,
-                            ProductId = 1,
-                            Quantity = 10m,
-                            SaleId = 5,
-                            TaxAmount = 5.00m,
-                            Total = 150.00m
-                        },
-                        new
-                        {
-                            SaleItemId = 10,
-                            Discount = 20.00m,
-                            Price = 300.00m,
-                            ProductId = 1,
-                            Quantity = 1m,
-                            SaleId = 5,
-                            TaxAmount = 15.00m,
-                            Total = 295.00m
-                        });
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.SalePayment", b =>
@@ -1661,6 +1267,9 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
@@ -1668,96 +1277,19 @@ namespace InventoryTrackApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
                     b.Property<int>("SaleId")
                         .HasColumnType("int");
 
                     b.HasKey("SalePaymentId");
 
+                    b.HasIndex("SaasClientId");
+
                     b.HasIndex("SaleId");
 
                     b.ToTable("SalePayments");
-
-                    b.HasData(
-                        new
-                        {
-                            SalePaymentId = 1,
-                            Amount = 100.00m,
-                            PaymentDate = new DateTime(2024, 12, 23, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(3576),
-                            PaymentType = "CASH",
-                            SaleId = 1
-                        },
-                        new
-                        {
-                            SalePaymentId = 2,
-                            Amount = 50.00m,
-                            PaymentDate = new DateTime(2024, 12, 28, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(4984),
-                            PaymentType = "PARTIAL_PAYMENT",
-                            SaleId = 1
-                        },
-                        new
-                        {
-                            SalePaymentId = 3,
-                            Amount = 200.00m,
-                            PaymentDate = new DateTime(2024, 12, 26, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(4988),
-                            PaymentType = "CREDIT",
-                            SaleId = 2
-                        },
-                        new
-                        {
-                            SalePaymentId = 4,
-                            Amount = 100.00m,
-                            PaymentDate = new DateTime(2024, 12, 30, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(4991),
-                            PaymentType = "CASH",
-                            SaleId = 2
-                        },
-                        new
-                        {
-                            SalePaymentId = 5,
-                            Amount = 300.00m,
-                            PaymentDate = new DateTime(2024, 12, 31, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(4993),
-                            PaymentType = "CASH",
-                            SaleId = 3
-                        },
-                        new
-                        {
-                            SalePaymentId = 6,
-                            Amount = 150.00m,
-                            PaymentDate = new DateTime(2025, 1, 1, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(4994),
-                            PaymentType = "PARTIAL_PAYMENT",
-                            SaleId = 3
-                        },
-                        new
-                        {
-                            SalePaymentId = 7,
-                            Amount = 120.00m,
-                            PaymentDate = new DateTime(2024, 12, 18, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(4996),
-                            PaymentType = "CREDIT",
-                            SaleId = 4
-                        },
-                        new
-                        {
-                            SalePaymentId = 8,
-                            Amount = 80.00m,
-                            PaymentDate = new DateTime(2024, 12, 23, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(4998),
-                            PaymentType = "CASH",
-                            SaleId = 4
-                        },
-                        new
-                        {
-                            SalePaymentId = 9,
-                            Amount = 200.00m,
-                            PaymentDate = new DateTime(2024, 12, 25, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(5000),
-                            PaymentType = "CREDIT",
-                            SaleId = 5
-                        },
-                        new
-                        {
-                            SalePaymentId = 10,
-                            Amount = 100.00m,
-                            PaymentDate = new DateTime(2025, 1, 2, 23, 27, 46, 938, DateTimeKind.Utc).AddTicks(5002),
-                            PaymentType = "PARTIAL_PAYMENT",
-                            SaleId = 5
-                        });
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Shelf", b =>
@@ -1767,6 +1299,9 @@ namespace InventoryTrackApi.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShelfId"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1781,16 +1316,19 @@ namespace InventoryTrackApi.Migrations
                         new
                         {
                             ShelfId = 1,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(451),
                             Name = "Shelf 1"
                         },
                         new
                         {
                             ShelfId = 2,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(680),
                             Name = "Shelf 2"
                         },
                         new
                         {
                             ShelfId = 3,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(681),
                             Name = "Shelf 3"
                         });
                 });
@@ -1851,174 +1389,17 @@ namespace InventoryTrackApi.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
                     b.HasKey("SupplierId");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Supplier");
+                    b.HasIndex("SaasClientId");
 
-                    b.HasData(
-                        new
-                        {
-                            SupplierId = 1,
-                            Adresse = "123 Supplier Street",
-                            City = "City A",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(6173),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(6763),
-                            Email = "supplierA@example.com",
-                            IsActivate = true,
-                            Land = "Country A",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier A",
-                            PhoneNumber1 = "1111111111",
-                            PhoneNumber2 = "2222222222"
-                        },
-                        new
-                        {
-                            SupplierId = 2,
-                            Adresse = "456 Another Street",
-                            City = "City B",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7319),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7322),
-                            Email = "supplierB@example.com",
-                            IsActivate = true,
-                            Land = "Country B",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier B",
-                            PhoneNumber1 = "3333333333",
-                            PhoneNumber2 = "4444444444"
-                        },
-                        new
-                        {
-                            SupplierId = 3,
-                            Adresse = "789 Third Avenue",
-                            City = "City C",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7329),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7331),
-                            Email = "supplierC@example.com",
-                            IsActivate = false,
-                            Land = "Country C",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier C",
-                            PhoneNumber1 = "5555555555",
-                            PhoneNumber2 = "6666666666"
-                        },
-                        new
-                        {
-                            SupplierId = 4,
-                            Adresse = "1011 Fourth Avenue",
-                            City = "City D",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7339),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7341),
-                            Email = "supplierD@example.com",
-                            IsActivate = true,
-                            Land = "Country D",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier D",
-                            PhoneNumber1 = "7777777777",
-                            PhoneNumber2 = "8888888888"
-                        },
-                        new
-                        {
-                            SupplierId = 5,
-                            Adresse = "1213 Fifth Street",
-                            City = "City E",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7348),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7350),
-                            Email = "supplierE@example.com",
-                            IsActivate = false,
-                            Land = "Country E",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier E",
-                            PhoneNumber1 = "9999999999",
-                            PhoneNumber2 = "1212121212"
-                        },
-                        new
-                        {
-                            SupplierId = 6,
-                            Adresse = "1415 Sixth Lane",
-                            City = "City F",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7356),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7358),
-                            Email = "supplierF@example.com",
-                            IsActivate = true,
-                            Land = "Country F",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier F",
-                            PhoneNumber1 = "3434343434",
-                            PhoneNumber2 = "5656565656"
-                        },
-                        new
-                        {
-                            SupplierId = 7,
-                            Adresse = "1617 Seventh Road",
-                            City = "City G",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7365),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7367),
-                            Email = "supplierG@example.com",
-                            IsActivate = true,
-                            Land = "Country G",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier G",
-                            PhoneNumber1 = "7878787878",
-                            PhoneNumber2 = "8989898989"
-                        },
-                        new
-                        {
-                            SupplierId = 8,
-                            Adresse = "1819 Eighth Avenue",
-                            City = "City H",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7373),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7406),
-                            Email = "supplierH@example.com",
-                            IsActivate = false,
-                            Land = "Country H",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier H",
-                            PhoneNumber1 = "2323232323",
-                            PhoneNumber2 = "4545454545"
-                        },
-                        new
-                        {
-                            SupplierId = 9,
-                            Adresse = "2021 Ninth Boulevard",
-                            City = "City I",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7415),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7417),
-                            Email = "supplierI@example.com",
-                            IsActivate = true,
-                            Land = "Country I",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier I",
-                            PhoneNumber1 = "6767676767",
-                            PhoneNumber2 = "8989898989"
-                        },
-                        new
-                        {
-                            SupplierId = 10,
-                            Adresse = "2223 Tenth Parkway",
-                            City = "City J",
-                            CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7423),
-                            DateModified = new DateTime(2025, 1, 3, 0, 27, 46, 929, DateTimeKind.Local).AddTicks(7425),
-                            Email = "supplierJ@example.com",
-                            IsActivate = true,
-                            Land = "Country J",
-                            ModifiedBy = "Admin",
-                            Name = "Supplier J",
-                            PhoneNumber1 = "1234123412",
-                            PhoneNumber2 = "5678567856"
-                        });
+                    b.ToTable("Supplier");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Tax", b =>
@@ -2028,6 +1409,9 @@ namespace InventoryTrackApi.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TaxId"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("TaxRate")
                         .HasColumnType("decimal(18,2)");
@@ -2040,16 +1424,19 @@ namespace InventoryTrackApi.Migrations
                         new
                         {
                             TaxId = 1,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1088),
                             TaxRate = 10m
                         },
                         new
                         {
                             TaxId = 2,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1381),
                             TaxRate = 20m
                         },
                         new
                         {
                             TaxId = 3,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1400),
                             TaxRate = 30m
                         });
                 });
@@ -2061,6 +1448,9 @@ namespace InventoryTrackApi.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UnitId"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -2075,18 +1465,61 @@ namespace InventoryTrackApi.Migrations
                         new
                         {
                             UnitId = 1,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1745),
                             Name = "Unit 1"
                         },
                         new
                         {
                             UnitId = 2,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1956),
                             Name = "Unit 2"
                         },
                         new
                         {
                             UnitId = 3,
+                            DateCreated = new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1957),
                             Name = "Unit 3"
                         });
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SaasClientId");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("InventoryMouvementProduct", b =>
@@ -2106,25 +1539,29 @@ namespace InventoryTrackApi.Migrations
 
             modelBuilder.Entity("InventoryTrackApi.Models.CashRegister", b =>
                 {
-                    b.HasOne("InventoryTrackApi.Models.CashRegister", null)
-                        .WithMany("CashRegisters")
-                        .HasForeignKey("CashRegisterId1");
-
                     b.HasOne("InventoryTrackApi.Models.Employee", "Employee")
                         .WithMany("CashRegisters")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InventoryTrackApi.Models.Location", "Location")
                         .WithMany("CashRegisters")
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("CashRegisters")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Employee");
 
                     b.Navigation("Location");
+
+                    b.Navigation("SaasClient");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.CashShift", b =>
@@ -2138,12 +1575,20 @@ namespace InventoryTrackApi.Migrations
                     b.HasOne("InventoryTrackApi.Models.Employee", "Employee")
                         .WithMany("CashShifts")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("CashShifts")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CashRegister");
 
                     b.Navigation("Employee");
+
+                    b.Navigation("SaasClient");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.CashTransaction", b =>
@@ -2151,10 +1596,40 @@ namespace InventoryTrackApi.Migrations
                     b.HasOne("InventoryTrackApi.Models.CashShift", "CashShift")
                         .WithMany("CashTransactions")
                         .HasForeignKey("CashShiftId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("CashTransactions")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CashShift");
+
+                    b.Navigation("SaasClient");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.Customer", b =>
+                {
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("Customers")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SaasClient");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.Employee", b =>
+                {
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("Employees")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SaasClient");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Inventory", b =>
@@ -2162,7 +1637,7 @@ namespace InventoryTrackApi.Migrations
                     b.HasOne("InventoryTrackApi.Models.Location", "Location")
                         .WithMany("Inventories")
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InventoryTrackApi.Models.Product", "Product")
@@ -2171,9 +1646,17 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("Inventories")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Location");
 
                     b.Navigation("Product");
+
+                    b.Navigation("SaasClient");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.InventoryMouvement", b =>
@@ -2181,10 +1664,29 @@ namespace InventoryTrackApi.Migrations
                     b.HasOne("InventoryTrackApi.Models.Location", "Location")
                         .WithMany("InventoryMouvements")
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("InventoryMouvements")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Location");
+
+                    b.Navigation("SaasClient");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.Location", b =>
+                {
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("Locations")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SaasClient");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Product", b =>
@@ -2192,31 +1694,31 @@ namespace InventoryTrackApi.Migrations
                     b.HasOne("InventoryTrackApi.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InventoryTrackApi.Models.Line", "Line")
                         .WithMany("Products")
                         .HasForeignKey("LineId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InventoryTrackApi.Models.Shelf", "Shelf")
                         .WithMany("Products")
                         .HasForeignKey("ShelfId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InventoryTrackApi.Models.Tax", "Tax")
                         .WithMany("Products")
                         .HasForeignKey("TaxId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InventoryTrackApi.Models.Unit", "Unit")
                         .WithMany("Products")
                         .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -2249,6 +1751,12 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("Purchases")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("InventoryTrackApi.Models.Supplier", "Supplier")
                         .WithMany("Purchases")
                         .HasForeignKey("SupplierId")
@@ -2256,6 +1764,8 @@ namespace InventoryTrackApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+
+                    b.Navigation("SaasClient");
 
                     b.Navigation("Supplier");
                 });
@@ -2274,9 +1784,17 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("PurchaseItems")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Product");
 
                     b.Navigation("Purchase");
+
+                    b.Navigation("SaasClient");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.PurchasePayment", b =>
@@ -2287,7 +1805,96 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("PurchasePayments")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Purchase");
+
+                    b.Navigation("SaasClient");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.Return", b =>
+                {
+                    b.HasOne("InventoryTrackApi.Models.Customer", "Customer")
+                        .WithMany("Returns")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.Employee", "Employee")
+                        .WithMany("Returns")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("Returns")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.Sale", "Sale")
+                        .WithMany("Returns")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("SaasClient");
+
+                    b.Navigation("Sale");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.ReturnItem", b =>
+                {
+                    b.HasOne("InventoryTrackApi.Models.Product", "Product")
+                        .WithMany("ReturnItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.Return", "Return")
+                        .WithMany("ReturnItems")
+                        .HasForeignKey("ReturnId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("ReturnItems")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Return");
+
+                    b.Navigation("SaasClient");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.ReturnPayment", b =>
+                {
+                    b.HasOne("InventoryTrackApi.Models.Return", "Return")
+                        .WithMany("ReturnPayments")
+                        .HasForeignKey("ReturnId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("ReturnPayments")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Return");
+
+                    b.Navigation("SaasClient");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Sale", b =>
@@ -2304,9 +1911,17 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("Sales")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Customer");
 
                     b.Navigation("Employee");
+
+                    b.Navigation("SaasClient");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.SaleItem", b =>
@@ -2315,6 +1930,12 @@ namespace InventoryTrackApi.Migrations
                         .WithMany("SaleItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("SaleItems")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("InventoryTrackApi.Models.Sale", "Sale")
@@ -2329,24 +1950,54 @@ namespace InventoryTrackApi.Migrations
 
                     b.Navigation("Product");
 
+                    b.Navigation("SaasClient");
+
                     b.Navigation("Sale");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.SalePayment", b =>
                 {
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("SalePayments")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("InventoryTrackApi.Models.Sale", "Sale")
                         .WithMany("SalePayments")
                         .HasForeignKey("SaleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("SaasClient");
+
                     b.Navigation("Sale");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.Supplier", b =>
+                {
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("Suppliers")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SaasClient");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.User", b =>
+                {
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("Users")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SaasClient");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.CashRegister", b =>
                 {
-                    b.Navigation("CashRegisters");
-
                     b.Navigation("CashShifts");
                 });
 
@@ -2362,6 +2013,8 @@ namespace InventoryTrackApi.Migrations
 
             modelBuilder.Entity("InventoryTrackApi.Models.Customer", b =>
                 {
+                    b.Navigation("Returns");
+
                     b.Navigation("Sales");
                 });
 
@@ -2372,6 +2025,8 @@ namespace InventoryTrackApi.Migrations
                     b.Navigation("CashShifts");
 
                     b.Navigation("Purchases");
+
+                    b.Navigation("Returns");
 
                     b.Navigation("Sales");
                 });
@@ -2398,6 +2053,8 @@ namespace InventoryTrackApi.Migrations
 
                     b.Navigation("PurchaseItems");
 
+                    b.Navigation("ReturnItems");
+
                     b.Navigation("SaleItems");
                 });
 
@@ -2408,8 +2065,58 @@ namespace InventoryTrackApi.Migrations
                     b.Navigation("PurchasePayments");
                 });
 
+            modelBuilder.Entity("InventoryTrackApi.Models.Return", b =>
+                {
+                    b.Navigation("ReturnItems");
+
+                    b.Navigation("ReturnPayments");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.SaasClient", b =>
+                {
+                    b.Navigation("CashRegisters");
+
+                    b.Navigation("CashShifts");
+
+                    b.Navigation("CashTransactions");
+
+                    b.Navigation("Customers");
+
+                    b.Navigation("Employees");
+
+                    b.Navigation("Inventories");
+
+                    b.Navigation("InventoryMouvements");
+
+                    b.Navigation("Locations");
+
+                    b.Navigation("PurchaseItems");
+
+                    b.Navigation("PurchasePayments");
+
+                    b.Navigation("Purchases");
+
+                    b.Navigation("ReturnItems");
+
+                    b.Navigation("ReturnPayments");
+
+                    b.Navigation("Returns");
+
+                    b.Navigation("SaleItems");
+
+                    b.Navigation("SalePayments");
+
+                    b.Navigation("Sales");
+
+                    b.Navigation("Suppliers");
+
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("InventoryTrackApi.Models.Sale", b =>
                 {
+                    b.Navigation("Returns");
+
                     b.Navigation("SaleItems");
 
                     b.Navigation("SalePayments");

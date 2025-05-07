@@ -22,5 +22,7 @@ namespace InventoryTrackApi.DTOs
         public DateTime? DateModified { get; set; }
         public decimal AmountPaid { get; set; } = 0m;
         public decimal BalancePaid => AccountBalance - AmountPaid;
+        public int SaasClientId { get; set; }
+
     }
 }

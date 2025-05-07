@@ -1,4 +1,5 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -14,31 +15,24 @@ namespace InventoryTrackApi.Controllers.Sales
     {
         private readonly SaleItemService _saleItemService;
         private readonly ILogger<SaleItemController> _logger;
+        private readonly IMapper _mapper;
         public SaleItemController(
             SaleItemService saleItemService,
-            ILogger<SaleItemController> logger)
+            ILogger<SaleItemController> logger, IMapper mapper)
         {
             _saleItemService = saleItemService;
             _logger = logger;
+            _mapper = mapper;
         }
 
         // Get paged saleItems
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSaleItems(int pageNumber = 1, int pageSize = 10)
         {
-            var saleItems = await _saleItemService.GetSaleItemsWithProductAsync(pageNumber, pageSize);
+            var saleItems = await _saleItemService.GetPagedSaleItemsAsync(pageNumber, pageSize);
             return Ok(saleItems);
         }
 
-
-        // Get paged sale items by date range
-        //[HttpGet("pagedSaleitemsByDate")]
-        //public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSaleItemsByDateAsync(
-        //    DateTime startDate, DateTime endDate, int pageNumber = 1, int pageSize = 10)
-        //{
-        //    var saleItems = await _saleItemService.GetPagedSaleItemsByDateAsync(startDate, endDate, pageNumber, pageSize);
-        //    return Ok(saleItems);
-        //}
         [HttpGet("SaleItemsDateRange")]
         public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedSaleItemsByDateRangeAsync(
                     [FromQuery] string startDate, [FromQuery] string endDate)
@@ -80,14 +74,14 @@ namespace InventoryTrackApi.Controllers.Sales
             return Ok(saleItem);
         }
 
-        //// Get product by ID
+        //// Get saleItem by ID
         [HttpGet("ByBarCode/{id}")]
-        public async Task<ActionResult<SaleItemDTO>> GetProductByBarCode(int id)
+        public async Task<ActionResult<SaleItemDTO>> GetSaleItemByBarCode(int id)
         {
             try
             {
-                var product = await _saleItemService.GetPagedSaleItemsByIdAsync(id);
-                return Ok(product);
+                var saleItem = await _saleItemService.GetPagedSaleItemsByIdAsync(id);
+                return Ok(saleItem);
             }
             catch (KeyNotFoundException ex)
             {
@@ -95,7 +89,7 @@ namespace InventoryTrackApi.Controllers.Sales
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving product by name");
+                _logger.LogError(ex, "Error retrieving saleItem by name");
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -107,76 +101,95 @@ namespace InventoryTrackApi.Controllers.Sales
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                _logger.LogWarning("Invalid model state for Create Sale Item.");
+                return ValidationProblem(ModelState);
             }
             try
             {
-                var saleItem = new SaleItem
-                {
-                    SaleId = saleItemDto.SaleId,
-                    ProductId = saleItemDto.ProductId,
-                    Quantity = saleItemDto.Quantity,
-                    Price = saleItemDto.Price,
-                    Discount = saleItemDto.Discount,
-                    TaxAmount = saleItemDto.TaxAmount,
-                    Total = saleItemDto.Total,
-                    ProfitMarge = saleItemDto.ProfitMarge,
-                    PurchasePrice = saleItemDto.PurchasePrice
-                };
-                await _saleItemService.CreateSaleItemAsync(saleItem);
+                var sale = _mapper.Map<SaleItem>(saleItemDto);
+                await _saleItemService.CreateSaleItemAsync(sale);
 
-                var responseDto = new SaleItemDTO
-                {
-                    SaleId = saleItem.SaleId,
-                    ProductId = saleItem.ProductId,
-                    Quantity = saleItem.Quantity,
-                    Price = saleItem.Price,
-                    Discount = saleItem.Discount,
-                    TaxAmount = saleItem.TaxAmount,
-                    Total = saleItem.Total,
-                    ProfitMarge = saleItem.ProfitMarge,
-                    PurchasePrice = saleItem.PurchasePrice
-                };
-                return CreatedAtAction(nameof(GetSaleItem), new { id = saleItem.SaleItemId }, saleItemDto);
+                var respondDto = _mapper.Map<SaleItemDTO>(sale);
+                return CreatedAtAction(nameof(GetSaleItem), new { id = sale.SaleItemId }, respondDto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error Creating Sale Item");
-                return StatusCode(500, $"Internal Server Error : {ex.Message}");
+                _logger.LogError(ex, "Error Creating Sale: {Message}", ex.Message);
+                return Problem(
+                    title: "An error occurred while creating the purchase.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
             }
+
         }
 
-        // Update a saleItem
+        //// Update a saleItem
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSaleItem(int id, SaleItemDTO saleItemDto)
+        //[Authorize]
+        public async Task<IActionResult> UpdateSaleItem([FromRoute] int id, SaleItemDTO saleItemDto)
         {
+            _logger.LogInformation($"Update SaleItem request received for Id : {id}");
             if (id != saleItemDto.SaleItemId)
             {
-                return BadRequest("Sale item ID mismatch.");
+                _logger.LogWarning($"SaleItem ID mismatch : Route Id {id} does not match DTO ID {saleItemDto.SaleItemId}");
+                return BadRequest("SaleItem ID mismatch");
             }
-
-            var existingSaleItem = await _saleItemService.GetSaleItemByIdAsync(id);
-            if (existingSaleItem == null)
+            try
             {
-                return NotFound("Sale Item not found.");
+                var existingSaleItem = await _saleItemService.GetSaleItemByIdAsync(id);
+                if (existingSaleItem == null)
+                {
+                    _logger.LogWarning($"SaleItem with ID : {id} not fount");
+                    return NotFound("SaleItem Not Found");
+                }
+
+                _logger.LogInformation($"Updating saleItem with Id {id}");
+                var saleItem = _mapper.Map<SaleItem>(saleItemDto);
+                await _saleItemService.UpdateSaleItemAsync(saleItem);
+
+                _logger.LogInformation($"saleItem with ID {id} successfully updated");
+                return Ok(saleItem);
             }
-
-            var saleItem = new SaleItem
+            catch (Exception ex)
             {
-                SaleItemId = id,
-                SaleId = saleItemDto.SaleId,
-                Quantity = saleItemDto.Quantity,
-                Price = saleItemDto.Price,
-                Discount = saleItemDto.Discount,
-                TaxAmount = saleItemDto.TaxAmount,
-                Total = saleItemDto.Total,
-                ProfitMarge = saleItemDto.ProfitMarge,
-                PurchasePrice = saleItemDto.PurchasePrice
-            };
-
-            await _saleItemService.UpdateSaleItemAsync(saleItem);
-            return NoContent();
+                _logger.LogError(ex, $"Error occurred while updating SaleItem with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> UpdateSaleItem(int id, SaleItemDTO saleItemDto)
+        //{
+        //    if (id != saleItemDto.SaleItemId)
+        //    {
+        //        return BadRequest("Sale item ID mismatch.");
+        //    }
+
+        //    var existingSaleItem = await _saleItemService.GetSaleItemByIdAsync(id);
+        //    if (existingSaleItem == null)
+        //    {
+        //        return NotFound("Sale Item not found.");
+        //    }
+
+        //    var saleItem = new SaleItem
+        //    {
+        //        SaleItemId = id,
+        //        SaleId = saleItemDto.SaleId,
+        //        Quantity = saleItemDto.Quantity,
+        //        Price = saleItemDto.Price,
+        //        Discount = saleItemDto.Discount,
+        //        TaxAmount = saleItemDto.TaxAmount,
+        //        Total = saleItemDto.Total,
+        //        ProfitMarge = saleItemDto.ProfitMarge,
+        //        PurchasePrice = saleItemDto.PurchasePrice
+        //    };
+
+        //    await _saleItemService.UpdateSaleItemAsync(saleItem);
+        //    return NoContent();
+        //}
 
         // Delete a saleItem
         [HttpDelete("{id}")]

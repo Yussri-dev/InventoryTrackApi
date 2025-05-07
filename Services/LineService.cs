@@ -34,6 +34,12 @@ namespace InventoryTrackApi.Services
         // Create a new line
         public async Task CreateLineAsync(Line line)
         {
+            bool exists = await _lineRepository.ExistsAsync(p => p.Name == line.Name);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Line with the same Rate already exists.");
+            }
             await _lineRepository.CreateAsync(line);
         }
 

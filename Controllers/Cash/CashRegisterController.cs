@@ -1,4 +1,5 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -12,11 +13,15 @@ namespace InventoryTrackApi.Controllers.Cash
     {
         private readonly CashRegisterService _cashRegisterService;
         private readonly ILogger<CashRegisterController> _logger;
-        // Constructor to inject the service dependency
-        public CashRegisterController(CashRegisterService cashRegisterService, ILogger<CashRegisterController> logger)
+        private readonly IMapper _mapper;
+
+        public CashRegisterController(CashRegisterService cashRegisterService, 
+            ILogger<CashRegisterController> logger,
+            IMapper mapper)
         {
             _cashRegisterService = cashRegisterService ?? throw new ArgumentNullException(nameof(cashRegisterService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // Get paged Cash Registers
@@ -43,6 +48,32 @@ namespace InventoryTrackApi.Controllers.Cash
         [HttpPost]
         public async Task<ActionResult<CashRegisterDTO>> CreateCashRegister(CashRegisterDTO cashRegisterDto)
         {
+
+            _logger.LogInformation($"Create Cash Register request: {cashRegisterDto}");
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for creating CashRegister");
+            }
+            try
+            {
+                var cashRegister = _mapper.Map<CashRegister>(cashRegisterDto);
+                await _cashRegisterService.CreateCashRegisterAsync(cashRegister);
+
+                var responseDto = _mapper.Map<CashRegisterDTO>(cashRegister);
+                return CreatedAtAction(nameof(GetCashRegister), new { id = cashRegister.CashRegisterId }, responseDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error creating Category : {ex.Message}");
+                return Problem(
+                    title: "An error occured while creating the cashRegister",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                    );
+                throw;
+            }
+            /*
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -75,12 +106,41 @@ namespace InventoryTrackApi.Controllers.Cash
                 _logger.LogError(ex, "Error creating employee");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+            */
         }
 
         // Update an existing Cash Register
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCashRegister(int id, CashRegisterDTO cashRegisterDto)
         {
+            _logger.LogInformation($"Update CashRegister request received for Id : {id}");
+            if (id != cashRegisterDto.CashRegisterId)
+            {
+                _logger.LogWarning($"CashRegister ID mismatch : Route Id {id} does not match DTO ID {cashRegisterDto.CashRegisterId}");
+                return BadRequest("Category ID mismatch");
+            }
+            try
+            {
+                var existingCashRegister = await _cashRegisterService.GetCashRegisterByIdAsync(id);
+                if (existingCashRegister == null)
+                {
+                    _logger.LogWarning($"cashRegister with ID : {id} not found");
+                    return NotFound("Cash Register Not Found");
+                }
+
+                _logger.LogInformation($"Updating Cash Register with Id {id}");
+                var cashregister = _mapper.Map<CashRegister>(cashRegisterDto);
+                await _cashRegisterService.UpdateCashRegisterAsync(cashregister);
+
+                _logger.LogInformation($"category with ID {id} successfully updated");
+                return Ok(cashregister);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while updating Category with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
+            /*
             if (id != cashRegisterDto.CashRegisterId)
             {
                 return BadRequest("Cash Register ID mismatch.");
@@ -103,6 +163,7 @@ namespace InventoryTrackApi.Controllers.Cash
 
             await _cashRegisterService.UpdateCashRegisterAsync(cashRegister);
             return NoContent();
+            */
         }
 
         // Delete a Cash Register

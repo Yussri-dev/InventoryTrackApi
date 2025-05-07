@@ -29,7 +29,11 @@ namespace InventoryTrackApi.Models
         public int LocationId { get; set; }
         [Required]
         public int ProductId { get; set; }
+        [Required]
+        public int SaasClientId { get; set; }
 
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
         [JsonIgnore]
         public virtual Product? Product { get; set; }
         [JsonIgnore]

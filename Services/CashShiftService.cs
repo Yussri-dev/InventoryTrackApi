@@ -9,7 +9,7 @@ namespace InventoryTrackApi.Services
 
         public CashShiftService(IGenericRepository<CashShift> cashShiftRepository)
         {
-            _cashShiftRepository  = cashShiftRepository;
+            _cashShiftRepository = cashShiftRepository;
         }
 
         // Get All CashShifts with Pagination
@@ -38,18 +38,6 @@ namespace InventoryTrackApi.Services
                 throw new InvalidOperationException("Cash Shift Not Found.");
             }
 
-            /*
-                public DateTime ShiftDate { get; set; }
-                public DateTime ShiftStart { get; set; }
-                public DateTime? ShiftEnd { get; set; }
-                public decimal OpeningBalance { get; set; }
-                public decimal ClosingBalance { get; set; }
-                public decimal TotalSales { get; set; }
-                public decimal TotalRefunds { get; set; }
-                public decimal CashIn { get; set; }
-                public decimal CashOut { get; set; }
-             */
-
             //Updating Data
             existingCashShift.ShiftDate = cashShift.ShiftDate;
             existingCashShift.ShiftStart = cashShift.ShiftStart;
@@ -60,6 +48,7 @@ namespace InventoryTrackApi.Services
             existingCashShift.TotalRefunds = cashShift.TotalRefunds;
             existingCashShift.CashIn = cashShift.CashIn;
             existingCashShift.CashOut = cashShift.CashOut;
+            existingCashShift.SaasClientId = cashShift.SaasClientId;
 
             await _cashShiftRepository.UpdateAsync(existingCashShift);
         }

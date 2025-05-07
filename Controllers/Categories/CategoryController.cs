@@ -10,7 +10,7 @@ namespace InventoryTrackApi.Controllers.Categories
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly CategoryService _categoryService;
@@ -27,7 +27,7 @@ namespace InventoryTrackApi.Controllers.Categories
 
         // Get paged categories
         [HttpGet]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
         {
             var categories = await _categoryService.GetPagedCategoriesAsync(pageNumber, pageSize);
@@ -36,7 +36,7 @@ namespace InventoryTrackApi.Controllers.Categories
 
         // Get category by ID
         [HttpGet("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
@@ -49,7 +49,7 @@ namespace InventoryTrackApi.Controllers.Categories
 
         // Create a new category
         [HttpPost]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<CategoryDTO>> CreateCategory(CategoryDTO categoryDto)
         {
             _logger.LogInformation($"Create Category request for Category: {categoryDto}");
@@ -80,7 +80,7 @@ namespace InventoryTrackApi.Controllers.Categories
 
         // Update a category
         [HttpPut("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> UpdateCategory(int id, CategoryDTO categoryDto)
         {
             _logger.LogInformation($"Update Category request received for Id : {id}");
@@ -114,7 +114,7 @@ namespace InventoryTrackApi.Controllers.Categories
 
         // Delete a category
         [HttpDelete("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             await _categoryService.DeleteCategoryAsync(id);
@@ -122,8 +122,8 @@ namespace InventoryTrackApi.Controllers.Categories
         }
 
         //// Get product by Name
-        [HttpGet("ByName/{name}")]
-        [Authorize]
+        [HttpGet("Name/{name}")]
+        //[Authorize]
         public async Task<ActionResult<LineDTO>> GetCategoryByName(string name)
         {
             try

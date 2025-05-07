@@ -32,8 +32,21 @@ namespace InventoryTrackApi.Models
         public virtual Customer? Customer { get; set; }
         [JsonIgnore]
         public virtual Employee? Employee { get; set; }
+
+        [Required]
+        public int SaasClientId { get; set; }
+
         [JsonIgnore]
-        public virtual ICollection<SaleItem> SaleItems { get; set; }
-        public virtual ICollection<SalePayment> SalePayments { get; set; }
+        public virtual SaasClient SaasClient { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<SaleItem>? SaleItems { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<SalePayment>? SalePayments { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<Return>? Returns { get; set; }
+
     }
 }

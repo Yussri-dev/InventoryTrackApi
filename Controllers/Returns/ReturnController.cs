@@ -55,7 +55,7 @@ namespace InventoryTrackApi.Controllers.Returns
 
                 var Return = new Return
                 {
-                    returnDate = ReturnDto.returnDate,
+                    ReturnDate = ReturnDto.returnDate,
                     CustomerId = ReturnDto.CustomerId,
                     EmployeeId = ReturnDto.EmployeeId,
                     RefundAmount = ReturnDto.RefundAmount,
@@ -69,7 +69,7 @@ namespace InventoryTrackApi.Controllers.Returns
 
                 var responseDto = new ReturnDTO
                 {
-                    returnDate = Return.returnDate,
+                    returnDate = Return.ReturnDate,
                     CustomerId = Return.CustomerId,
                     EmployeeId = Return.EmployeeId,
                     RefundAmount = ReturnDto.RefundAmount,
@@ -110,7 +110,7 @@ namespace InventoryTrackApi.Controllers.Returns
             var Return = new Return
             {
                 ReturnId = id,
-                returnDate = ReturnDto.returnDate,
+                ReturnDate = ReturnDto.returnDate,
                 CustomerId = ReturnDto.CustomerId,
                 EmployeeId = ReturnDto.EmployeeId,
                 RefundAmount = ReturnDto.RefundAmount,

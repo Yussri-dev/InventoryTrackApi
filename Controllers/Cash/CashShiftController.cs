@@ -1,4 +1,5 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -12,10 +13,12 @@ namespace InventoryTrackApi.Controllers.Cash
     {
         private readonly CashShiftService _cashShiftService;
         private readonly ILogger<CashShiftController> _logger;
-        public CashShiftController(CashShiftService cashShiftService, ILogger<CashShiftController> logger)
+        private readonly IMapper _mapper;
+        public CashShiftController(CashShiftService cashShiftService, ILogger<CashShiftController> logger, IMapper mapper)
         {
-            _cashShiftService = cashShiftService;
-            _logger = logger;
+            _cashShiftService = cashShiftService ?? throw new ArgumentNullException(nameof(cashShiftService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         //Get Paged CashShift
@@ -42,6 +45,32 @@ namespace InventoryTrackApi.Controllers.Cash
         [HttpPost]
         public async Task<ActionResult<CashShiftDTO>> CreateCashShift(CashShiftDTO cashShiftDto)
         {
+
+            _logger.LogInformation($"Create CashShift request for Cash Shift: {cashShiftDto}");
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for creating Customer");
+            }
+            try
+            {
+                var cashShift = _mapper.Map<CashShift>(cashShiftDto);
+                await _cashShiftService.CreateCashShiftAsync(cashShift);
+
+                var responseDto = _mapper.Map<CashShiftDTO>(cashShift);
+                return CreatedAtAction(nameof(GetCashShift), new { id = cashShift.CashShiftId }, responseDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error creating CashShift : {ex.Message}");
+                return Problem(
+                    title: "An error occured while creating the cashShift",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                    );
+                throw;
+            }
+            /*
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -88,12 +117,41 @@ namespace InventoryTrackApi.Controllers.Cash
                 _logger.LogError(ex, "Error creating employee");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+            */
         }
 
         //Update a CashShift
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCashShift(int id, CashShiftDTO cashShiftDto)
         {
+            _logger.LogInformation($"Update CashShift request received for Id : {id}");
+            if (id != cashShiftDto.CashShiftId)
+            {
+                _logger.LogWarning($"CashShift ID mismatch : Route Id {id} does not match DTO ID {cashShiftDto.CashShiftId}");
+                return BadRequest("CashShift ID mismatch");
+            }
+            try
+            {
+                var exisitingCashShift = await _cashShiftService.GetCashShiftByIdAsync(id);
+                if (exisitingCashShift == null)
+                {
+                    _logger.LogWarning($"CashShift with ID : {id} not found");
+                    return NotFound("CashShift Not Found");
+                }
+
+                _logger.LogInformation($"Updating CashShift with Id {id}");
+                var customer = _mapper.Map<CashShift>(cashShiftDto);
+                await _cashShiftService.UpdateCashShiftAsync(customer);
+
+                _logger.LogInformation($"CashShift with ID {id} successfully updated");
+                return Ok(customer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while updating CashShift with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
+            /*
             if (id != cashShiftDto.CashShiftId)
             {
                 return BadRequest("CashShift ID mismatch.");
@@ -124,6 +182,7 @@ namespace InventoryTrackApi.Controllers.Cash
 
             await _cashShiftService.UpdateCashShiftAsync(cashShift);
             return NoContent();
+            */
         }
 
         //Delete a Cash Shift

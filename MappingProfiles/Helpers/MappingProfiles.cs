@@ -10,16 +10,53 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
     {
         public MappingProfiles()
         {
-            #region Mapping Finished
-            //-------------Employee----------------
-            CreateMap<EmployeeDTO, Employee>()
-           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            #region Cash Register
+            //-------------CashRegister----------------
 
-            CreateMap<Employee, EmployeeDTO>().ReverseMap();
+            CreateMap<CashRegister, CashRegisterDTO>().ReverseMap();
 
-            //-------------Location----------------
-            CreateMap<LocationDTO, Location>()
-           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<CashRegister, CashRegisterDTO>()
+             .ForMember(emp => emp.NameComplete, opt => opt.MapFrom(src => src.Employee.NameComplete))
+             .ForMember(loc => loc.NameLocation, opt => opt.MapFrom(src => src.Location.Name));
+
+            CreateMap<CashRegisterDTO, CashRegister>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+            #region CashShift
+            //-------------CashShift----------------
+
+            CreateMap<CashShift, CashShiftDTO>().ReverseMap();
+
+            CreateMap<CashShift, CashShiftDTO>()
+            .ForMember(dest => dest.EmployeeId, opt => opt.MapFrom(src => src.EmployeeId))
+            .ForMember(dest => dest.NameComplete, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.NameComplete : string.Empty))
+            .ReverseMap();
+
+            CreateMap<CashShiftDTO, CashShift>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+
+            //-------------CashTransaction----------------
+            #region CashTransaction
+            CreateMap<CashTransaction, CashTransactionDTO>().ReverseMap();
+
+            CreateMap<CashTransactionDTO, CashTransaction>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+
+            #region Category
 
             //-------------Category----------------
             CreateMap<Category, CategoryDTO>().ReverseMap();
@@ -27,116 +64,327 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             CreateMap<CategoryDTO, Category>()
            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
+            #endregion
+
+            #region Customer
+            //-------------Customer----------------
+            CreateMap<Customer, CustomerDTO>().ReverseMap();
+
+            CreateMap<CustomerDTO, Customer>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<CustomerDTO, Customer>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+
+            CreateMap<JsonPatchDocument<CustomerDTO>, JsonPatchDocument<Customer>>();
+            CreateMap<Operation<CustomerDTO>, Operation<Customer>>();
 
             #endregion
 
-            //Shelfs
-            CreateMap<Shelf, ShelfDTO>().ReverseMap();
-            //Taxes
+            #region Taxes
+            //-------------Customer----------------
             CreateMap<Tax, TaxDTO>().ReverseMap();
 
-            ////Units
-            CreateMap<UnitDTO, Unit>()
+            CreateMap<TaxDTO, Tax>()
            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<Unit, UnitDTO>().ReverseMap();
+            #endregion
 
-            
+
+
+            #region Employee
+            //-------------Employee----------------
+            CreateMap<Employee, EmployeeDTO>().ReverseMap();
+
+            CreateMap<EmployeeDTO, Employee>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<EmployeeDTO, Employee>()
+           .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+           .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+            #region Inventory
+            //Inventory
+            CreateMap<Inventory, InventoryDTO>().ReverseMap();
+
+            // CreateMap<Inventory, InventoryDTO>()
+            //.ForMember(location => location.LocationName, opt => opt.MapFrom(src => src.Location.Name));
+
+            CreateMap<InventoryDTO, Inventory>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+
+            #region Inventory Mouvement
+            //Inventory Mouvement
+            CreateMap<InventoryMouvement, InventoryMouvementDTO>().ReverseMap();
+
+            CreateMap<InventoryMouvement, InventoryMouvementDTO>()
+           .ForMember(location => location.LocationName, opt => opt.MapFrom(src => src.Location.Name));
+
+            CreateMap<InventoryMouvementDTO, InventoryMouvement>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+
+            #region SaasClient
+            //-------------SaasClient----------------
+            CreateMap<SaasClient, SaasClientDTO>().ReverseMap();
+
+            CreateMap<SaasClientDTO, SaasClient>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            #endregion
+
+
+            #region Location
+
+            //-------------Location----------------
+            CreateMap<Location, LocationDTO>().ReverseMap();
+
+            CreateMap<LocationDTO, Location>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<LocationDTO, Location>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+            #region Lines
             //Lines
             CreateMap<Line, LineDTO>().ReverseMap();
+            #endregion
 
-            #region
+
+            #region Supplier
+            //-------------Supplier----------------
+
+            CreateMap<Supplier, SupplierDTO>().ReverseMap();
+
+            CreateMap<SupplierDTO, Supplier>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<SupplierDTO, Supplier>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<JsonPatchDocument<SupplierDTO>, JsonPatchDocument<Supplier>>();
+            CreateMap<Operation<SupplierDTO>, Operation<Supplier>>();
+
+            #endregion
+
+
+            #region Shelfs
+            //Shelfs
+            CreateMap<Shelf, ShelfDTO>().ReverseMap();
+            #endregion
+
+
+
+
+            #region Products
 
             //Products
-            CreateMap<Product, ProductDTO>().ReverseMap();
-
             CreateMap<Product, ProductDTO>()
-           .ForMember(shelf => shelf.ShelfName, opt => opt.MapFrom(src => src.Shelf.Name))
-           .ForMember(category => category.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-           .ForMember(unit => unit.UnitName, opt => opt.MapFrom(src => src.Unit.Name))
-           .ForMember(tax => tax.TaxRate, opt => opt.MapFrom(src => src.Tax.TaxRate))
-           .ForMember(line => line.LineName, opt => opt.MapFrom(src => src.Line.Name));
+                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.ShelfId, opt => opt.MapFrom(src => src.ShelfId))
+                .ForMember(dest => dest.ShelfName, opt => opt.MapFrom(src => src.Shelf.Name))
+                .ForMember(dest => dest.UnitId, opt => opt.MapFrom(src => src.UnitId))
+                .ForMember(dest => dest.UnitName, opt => opt.MapFrom(src => src.Unit.Name))
+                .ForMember(dest => dest.TaxId, opt => opt.MapFrom(src => src.TaxId))
+                .ForMember(dest => dest.TaxRate, opt => opt.MapFrom(src => src.Tax.TaxRate))
+                .ForMember(dest => dest.LineId, opt => opt.MapFrom(src => src.LineId))
+                .ForMember(dest => dest.LineName, opt => opt.MapFrom(src => src.Line.Name))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+
+            CreateMap<ProductDTO, Product>()
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
+                .ForMember(dest => dest.Shelf, opt => opt.Ignore())
+                .ForMember(dest => dest.ShelfId, opt => opt.MapFrom(src => src.ShelfId))
+                .ForMember(dest => dest.Unit, opt => opt.Ignore())
+                .ForMember(dest => dest.UnitId, opt => opt.MapFrom(src => src.UnitId))
+                .ForMember(dest => dest.Tax, opt => opt.Ignore())
+                .ForMember(dest => dest.TaxId, opt => opt.MapFrom(src => src.TaxId))
+                .ForMember(dest => dest.Line, opt => opt.Ignore())
+                .ForMember(dest => dest.LineId, opt => opt.MapFrom(src => src.LineId));
+
+
+            #endregion
+
+            #region ProductBatch
 
             //Product Batch
             CreateMap<ProductBatch, ProductBatchDTO>().ReverseMap();
 
             #endregion
 
-            //CashRegister
-            CreateMap<CashRegister, CashRegisterDTO>().ReverseMap();
-            //CashShift
-            CreateMap<CashShift, CashShiftDTO>().ReverseMap();
-            //CashTransaction
-            CreateMap<CashTransaction, CashTransactionDTO>().ReverseMap();
-
-            // //Customer
-            CreateMap<CustomerDTO, Customer>()
-           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-
-            CreateMap<Customer, CustomerDTO>().ReverseMap();
-
-            CreateMap<JsonPatchDocument<CustomerDTO>, JsonPatchDocument<Customer>>();
-
-            CreateMap<Operation<CustomerDTO>, Operation<Customer>>();
-            //CreateMap<CustomerDTO, Customer>().ReverseMap();
-
-
-
-            //Inventory
-            CreateMap<Inventory, InventoryDTO>().ReverseMap();
-            //Inventory Mouvement
-            CreateMap<InventoryMouvement, InventoryMouvementDTO>().ReverseMap();
-
-            //Purchase
-            //CreateMap<Purchase, PurchaseDTO>().ReverseMap() ;
+            #region Purchase
+            //-------------Sale----------------
             CreateMap<PurchaseDTO, Purchase>().ReverseMap();
-            // Map Customer.Name to CustomerName
 
             CreateMap<Purchase, PurchaseDTO>()
             .ForMember(dest => dest.SupplierId, opt => opt.Ignore())  // Prevents creating a new Customer
             .ForMember(dest => dest.SupplierId, opt => opt.MapFrom(src => src.SupplierId))
             .ForMember(supplier => supplier.SupplierName, opt => opt.MapFrom(src => src.Supplier.Name)).ReverseMap();
 
-            //Purchase Item
+            CreateMap<PurchaseDTO, Purchase>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            #endregion
+
+            #region PurchaseItem
+            //Inventory
             CreateMap<PurchaseItem, PurchaseItemDTO>().ReverseMap();
 
-            // Map Product.Name to ProductName
             CreateMap<PurchaseItem, PurchaseItemDTO>()
-            .ForMember(product => product.ProductName, opt => opt.MapFrom(src => src.Product.Name)).ReverseMap();
+           .ForMember(prd => prd.ProductName, opt => opt.MapFrom(src => src.Product.Name));
 
-            //Purchase Payement
-            CreateMap<PurchasePayment, PurchasePaymentDTO>().ReverseMap();
+            CreateMap<PurchaseItemDTO, PurchaseItem>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            //Sale
-            //CreateMap<Sale, SaleDTO>().ReverseMap() ;
+            #endregion
+
+
+            #region PurchasePayement
+            CreateMap<PurchasePaymentDTO, PurchasePayment>().ReverseMap();
+
+            CreateMap<PurchasePaymentDTO, PurchasePayment>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            #endregion
+
+            #region Return
+            //-------------Return----------------
+            CreateMap<ReturnDTO, Return>().ReverseMap();
+
+            CreateMap<Return, ReturnDTO>()
+            .ForMember(dest => dest.CustomerId, opt => opt.Ignore())  // Prevents creating a new Customer
+            .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.CustomerId))
+            .ForMember(supplier => supplier.CustomerName, opt => opt.MapFrom(src => src.Customer.Name)).ReverseMap();
+
+            CreateMap<ReturnDTO, Return>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            #endregion
+
+
+            #region ReturnItem
+            //Inventory
+            CreateMap<ReturnItem, ReturnItemDTO>().ReverseMap();
+
+            CreateMap<ReturnItem, ReturnItemDTO>()
+           .ForMember(prd => prd.ProductName, opt => opt.MapFrom(src => src.Product.Name));
+
+            CreateMap<ReturnItemDTO, ReturnItem>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+            #region ReturnPayment
+            CreateMap<ReturnPaymentDTO, ReturnPayment>().ReverseMap();
+
+            CreateMap<ReturnPaymentDTO, ReturnPayment>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            #endregion
+
+            #region Sale
+            //-------------Sale----------------
+            CreateMap<SaleDTO, Sale>().ReverseMap();
 
             CreateMap<Sale, SaleDTO>()
             .ForMember(dest => dest.CustomerId, opt => opt.Ignore())  // Prevents creating a new Customer
             .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.CustomerId))
-            .ForMember(customer => customer.CustomerName, opt => opt.MapFrom(src => src.Customer.Name)).ReverseMap();
+            .ForMember(supplier => supplier.CustomerName, opt => opt.MapFrom(src => src.Customer.Name)).ReverseMap();
 
-            //Sale Item
+            CreateMap<SaleDTO, Sale>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            #endregion
+
+            #region SaleItem
+            //Inventory
             CreateMap<SaleItem, SaleItemDTO>().ReverseMap();
 
-            // Map SaleItem to SaleItemDTO
             CreateMap<SaleItem, SaleItemDTO>()
-                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name)); // Map Product to ProductDTO
+           .ForMember(prd => prd.ProductName, opt => opt.MapFrom(src => src.Product.Name));
 
-            //Sale Payment
-            CreateMap<SalePayment, SalePaymentDTO>().ReverseMap();
+            CreateMap<SaleItemDTO, SaleItem>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            //Sale
-            CreateMap<Return, ReturnDTO>().ReverseMap();
-            //Sale Item
-            CreateMap<ReturnItem, ReturnItemDTO>().ReverseMap();
-            //Sale Payment
-            CreateMap<ReturnPayment, ReturnPaymentDTO>().ReverseMap();
+            #endregion
 
-            //Supplier
-            CreateMap<Supplier, SupplierDTO>().ReverseMap();
+            #region SalePayment
+            CreateMap<SalePayment, SalePaymentDTO>()
+                .ForMember(dest => dest.SaleId, opt => opt.MapFrom(src => src.SaleId))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            //User
+            CreateMap<SalePaymentDTO, SalePayment>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForMember(dest => dest.SaleId, opt => opt.Ignore()) // <--- Prevent update
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+
+            #endregion
+
+
+
+
+
+            #region User
+            //-------------Supplier----------------
+
             CreateMap<User, UserDTO>().ReverseMap();
+
+            CreateMap<UserDTO, User>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<UserDTO, User>()
+            .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+            #region Units
+
+            //-------------Category----------------
+            CreateMap<Unit, UnitDTO>().ReverseMap();
+
+            CreateMap<UnitDTO, Unit>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
         }
     }
 }

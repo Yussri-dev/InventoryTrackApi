@@ -33,6 +33,12 @@ namespace InventoryTrackApi.Services
         //Create a new Location
         public async Task CreateLocationAsync(Location location)
         {
+            bool exists = await _locationRepository.ExistsAsync(p => p.Name == location.Name);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Location with the same Rate already exists.");
+            }
             await _locationRepository.CreateAsync(location);
         }
 
@@ -54,6 +60,7 @@ namespace InventoryTrackApi.Services
             existingLocation.IsActivated = location.IsActivated;
             existingLocation.ModifiedBy = location.ModifiedBy;
             existingLocation.DateModified = location.DateModified;
+            existingLocation.SaasClientId = location.SaasClientId;
 
             await _locationRepository.UpdateAsync(existingLocation);
         }

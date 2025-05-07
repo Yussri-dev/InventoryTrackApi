@@ -7,19 +7,19 @@ namespace InventoryTrackApi.Data
     {
         public static void Seed(this ModelBuilder modelBuilder)
         {
-            //seed Supplier
-            modelBuilder.Entity<Supplier>().HasData(
-               new Supplier { SupplierId = 1, Name = "Supplier A", PhoneNumber1 = "1111111111", PhoneNumber2 = "2222222222", Email = "supplierA@example.com", Adresse = "123 Supplier Street", City = "City A", Land = "Country A", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
-               new Supplier { SupplierId = 2, Name = "Supplier B", PhoneNumber1 = "3333333333", PhoneNumber2 = "4444444444", Email = "supplierB@example.com", Adresse = "456 Another Street", City = "City B", Land = "Country B", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
-               new Supplier { SupplierId = 3, Name = "Supplier C", PhoneNumber1 = "5555555555", PhoneNumber2 = "6666666666", Email = "supplierC@example.com", Adresse = "789 Third Avenue", City = "City C", Land = "Country C", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = false },
-               new Supplier { SupplierId = 4, Name = "Supplier D", PhoneNumber1 = "7777777777", PhoneNumber2 = "8888888888", Email = "supplierD@example.com", Adresse = "1011 Fourth Avenue", City = "City D", Land = "Country D", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
-               new Supplier { SupplierId = 5, Name = "Supplier E", PhoneNumber1 = "9999999999", PhoneNumber2 = "1212121212", Email = "supplierE@example.com", Adresse = "1213 Fifth Street", City = "City E", Land = "Country E", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = false },
-               new Supplier { SupplierId = 6, Name = "Supplier F", PhoneNumber1 = "3434343434", PhoneNumber2 = "5656565656", Email = "supplierF@example.com", Adresse = "1415 Sixth Lane", City = "City F", Land = "Country F", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
-               new Supplier { SupplierId = 7, Name = "Supplier G", PhoneNumber1 = "7878787878", PhoneNumber2 = "8989898989", Email = "supplierG@example.com", Adresse = "1617 Seventh Road", City = "City G", Land = "Country G", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
-               new Supplier { SupplierId = 8, Name = "Supplier H", PhoneNumber1 = "2323232323", PhoneNumber2 = "4545454545", Email = "supplierH@example.com", Adresse = "1819 Eighth Avenue", City = "City H", Land = "Country H", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = false },
-               new Supplier { SupplierId = 9, Name = "Supplier I", PhoneNumber1 = "6767676767", PhoneNumber2 = "8989898989", Email = "supplierI@example.com", Adresse = "2021 Ninth Boulevard", City = "City I", Land = "Country I", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
-               new Supplier { SupplierId = 10, Name = "Supplier J", PhoneNumber1 = "1234123412", PhoneNumber2 = "5678567856", Email = "supplierJ@example.com", Adresse = "2223 Tenth Parkway", City = "City J", Land = "Country J", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true }
-           );
+           // //seed Supplier
+           // modelBuilder.Entity<Supplier>().HasData(
+           //    new Supplier { SupplierId = 1, Name = "Supplier A", PhoneNumber1 = "1111111111", PhoneNumber2 = "2222222222", Email = "supplierA@example.com", Adresse = "123 Supplier Street", City = "City A", Land = "Country A", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
+           //    new Supplier { SupplierId = 2, Name = "Supplier B", PhoneNumber1 = "3333333333", PhoneNumber2 = "4444444444", Email = "supplierB@example.com", Adresse = "456 Another Street", City = "City B", Land = "Country B", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
+           //    new Supplier { SupplierId = 3, Name = "Supplier C", PhoneNumber1 = "5555555555", PhoneNumber2 = "6666666666", Email = "supplierC@example.com", Adresse = "789 Third Avenue", City = "City C", Land = "Country C", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = false },
+           //    new Supplier { SupplierId = 4, Name = "Supplier D", PhoneNumber1 = "7777777777", PhoneNumber2 = "8888888888", Email = "supplierD@example.com", Adresse = "1011 Fourth Avenue", City = "City D", Land = "Country D", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
+           //    new Supplier { SupplierId = 5, Name = "Supplier E", PhoneNumber1 = "9999999999", PhoneNumber2 = "1212121212", Email = "supplierE@example.com", Adresse = "1213 Fifth Street", City = "City E", Land = "Country E", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = false },
+           //    new Supplier { SupplierId = 6, Name = "Supplier F", PhoneNumber1 = "3434343434", PhoneNumber2 = "5656565656", Email = "supplierF@example.com", Adresse = "1415 Sixth Lane", City = "City F", Land = "Country F", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
+           //    new Supplier { SupplierId = 7, Name = "Supplier G", PhoneNumber1 = "7878787878", PhoneNumber2 = "8989898989", Email = "supplierG@example.com", Adresse = "1617 Seventh Road", City = "City G", Land = "Country G", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
+           //    new Supplier { SupplierId = 8, Name = "Supplier H", PhoneNumber1 = "2323232323", PhoneNumber2 = "4545454545", Email = "supplierH@example.com", Adresse = "1819 Eighth Avenue", City = "City H", Land = "Country H", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = false },
+           //    new Supplier { SupplierId = 9, Name = "Supplier I", PhoneNumber1 = "6767676767", PhoneNumber2 = "8989898989", Email = "supplierI@example.com", Adresse = "2021 Ninth Boulevard", City = "City I", Land = "Country I", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true },
+           //    new Supplier { SupplierId = 10, Name = "Supplier J", PhoneNumber1 = "1234123412", PhoneNumber2 = "5678567856", Email = "supplierJ@example.com", Adresse = "2223 Tenth Parkway", City = "City J", Land = "Country J", CreatedBy = "Admin", DateCreated = DateTime.Now, ModifiedBy = "Admin", DateModified = DateTime.Now, IsActivate = true }
+           //);
 
             // Seeding Category data
             modelBuilder.Entity<Category>().HasData(
@@ -152,6 +152,7 @@ namespace InventoryTrackApi.Data
                 }
             );
 
+            /*
             //seeding Location data 
             modelBuilder.Entity<Location>().HasData(
                 new Location
@@ -963,7 +964,7 @@ namespace InventoryTrackApi.Data
                     PaymentType = "PARTIAL_PAYMENT"
                 }
             );
-
+            */
         }
     }
 }

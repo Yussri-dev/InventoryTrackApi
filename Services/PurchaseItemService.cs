@@ -38,16 +38,18 @@ namespace InventoryTrackApi.Services
         public async Task UpdatePurchaseItemAsync(PurchaseItem purchaseItem)
         {
             var existingPurchaseItem = await _purchaseItemRepository.GetByIdAsync(purchaseItem.PurchaseItemId);
+            
             if (existingPurchaseItem == null)
             {
                 throw new InvalidOperationException("Purchase Item Not Found");
             }
-            purchaseItem.PurchaseId = existingPurchaseItem.PurchaseId;
-            purchaseItem.Quantity = existingPurchaseItem.Quantity;
-            purchaseItem.Price = existingPurchaseItem.Price;
-            purchaseItem.Discount = existingPurchaseItem.Discount;
-            purchaseItem.TaxAmount = existingPurchaseItem.TaxAmount;
-            purchaseItem.Total = existingPurchaseItem.Total;
+            existingPurchaseItem.PurchaseId = purchaseItem.PurchaseId;
+            existingPurchaseItem.Quantity = purchaseItem.Quantity;
+            existingPurchaseItem.Price = purchaseItem.Price;
+            existingPurchaseItem.Discount = purchaseItem.Discount;
+            existingPurchaseItem.TaxAmount = purchaseItem.TaxAmount;
+            existingPurchaseItem.Total = purchaseItem.Total;
+            existingPurchaseItem.SaasClientId = purchaseItem.SaasClientId;
 
             await _purchaseItemRepository.UpdateAsync(existingPurchaseItem);
 

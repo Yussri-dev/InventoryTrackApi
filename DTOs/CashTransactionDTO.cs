@@ -10,5 +10,6 @@ namespace InventoryTrackApi.DTOs
         public decimal Amount { get; set; } = decimal.Zero;
         public DateTime TransactionTime { get; set; } = DateTime.UtcNow;
         public string Description { get; set; } = string.Empty;
+        public int SaasClientId { get; set; }
     }
 }

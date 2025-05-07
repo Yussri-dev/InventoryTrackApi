@@ -12,5 +12,6 @@ namespace InventoryTrackApi.DTOs
         public string PaymentType { get; set; } = string.Empty;
         public string PaymentStatus { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        public int SaasClientId { get; set; }
     }
 }

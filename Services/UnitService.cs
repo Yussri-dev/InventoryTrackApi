@@ -27,13 +27,19 @@ namespace InventoryTrackApi.Services
         //Get a product by Name
         public async Task<IEnumerable<Unit>> GetUnitByNameAsync(string name)
         {
-            //return await _productRepository.GetByNameAsync(p => EF.Functions.Like(p.Name, name));
             return await _unitRepository.GetByNameAsync(p => p.Name.Contains(name));
         }
 
         // Create a new unit
         public async Task CreateUnitAsync(Unit unit)
         {
+            bool exists = await _unitRepository.ExistsAsync(p => p.Name == unit.Name);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Unit with the same name already exists.");
+            }
+
             await _unitRepository.CreateAsync(unit);
         }
 
@@ -44,11 +50,11 @@ namespace InventoryTrackApi.Services
 
             if (existingUnit == null)
             {
-                throw new InvalidOperationException("Unit Not Found");
+                throw new InvalidOperationException("Category not found.");
             }
 
-            existingUnit.Name = existingUnit.Name;
-
+            existingUnit.Name = unit.Name;
+            //
             await _unitRepository.UpdateAsync(existingUnit);
         }
 

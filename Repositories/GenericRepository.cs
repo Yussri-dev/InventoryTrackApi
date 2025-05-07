@@ -18,6 +18,11 @@ namespace InventoryTrackApi.Repositories
             _context.Database.EnsureCreated();
         }
 
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.AnyAsync(predicate);
+        }
+
         // Gets all records with optional pagination and filtering
         public async Task<IEnumerable<T>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
         {

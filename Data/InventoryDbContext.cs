@@ -14,245 +14,269 @@ namespace InventoryTrackApi.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region Category, Location, Customer, Supplier
 
-            // Category
+            // Ensuring unique names
             modelBuilder.Entity<Category>()
                 .HasIndex(c => c.Name)
                 .IsUnique();
 
-            // Category
-            modelBuilder.Entity<Location>()
+            // Ensuring unique names
+            modelBuilder.Entity<Line>()
                 .HasIndex(c => c.Name)
                 .IsUnique();
 
-            // Customer
+            modelBuilder.Entity<Location>()
+                .HasIndex(l => l.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<Supplier>()
+                .HasIndex(s => s.Name)
+                .IsUnique();
+
+            // Consider removing uniqueness from Customer.Name if duplicates are allowed
             modelBuilder.Entity<Customer>()
                 .HasIndex(c => c.Name)
                 .IsUnique();
 
-            // Supplier
-            modelBuilder.Entity<Supplier>()
-                .HasIndex(c => c.Name)
-                .IsUnique();
+            // Foreign key constraint for Customer -> SaasClient
+            modelBuilder.Entity<Customer>()
+                .HasOne(c => c.SaasClient)
+                .WithMany(s => s.Customers)
+                .HasForeignKey(c => c.SaasClientId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Employee
-            modelBuilder.Entity<Employee>().Ignore(e => e.NameComplete);
+            #endregion
 
+            #region Product Relationships
 
-
-            // InventoryMouvement
-            modelBuilder.Entity<InventoryMouvement>()
-                .Property(m => m.MouvementType)
-                .HasConversion<string>();
-
-            #region Product
-            // Foreign Key between Product and Category
+            // Product → Category (Required)
             modelBuilder.Entity<Product>()
-                .HasOne(c => c.Category)
+                .HasOne(p => p.Category)
                 .WithMany(c => c.Products)
-                .HasForeignKey(c => c.CategoryId);
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent accidental deletion
 
+            // Product → Shelf (Optional if some products might not be placed on shelves)
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Shelf)
                 .WithMany(s => s.Products)
-                .HasForeignKey(f => f.ShelfId);
+                .HasForeignKey(p => p.ShelfId)
+                .OnDelete(DeleteBehavior.Restrict); // Keeps product if shelf is deleted
 
-            // Foreign Key Between Product and Line
-
+            // Product → Line (Optional if not all products belong to a line)
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Line)
-                .WithMany(s => s.Products)
-                .HasForeignKey(f => f.LineId);
+                .WithMany(l => l.Products)
+                .HasForeignKey(p => p.LineId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-
+            // Product → Tax (Required)
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Tax)
-                .WithMany(s => s.Products)
-                .HasForeignKey(f => f.TaxId);
+                .WithMany(t => t.Products)
+                .HasForeignKey(p => p.TaxId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevents deleting tax category if associated with products
 
-
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.Unit)
-                .WithMany(s => s.Products)
-                .HasForeignKey(f => f.UnitId);
-
-            modelBuilder.Entity<Product>()
-               .HasMany(p => p.Inventories)
-               .WithOne(i => i.Product)
-               .HasForeignKey(f => f.ProductId);
-
-            modelBuilder.Entity<Product>()
-                .HasMany(p => p.ProductBatches)
-                .WithOne(pb => pb.Product)
-                .HasForeignKey(f => f.ProductId);
             #endregion
 
-            #region Employee
-            // Foreign Key Between CashRegister and Employee
+            #region Employee Relationships
+
             modelBuilder.Entity<Employee>()
                 .HasMany(e => e.CashRegisters)
                 .WithOne(c => c.Employee)
-                .HasForeignKey(f => f.EmployeeId);
+                .HasForeignKey(c => c.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevents accidental deletion of Employee affecting CashRegisters
 
             modelBuilder.Entity<Employee>()
                 .HasMany(e => e.CashShifts)
                 .WithOne(cs => cs.Employee)
-                .HasForeignKey(f => f.EmployeeId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(cs => cs.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict); // Ensures Employee deletion doesn’t affect shifts
+
             #endregion
-            // Foreign Key Between CashRegister and Location
-            modelBuilder.Entity<Location>()
-                .HasMany(l => l.CashRegisters)
-                .WithOne(c => c.Location)
-                .HasForeignKey(f => f.LocationId);
 
+            #region Cash Register and Location
 
-
+            // CashRegister → SaasClient (Required)
             modelBuilder.Entity<CashRegister>()
-                .HasMany(cr => cr.CashShifts)
-                .WithOne(cs => cs.CashRegister)
-                .HasForeignKey(f => f.CashRegisterId);
+                .HasOne(c => c.SaasClient)
+                .WithMany(s => s.CashRegisters)
+                .HasForeignKey(c => c.SaasClientId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
 
+            // CashRegister → Location (Required)
+            modelBuilder.Entity<CashRegister>()
+                .HasOne(c => c.Location)
+                .WithMany(l => l.CashRegisters)
+                .HasForeignKey(c => c.LocationId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
 
+            // CashRegister → Employee (Optional)
+            modelBuilder.Entity<CashRegister>()
+                .HasOne(c => c.Employee)
+                .WithMany(e => e.CashRegisters)
+                .HasForeignKey(c => c.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict); // Allows unregistering an employee without deleting CashRegister
+
+            #endregion
+
+            #region Cash Shift and Cash Transaction
+
+            // CashShift → CashTransaction (Required)
             modelBuilder.Entity<CashShift>()
                 .HasMany(cs => cs.CashTransactions)
                 .WithOne(ct => ct.CashShift)
-                .HasForeignKey(f => f.CashShiftId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(ct => ct.CashShiftId)
+                .OnDelete(DeleteBehavior.Restrict); // Ensures cash transactions are deleted if the shift is removed
+
+            #endregion
+
+            #region Inventory Relationships
+
+            modelBuilder.Entity<InventoryMouvement>()
+                .HasOne(im => im.SaasClient)
+                .WithMany(sc => sc.InventoryMouvements)
+                .HasForeignKey(im => im.SaasClientId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+
+            modelBuilder.Entity<InventoryMouvement>()
+                .HasOne(im => im.Location)
+                .WithMany(l => l.InventoryMouvements)
+                .HasForeignKey(im => im.LocationId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
 
             // Foreign Key Between Location and Inventory
             modelBuilder.Entity<Location>()
                 .HasMany(l => l.Inventories)
                 .WithOne(i => i.Location)
-                .HasForeignKey(f => f.LocationId);
-
-            // Foreign Key between Location and InventoryMouvement
-            modelBuilder.Entity<Location>()
-                .HasMany(l => l.InventoryMouvements)
-                .WithOne(im => im.Location)
-                .HasForeignKey(f => f.LocationId);
-
-            #region Purchase
-            // Sale
-            modelBuilder.Entity<Purchase>()
-                .HasOne(s => s.Supplier)
-                .WithMany(c => c.Purchases)
-                .HasForeignKey(f => f.SupplierId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-
-
-            modelBuilder.Entity<Purchase>()
-                    .HasOne(s => s.Employee)
-                    .WithMany(e => e.Purchases)
-                    .HasForeignKey(f => f.EmployeeId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-            // Sale -> SaleItem
-            modelBuilder.Entity<PurchaseItem>()
-                .HasOne(si => si.Purchase)
-                .WithMany(s => s.PurchaseItems)
-                .HasForeignKey(si => si.PurchaseId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Product -> SaleItem
-            modelBuilder.Entity<PurchaseItem>()
-                .HasOne(si => si.Product)
-                .WithMany(p => p.PurchaseItems)
-                .HasForeignKey(si => si.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-
-
-            // Sale Payment
-            modelBuilder.Entity<PurchasePayment>()
-                .HasOne(sp => sp.Purchase)
-                .WithMany(s => s.PurchasePayments)
-                .HasForeignKey(f => f.PurchaseId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(i => i.LocationId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
 
             #endregion
 
+            #region Purchase and Sale Relationships
 
-            #region Sale
-            // Sale
+            // Purchase Relationships
+            modelBuilder.Entity<Purchase>()
+                .HasOne(p => p.Supplier)
+                .WithMany(s => s.Purchases)
+                .HasForeignKey(p => p.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Purchase>()
+                .HasOne(p => p.Employee)
+                .WithMany(e => e.Purchases)
+                .HasForeignKey(p => p.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PurchaseItem>()
+                .HasOne(pi => pi.Purchase)
+                .WithMany(p => p.PurchaseItems)
+                .HasForeignKey(pi => pi.PurchaseId)
+                .OnDelete(DeleteBehavior.Restrict); // Ensures purchase items are removed if a purchase is deleted
+
+            modelBuilder.Entity<PurchaseItem>()
+                .HasOne(pi => pi.Product)
+                .WithMany(p => p.PurchaseItems)
+                .HasForeignKey(pi => pi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PurchasePayment>()
+                .HasOne(pp => pp.Purchase)
+                .WithMany(p => p.PurchasePayments)
+                .HasForeignKey(pp => pp.PurchaseId)
+                .OnDelete(DeleteBehavior.Restrict); // Ensures payments are removed if purchase is deleted
+
+            #endregion
+
+            #region Product and Unit Relationship
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Unit)
+                .WithMany(u => u.Products)
+                .HasForeignKey(p => p.UnitId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of Unit affecting Products
+
+            #endregion
+
+            #region Sale Relationships
+
+            // Sale Relationships
             modelBuilder.Entity<Sale>()
                 .HasOne(s => s.Customer)
                 .WithMany(c => c.Sales)
-                .HasForeignKey(f => f.CustomerId)
+                .HasForeignKey(s => s.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Sale>()
-                    .HasOne(s => s.Employee)
-                    .WithMany(e => e.Sales)
-                    .HasForeignKey(f => f.EmployeeId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(s => s.Employee)
+                .WithMany(e => e.Sales)
+                .HasForeignKey(s => s.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Sale -> SaleItem
             modelBuilder.Entity<SaleItem>()
                 .HasOne(si => si.Sale)
                 .WithMany(s => s.SaleItems)
                 .HasForeignKey(si => si.SaleId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); // Ensures sale items are removed if sale is deleted
 
-            // Product -> SaleItem
             modelBuilder.Entity<SaleItem>()
                 .HasOne(si => si.Product)
                 .WithMany(p => p.SaleItems)
                 .HasForeignKey(si => si.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
-
-            // Sale Payment
             modelBuilder.Entity<SalePayment>()
                 .HasOne(sp => sp.Sale)
                 .WithMany(s => s.SalePayments)
-                .HasForeignKey(f => f.SaleId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(sp => sp.SaleId)
+                .OnDelete(DeleteBehavior.Restrict); // Ensures payments are removed if sale is deleted
 
             #endregion
 
-            #region Return
-            // Sale
+            #region Return Relationships
+
+            // Return Relationships
             modelBuilder.Entity<Return>()
-                .HasOne(s => s.Customer)
+                .HasOne(r => r.Customer)
                 .WithMany(c => c.Returns)
-                .HasForeignKey(f => f.CustomerId)
+                .HasForeignKey(r => r.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-
 
             modelBuilder.Entity<Return>()
-                    .HasOne(s => s.Employee)
-                    .WithMany(e => e.Returns)
-                    .HasForeignKey(f => f.EmployeeId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-            // Sale -> SaleItem
-            modelBuilder.Entity<ReturnItem>()
-                .HasOne(si => si.Return)
-                .WithMany(s => s.returnItems)
-                .HasForeignKey(si => si.ReturnId)
+                .HasOne(r => r.Employee)
+                .WithMany(e => e.Returns)
+                .HasForeignKey(r => r.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Product -> SaleItem
             modelBuilder.Entity<ReturnItem>()
-                .HasOne(si => si.Product)
+                .HasOne(ri => ri.Return)
+                .WithMany(r => r.ReturnItems)
+                .HasForeignKey(ri => ri.ReturnId)
+                .OnDelete(DeleteBehavior.Restrict); // Ensures return items are deleted when return is deleted
+
+            modelBuilder.Entity<ReturnItem>()
+                .HasOne(ri => ri.Product)
                 .WithMany(p => p.ReturnItems)
-                .HasForeignKey(si => si.ProductId)
+                .HasForeignKey(ri => ri.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
-
-            // Sale Payment
             modelBuilder.Entity<ReturnPayment>()
-                .HasOne(sp => sp.Return)
-                .WithMany(s => s.ReturnPayments)
-                .HasForeignKey(f => f.ReturnId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(rp => rp.Return)
+                .WithMany(r => r.ReturnPayments)
+                .HasForeignKey(rp => rp.ReturnId)
+                .OnDelete(DeleteBehavior.Restrict); // Ensures return payments are deleted when return is deleted
+
+            // Sale relationship: restrict cascading delete
+            modelBuilder.Entity<Return>()
+                .HasOne(r => r.Sale)
+                .WithMany(s => s.Returns)
+                .HasForeignKey(r => r.SaleId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete on SaleId
 
             #endregion
+
             // Seeding data from ModelBuilderExtensions (if defined)
             modelBuilder.Seed();
         }
@@ -279,6 +303,7 @@ namespace InventoryTrackApi.Data
         public DbSet<SaleItem> SaleItems { get; set; }
         public DbSet<SalePayment> SalePayments { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<SaasClient> SaasClients { get; set; }
 
     }
 }

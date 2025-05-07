@@ -13,5 +13,7 @@ namespace InventoryTrackApi.DTOs
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public string ProductName { get; set; }
 
+        public int SaasClientId { get; set; }
+
     }
 }

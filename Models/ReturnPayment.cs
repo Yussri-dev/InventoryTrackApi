@@ -29,6 +29,12 @@ namespace InventoryTrackApi.Models
         public string PaymentStatus { get; set; } = string.Empty;
         [DefaultValue("DateTime.Now")]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        [Required]
+        public int SaasClientId { get; set; }
+
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
+
         [JsonIgnore]
         public virtual Return? Return { get; set; }
     }

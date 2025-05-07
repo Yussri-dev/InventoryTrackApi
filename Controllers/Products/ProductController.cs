@@ -3,6 +3,7 @@ using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
@@ -11,6 +12,7 @@ namespace InventoryTrackApi.Controllers.Products
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize]
     public class ProductController : ControllerBase
     {
         private readonly ProductService _productService;
@@ -26,9 +28,9 @@ namespace InventoryTrackApi.Controllers.Products
 
         // Get paged products
         [HttpGet]
+        //[Authorize]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetPagedProducts(int pageNumber = 1, int pageSize = 10)
         {
-            //var products = await _productService.GetPagedProducts(pageNumber, pageSize);
             var products = await _productService.GetDataReferencesWithProductAsync(pageNumber, pageSize);
             return Ok(products);
         }
@@ -36,7 +38,8 @@ namespace InventoryTrackApi.Controllers.Products
 
         // Get product by ID
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDTO>> GetProduct(int id)
+        //[Authorize]
+        public async Task<ActionResult<ProductDTO>> GetProduct([FromRoute] int id)
         {
             var product = await _productService.GetProductByIdAsync(id);
             if (product == null)
@@ -47,8 +50,9 @@ namespace InventoryTrackApi.Controllers.Products
         }
 
         //// Get product by Name
-        [HttpGet("ByName/{name}")]
-        public async Task<ActionResult<ProductDTO>> GetProductByName(string name)
+        [HttpGet("Name/{name}")]
+        //[Authorize]
+        public async Task<ActionResult<ProductDTO>> GetProductByName([FromRoute]string name)
         {
             try
             {
@@ -67,8 +71,9 @@ namespace InventoryTrackApi.Controllers.Products
         }
 
         //// Get product by ID
-        [HttpGet("ByBarCode/{barCode}")]
-        public async Task<ActionResult<ProductDTO>> GetProductByBarCode(string barCode)
+        [HttpGet("BarCode/{barCode}")]
+        //[Authorize]
+        public async Task<ActionResult<ProductDTO>> GetProductByBarCode([FromRoute] string barCode)
         {
             try
             {
@@ -88,7 +93,8 @@ namespace InventoryTrackApi.Controllers.Products
 
         //Get stock Product by Id
         [HttpGet("QuantityStock/{id}")]
-        public async Task<ActionResult<decimal>> GetProductStockQuantity(int id)
+        //[Authorize]
+        public async Task<ActionResult<decimal>> GetProductStockQuantity([FromRoute] int id)
         {
             try
             {
@@ -108,9 +114,34 @@ namespace InventoryTrackApi.Controllers.Products
 
         // Create a new product
         [HttpPost]
+        //[Authorize]
         public async Task<ActionResult<ProductDTO>> CreateProduct(ProductDTO productDto)
         {
+            _logger.LogInformation($"Create Product request for Product: {productDto}");
 
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for creating Product");
+            }
+            try
+            {
+                var product = _mapper.Map<Product>(productDto);
+                await _productService.CreateProductAsync(product);
+
+                var responseDto = _mapper.Map<ProductDTO>(product);
+                return CreatedAtAction(nameof(GetProduct), new { id = product.ProductId }, responseDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error creating Product : {ex.Message}");
+                return Problem(
+                    title: "An error occured while creating the product",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                    );
+                throw;
+            }
+            /*
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning("Invalid model state for Creating P.");
@@ -133,125 +164,47 @@ namespace InventoryTrackApi.Controllers.Products
                     statusCode: StatusCodes.Status500InternalServerError
                 );
             }
-            /*
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                var product = new Product
-                {
-                    ProductUnitId = productDto.ProductUnitId,
-                    Name = productDto.Name,
-                    MinStock = productDto.MinStock,
-                    MaxStock = productDto.MaxStock,
-                    PackUnitType = productDto.PackUnitType,
-                    QuantityStock = productDto.QuantityStock,
-                    QuantityPack = productDto.QuantityPack,
-                    Barcode = productDto.Barcode,
-                    PurchasePrice = productDto.PurchasePrice,
-                    SalePrice1 = productDto.SalePrice1,
-                    SalePrice2 = productDto.SalePrice2,
-                    SalePrice3 = productDto.SalePrice3,
-                    ImageUrl = productDto.ImageUrl,
-                    ModifiedBy = productDto.ModifiedBy,
-                    DateModified = productDto.DateModified,
-                    IsActivate = productDto.IsActivate,
-                    ShelfId = productDto.ShelfId,
-                    CategoryId = productDto.CategoryId,
-                    UnitId = productDto.UnitId,
-                    TaxId = productDto.TaxId,
-                    LineId = productDto.LineId
-                };
-                await _productService.CreateProductAsync(product);
-
-                var respondDto = new ProductDTO
-                {
-                    ProductUnitId = product.ProductUnitId,
-                    Name = product.Name,
-                    MinStock = product.MinStock,
-                    MaxStock = product.MaxStock,
-                    PackUnitType = product.PackUnitType,
-                    QuantityStock = product.QuantityStock,
-                    QuantityPack = product.QuantityPack,
-                    Barcode = product.Barcode,
-                    PurchasePrice = product.PurchasePrice,
-                    SalePrice1 = product.SalePrice1,
-                    SalePrice2 = product.SalePrice2,
-                    SalePrice3 = product.SalePrice3,
-                    ImageUrl = product.ImageUrl,
-                    ModifiedBy = product.ModifiedBy,
-                    DateModified = product.DateModified,
-                    IsActivate = product.IsActivate,
-                    ShelfId = product.ShelfId,
-                    CategoryId = product.CategoryId,
-                    UnitId = product.UnitId,
-                    TaxId = product.TaxId,
-                    LineId = product.LineId
-                };
-                return CreatedAtAction(nameof(GetProduct), new { id = product.ProductId }, respondDto);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating location");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-            */
+           */
         }
 
         // Update a product
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, ProductDTO productDto)
+        //[Authorize]
+        public async Task<IActionResult> UpdateProduct([FromRoute] int id, ProductDTO productDto)
         {
+            _logger.LogInformation($"Update Product request received for Id : {id}");
             if (id != productDto.ProductId)
             {
-                return BadRequest("Product ID mismatch.");
+                _logger.LogWarning($"Product ID mismatch : Route Id {id} does not match DTO ID {productDto.ProductId}");
+                return BadRequest("Product ID mismatch");
             }
-
-            var existingProduct = await _productService.GetProductByIdAsync(id);
-            if (existingProduct == null)
+            try
             {
-                return NotFound("Product not found.");
+                var existingProduct = await _productService.GetProductByIdAsync(id);
+                if (existingProduct == null)
+                {
+                    _logger.LogWarning($"Product with ID : {id} not fount");
+                    return NotFound("Product Not Found");
+                }
+
+                _logger.LogInformation($"Updating product with Id {id}");
+                var product = _mapper.Map<Product>(productDto);
+                await _productService.UpdateProductAsync(product);
+
+                _logger.LogInformation($"product with ID {id} successfully updated");
+                return Ok(product);
             }
-
-            var product = _mapper.Map<Product>(productDto);
-            //var product = new Product
-            //{
-            //    ProductId = id,
-            //    ProductUnitId = productDto.ProductUnitId,
-            //    Name = productDto.Name,
-            //    MinStock = productDto.MinStock,
-            //    MaxStock = productDto.MaxStock,
-            //    PackUnitType = productDto.PackUnitType,
-            //    QuantityStock = productDto.QuantityStock,
-            //    QuantityPack = productDto.QuantityPack,
-            //    Barcode = productDto.Barcode,
-            //    PurchasePrice = productDto.PurchasePrice,
-            //    SalePrice1 = productDto.SalePrice1,
-            //    SalePrice2 = productDto.SalePrice2,
-            //    SalePrice3 = productDto.SalePrice3,
-            //    ImageUrl = productDto.ImageUrl,
-            //    ModifiedBy = productDto.ModifiedBy,
-            //    DateModified = productDto.DateModified,
-            //    IsActivate = productDto.IsActivate,
-            //    ShelfId = productDto.ShelfId,
-            //    CategoryId = productDto.CategoryId,
-            //    UnitId = productDto.UnitId,
-            //    TaxId = productDto.TaxId,
-            //    LineId = productDto.LineId,
-            //    IsSecondItemDiscountEligible = productDto.IsSecondItemDiscountEligible,
-            //    IsBuyThreeForFiveEligible = productDto.IsBuyThreeForFiveEligible
-            //};
-
-            await _productService.UpdateProductAsync(product);
-
-            return Ok(product);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while updating Product with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
-        [HttpPut("ByQuantity/{id}")]
-        public async Task<IActionResult> UpdateQuantityOfProduct(int id, decimal quantity)
+        [HttpPut("Quantity/{id}")]
+        //[Authorize]
+        public async Task<IActionResult> UpdateQuantityOfProduct([FromRoute] int id, decimal quantity)
         {
             if (quantity == 0)
             {
@@ -279,7 +232,8 @@ namespace InventoryTrackApi.Controllers.Products
         }
 
         [HttpPut("Discount/{id}")]
-        public async Task<IActionResult> UpdateDiscountOfProduct(int id, decimal discount)
+        //[Authorize]
+        public async Task<IActionResult> UpdateDiscountOfProduct([FromRoute] int id, decimal discount)
         {
             if (discount == 0)
             {
@@ -308,7 +262,8 @@ namespace InventoryTrackApi.Controllers.Products
 
         // Delete a product
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        //[Authorize]
+        public async Task<IActionResult> DeleteProduct([FromRoute] int id)
         {
             await _productService.DeleteProductAsync(id);
             return NoContent();
@@ -316,6 +271,7 @@ namespace InventoryTrackApi.Controllers.Products
 
         // Get product prices by ID
         [HttpGet("{id}/prices")]
+        //[Authorize]
         public async Task<ActionResult<Dictionary<string, decimal>>> GetProductPrices(int id, string priceType)
         {
             try
@@ -341,6 +297,7 @@ namespace InventoryTrackApi.Controllers.Products
         }
 
         [HttpGet("countBarCode")]
+        //[Authorize]
         public async Task<ActionResult<int>> GetProductCount([FromQuery] string barCode)
         {
             try
@@ -363,6 +320,7 @@ namespace InventoryTrackApi.Controllers.Products
         }
 
         [HttpGet("count")]
+        //[Authorize]
         public async Task<ActionResult<int>> GetSaleCount()
         {
             try
@@ -377,6 +335,7 @@ namespace InventoryTrackApi.Controllers.Products
         }
 
         [HttpGet("ProductsDateRange")]
+        //[Authorize]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetPagedSalesByDateRangeAsync(
                 [FromQuery] string startDate, [FromQuery] string endDate)
         {

@@ -1,4 +1,5 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -12,11 +13,13 @@ namespace InventoryTrackApi.Controllers.Taxes
     {
         private readonly TaxService _taxService;
         private readonly ILogger<TaxController> _logger;
+        private readonly IMapper _mapper;
 
-        public TaxController(TaxService taxService, ILogger<TaxController> logger)
+        public TaxController(TaxService taxService, ILogger<TaxController> logger, IMapper mapper)
         {
             _taxService = taxService ?? throw new ArgumentNullException(nameof(taxService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         //GetPaged Taxes
@@ -28,12 +31,12 @@ namespace InventoryTrackApi.Controllers.Taxes
         }
 
         //// Get product by Name
-        [HttpGet("ByName/{name}")]
-        public async Task<ActionResult<TaxDTO>> GetProductByName(decimal name)
+        [HttpGet("Rate/{Tax}")]
+        public async Task<ActionResult<TaxDTO>> GetTaxByRate(decimal Tax)
         {
             try
             {
-                var tax = await _taxService.GetTaxByNameAsync(name);
+                var tax = await _taxService.GetTaxByRateAsync(Tax);
                 return Ok(tax);
             }
             catch (KeyNotFoundException ex)
@@ -42,14 +45,14 @@ namespace InventoryTrackApi.Controllers.Taxes
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving tax by name");
+                _logger.LogError(ex, "Error retrieving Tax by Rate");
                 return StatusCode(500, "Internal server error");
             }
         }
 
         //Get Taxe By ID
         [HttpGet("{id}")]
-        public async Task<ActionResult<TaxDTO>> GetTaxe(int id)
+        public async Task<ActionResult<TaxDTO>> GetTax(int id)
         {
             var taxe = await _taxService.GetTaxByIdAsync(id);
             if (taxe == null)
@@ -61,7 +64,7 @@ namespace InventoryTrackApi.Controllers.Taxes
 
         //Createa new Taxe
         [HttpPost]
-        public async Task<ActionResult<TaxDTO>> CreateTaxe(TaxDTO taxDto)
+        public async Task<ActionResult<TaxDTO>> CreateTax(TaxDTO taxDto)
         {
             if (!ModelState.IsValid)
             {
@@ -82,7 +85,7 @@ namespace InventoryTrackApi.Controllers.Taxes
                     TaxRate = tax.TaxRate
                 };
 
-                return CreatedAtAction(nameof(GetTaxe), new { id = tax.TaxId }, responseDto);
+                return CreatedAtAction(nameof(GetTax), new { id = tax.TaxId }, responseDto);
             }
             catch (Exception ex)
             {
@@ -93,32 +96,43 @@ namespace InventoryTrackApi.Controllers.Taxes
 
         //Update a Taxe
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTaxe(int id, TaxDTO taxDto)
+        //[Authorize]
+        public async Task<IActionResult> UpdateTax([FromRoute] int id, TaxDTO taxDto)
         {
+            _logger.LogInformation($"UpdateTax request received for ID: {id}");
+
             if (id != taxDto.TaxId)
             {
+                _logger.LogWarning($"Tax ID mismatch: Route ID {id} does not match DTO ID {taxDto.TaxId}");
                 return BadRequest("Tax ID mismatch.");
             }
 
-            var existingTax = await _taxService.GetTaxByIdAsync(id);
-            if (existingTax == null)
+            try
             {
-                return NotFound("Employee not found.");
+                var existingTax = await _taxService.GetTaxByIdAsync(id);
+                if (existingTax == null)
+                {
+                    _logger.LogWarning($"Tax with ID {id} not found");
+                    return NotFound("Tax not found.");
+                }
+
+                _logger.LogInformation($"Updating Tax with ID {id}");
+                var tax = _mapper.Map<Tax>(taxDto);
+                await _taxService.UpdateTaxAsync(tax);
+
+                _logger.LogInformation($"Tax with ID {id} successfully updated");
+                return Ok(tax);
             }
-
-            var tax = new Tax
+            catch (Exception ex)
             {
-                TaxId = id,
-                TaxRate = taxDto.TaxRate
-            };
-
-            await _taxService.UpdateTaxAsync(tax);
-            return NoContent();
+                _logger.LogError(ex, $"Error occurred while updating Tax with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         //Delete a Taxe
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTaxe(int id)
+        public async Task<IActionResult> DeleteTax(int id)
         {
             await _taxService.DeleteTaxAsync(id);
             return NoContent();

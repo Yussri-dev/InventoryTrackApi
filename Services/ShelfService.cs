@@ -35,6 +35,12 @@ namespace InventoryTrackApi.Services
         //create a new Shelf
         public async Task CreateShelfAsync(Shelf shelf)
         {
+            bool exists = await _shelfRepository.ExistsAsync(p => p.Name == shelf.Name);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Shelf with the same Rate already exists.");
+            }
             await _shelfRepository.CreateAsync(shelf);
         }
 

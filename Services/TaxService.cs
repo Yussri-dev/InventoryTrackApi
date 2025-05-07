@@ -19,7 +19,7 @@ namespace InventoryTrackApi.Services
         }
 
         //Get a product by Name
-        public async Task<IEnumerable<Tax>> GetTaxByNameAsync(decimal taxe)
+        public async Task<IEnumerable<Tax>> GetTaxByRateAsync(decimal taxe)
         {
             //return await _productRepository.GetByNameAsync(p => EF.Functions.Like(p.Name, name));
             return await _taxRepository.GetByNameAsync(p => p.TaxRate.ToString().Contains(taxe.ToString()));
@@ -34,6 +34,13 @@ namespace InventoryTrackApi.Services
         // Create a new tax
         public async Task CreateTaxAsync(Tax tax)
         {
+            bool exists = await _taxRepository.ExistsAsync(p => p.TaxRate == tax.TaxRate);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Tax with the same Rate already exists.");
+            }
+
             await _taxRepository.CreateAsync(tax);
         }
 

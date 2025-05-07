@@ -14,7 +14,7 @@ namespace InventoryTrackApi.DTOs
         public string Land { get; set; } = string.Empty;
         public string ModifiedBy { get; set; }
         public bool IsActivated { get; set; }
-
+        public int SaasClientId { get; set; }
 
     }
 }

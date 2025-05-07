@@ -1,5 +1,7 @@
-﻿using InventoryTrackApi.Models;
+﻿using InventoryTrackApi.DTOs;
+using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
+using System.Linq.Expressions;
 
 namespace InventoryTrackApi.Services
 {
@@ -18,6 +20,35 @@ namespace InventoryTrackApi.Services
             return await _salePaymentRepository.GetAllAsync(pageNumber, pageSize);
         }
 
+        //get paged salePayment 
+        public async Task<IEnumerable<SalePaymentDTO>> GetPagedSalePaymentsByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            // Define the filter using the entity type (SalePayment)
+            Expression<Func<SalePayment, bool>> dateFilter = SalePayment =>
+                SalePayment.DateCreated.Date >= startDate.Date && SalePayment.DateCreated.Date <= endDate.Date;
+
+            // Fetch SalePayment entities from the repository
+            var SalePayments = await _salePaymentRepository.GetByConditionAsync(dateFilter);
+
+            // Fetch Product entities for the SalePayments
+            var productIds = SalePayments.Select(s => s.SaleId).Distinct();
+            var products = await _salePaymentRepository.GetByConditionAsync(p => productIds.Contains(p.SaleId));
+
+            // Create a dictionary for quick lookup of Product by ProductId
+            var productDictionary = products.ToDictionary(p => p.SaleId, p => p);
+
+            // Map SalePayment entities to SalePaymentDTO objects
+            var SalePaymentDTOs = SalePayments.Select(s => new SalePaymentDTO
+            {
+                SalePaymentId = s.SalePaymentId,
+                SaleId = s.SaleId,
+                PaymentDate = s.PaymentDate,
+                Amount = s.Amount,
+                PaymentType = s.PaymentType,
+            });
+
+            return SalePaymentDTOs;
+        }
         // Get a salePayment by ID
         public async Task<SalePayment> GetSalePaymentByIdAsync(int id)
         {

@@ -18,10 +18,11 @@ namespace InventoryTrackApi.Services
         }
 
         // Add a new user
-        public async Task<UserDTO> CreateUserAsync(UserDTO userDto, string password)
+        public async Task<UserDTO> CreateUserAsync(UserDTO userDto)
         {
             var user = _mapper.Map<User>(userDto);
-            user.PasswordHash = HashPassword(password); 
+
+            user.PasswordHash = HashPassword(userDto.PasswordHash);
 
             await _userRepository.CreateAsync(user);
             return _mapper.Map<UserDTO>(user);
@@ -54,6 +55,26 @@ namespace InventoryTrackApi.Services
         {
             return BCrypt.Net.BCrypt.Verify(enteredPassword, hashedPassword);
         }
+
+        //Update an existing product
+        public async Task UpdateUserAsync(User user)
+        {
+            var existingUser = await _userRepository.GetByIdAsync(user.Id);
+
+            if (existingUser == null)
+            {
+                throw new InvalidOperationException("User Not Found");
+            }
+            existingUser.Id = user.Id;
+            existingUser.Username = user.Username;
+            //existingUser.PasswordHash = user.PasswordHash;
+            existingUser.Email = user.Email;
+            existingUser.Role = user.Role;
+            existingUser.SaasClientId = user.SaasClientId;
+
+            await _userRepository.UpdateAsync(existingUser);
+        }
+
 
         // Helper function to hash passwords
         private string HashPassword(string password)

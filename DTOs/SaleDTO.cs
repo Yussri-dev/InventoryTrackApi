@@ -15,5 +15,6 @@ namespace InventoryTrackApi.DTOs
         public decimal OutstandingBalance => TotalAmount - AmountPaid;
         public decimal DiscountPercentage { get; set; } = decimal.Zero; // Field for discount
         public string? CustomerName { get; set; }
+        public int SaasClientId { get; set; }
     }
 }

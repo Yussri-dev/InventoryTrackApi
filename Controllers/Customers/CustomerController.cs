@@ -12,7 +12,7 @@ namespace InventoryTrackApi.Controllers.Customers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    ////[Authorize]
     public class CustomerController : ControllerBase
     {
         private readonly CustomerService _customerService;
@@ -27,16 +27,16 @@ namespace InventoryTrackApi.Controllers.Customers
 
         [HttpGet]
         //[AllowAnonymous]
-        [Authorize]
-        public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
+        ////[Authorize]
+        public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetPagedCustomers(int pageNumber = 1, int pageSize = 10)
         {
             var customers = await _customerService.GetPagedCustomersAsync(pageNumber, pageSize);
             return Ok(customers);
         }
 
         [HttpGet("{id}")]
-        [Authorize]
-        public async Task<ActionResult<CustomerDTO>> GetCustomer(int id)
+        ////[Authorize]
+        public async Task<ActionResult<CustomerDTO>> GetCustomer([FromRoute]int id)
         {
             var customer = await _customerService.GetCustomerByIdAsync(id);
             if (customer == null)
@@ -47,111 +47,71 @@ namespace InventoryTrackApi.Controllers.Customers
         }
 
         [HttpPost]
-        [Authorize]
+        ////[Authorize]
         public async Task<ActionResult<CustomerDTO>> CreateCustomer(CustomerDTO customerDto)
         {
+            _logger.LogInformation($"Create Customer request for Customer: {customerDto}");
+
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Invalid model state for Creating Customer.");
-                return ValidationProblem(ModelState);
+                _logger.LogWarning("Invalid model state for creating Customer");
             }
             try
             {
                 var customer = _mapper.Map<Customer>(customerDto);
                 await _customerService.CreateCustomerAsync(customer);
 
-                var respondDto = _mapper.Map<CustomerDTO>(customer);
-                return CreatedAtAction(nameof(GetCustomer), new { id = customer.CustomerId }, respondDto);
+                var responseDto = _mapper.Map<CustomerDTO>(customer);
+                return CreatedAtAction(nameof(GetCustomer), new { id = customer.CustomerId }, responseDto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error Creating Customer: {ex.Message}");
+                _logger.LogError(ex, $"Error creating Customer : {ex.Message}");
                 return Problem(
-                    title: "An error occurred while creating the Customer.",
+                    title: "An error occured while creating the customer",
                     detail: ex.Message,
                     statusCode: StatusCodes.Status500InternalServerError
-                );
+                    );
+                throw;
             }
         }
 
-
-        /*
-        [HttpPost]
-        public async Task<ActionResult<CustomerDTO>> CreateCustomer(CustomerDTO customerDto)
+       
+        [HttpPut("{id}")]
+        ////[Authorize]
+        public async Task<IActionResult> UpdateCustomer([FromRoute] int id, CustomerDTO customerDto)
         {
-            if (!ModelState.IsValid)
+            _logger.LogInformation($"Update Customer request received for Id : {id}");
+            if (id != customerDto.CustomerId)
             {
-                return BadRequest(ModelState);
+                _logger.LogWarning($"Customer ID mismatch : Route Id {id} does not match DTO ID {customerDto.CustomerId}");
+                return BadRequest("Customer ID mismatch");
             }
             try
             {
-                var customer = new Customer
+                var existingCustomer = await _customerService.GetCustomerByIdAsync(id);
+                if (existingCustomer == null)
                 {
-                    Name = customerDto.Name,
-                    CreditLimit = customerDto.CreditLimit,
-                    AccountBalance = customerDto.AccountBalance,
-                    PhoneNumber1 = customerDto.PhoneNumber1,
-                    PhoneNumber2 = customerDto.PhoneNumber2,
-                    Email = customerDto.Email,
-                    Adresse = customerDto.Adresse,
-                    City = customerDto.City,
-                    Land = customerDto.Land,
-                    IsActivate = customerDto.IsActivate,
-                    CreatedBy = customerDto.CreatedBy,
-                    DateCreated = customerDto.DateCreated
-                };
-                await _customerService.CreateCustomerAsync(customer);
-                var responseDto = new CustomerDTO
-                {
-                    Name = customer.Name,
-                    CreditLimit = customer.CreditLimit,
-                    AccountBalance = customer.AccountBalance,
-                    PhoneNumber1 = customer.PhoneNumber1,
-                    PhoneNumber2 = customer.PhoneNumber2,
-                    Email = customer.Email,
-                    Adresse = customer.Adresse,
-                    City = customer.City,
-                    Land = customer.Land,
-                    IsActivate = customer.IsActivate,
-                    CreatedBy = customer.CreatedBy,
-                    DateCreated = customer.DateCreated
-                };
-                return CreatedAtAction(nameof(GetCustomer), new { id = customer.CustomerId }, customerDto);
+                    _logger.LogWarning($"Customer with ID : {id} not found");
+                    return NotFound("Customer Not Found");
+                }
+
+                _logger.LogInformation($"Updating customer with Id {id}");
+                var customer = _mapper.Map<Customer>(customerDto);
+                await _customerService.UpdateCustomerAsync(customer);
+
+                _logger.LogInformation($"customer with ID {id} successfully updated");
+                return Ok(customer);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating customer");
-                return StatusCode(500, $"Internal Server Error : {ex}");
+                _logger.LogError(ex, $"Error occurred while updating Customer with ID {id}");
+                return StatusCode(500, "Internal server error.");
             }
-
-
-
-        }
-        */
-
-        [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateCustomer([FromRoute] int id, CustomerDTO customerDto)
-        {
-            if (id != customerDto.CustomerId)
-            {
-                return BadRequest("Customer ID mismatch.");
-            }
-
-            var existingCustomer = await _customerService.GetCustomerByIdAsync(id);
-            if (existingCustomer == null)
-            {
-                return NotFound("Customer not found.");
-            }
-
-            var customer = _mapper.Map<Customer>(customerDto);
-            await _customerService.UpdateCustomerAsync(customer);
-
-            return Ok(customer);
         }
 
         [HttpPatch("{id}")]
-        [Authorize]
+        ////[Authorize]
         public async Task<IActionResult> PatchCustomer([FromRoute] int id, [FromBody] JsonPatchDocument<CustomerDTO> patchCustomer)
         {
             if (patchCustomer == null)
@@ -178,14 +138,12 @@ namespace InventoryTrackApi.Controllers.Customers
 
             await _customerService.UpdateCustomerAsync(existingCustomer);
 
-            //return Ok(_mapper.Map<CustomerDTO>(existingCustomer));
-            return NoContent();
-
+            return Ok(customerDto);
         }
 
         [HttpPut("CreditLimit/{id}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateCustomerCreditLimit(int id, decimal amount, decimal amountPaid, string validate)
+        ////[Authorize]
+        public async Task<IActionResult> UpdateCustomerCreditLimit([FromRoute]int id, decimal amount, decimal amountPaid, string validate)
         {
             //if (amount == 0)
             //{
@@ -211,8 +169,8 @@ namespace InventoryTrackApi.Controllers.Customers
         }
 
         [HttpPut("AccountBalance")]
-        [Authorize]
-        public async Task<IActionResult> UpdateAccountBalance(int id, decimal amount)
+        ////[Authorize]
+        public async Task<IActionResult> UpdateAccountBalance([FromRoute] int id, decimal amount)
         {
             if (amount == 0)
             {
@@ -240,15 +198,15 @@ namespace InventoryTrackApi.Controllers.Customers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteCustomer(int id)
+        ////[Authorize]
+        public async Task<IActionResult> DeleteCustomer([FromRoute] int id)
         {
             await _customerService.DeleteCustomerAsync(id);
             return NoContent();
         }
 
-        [HttpGet("ByName/{name}")]
-        [Authorize]
+        [HttpGet("Name/{name}")]
+        ////[Authorize]
         public async Task<ActionResult<CustomerDTO>> GetCustomerByName(string name)
         {
             try
@@ -268,7 +226,7 @@ namespace InventoryTrackApi.Controllers.Customers
         }
 
         [HttpGet("Credit")]
-        [Authorize]
+        ////[Authorize]
         public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetSpecificCustomers()
         {
             var customers = await _customerService.GetSpecificCustomersAsync();

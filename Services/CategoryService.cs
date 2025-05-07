@@ -34,6 +34,13 @@ namespace InventoryTrackApi.Services
         // Create a new category
         public async Task CreateCategoryAsync(Category category)
         {
+            bool exists = await _categoryRepository.ExistsAsync(p => p.Name == category.Name);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Category with the same Rate already exists.");
+            }
+
             await _categoryRepository.CreateAsync(category);
         }
 

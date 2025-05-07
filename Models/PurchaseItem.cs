@@ -23,6 +23,13 @@ namespace InventoryTrackApi.Models
         public decimal Total { get; set; } = decimal.Zero;
         [DefaultValue("DateTime.Now")]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+
+        [Required]
+        public int SaasClientId { get; set; }
+
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
+
         [JsonIgnore]
         public virtual Purchase? Purchase { get; set; }
         [JsonIgnore]

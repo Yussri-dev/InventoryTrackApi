@@ -10,7 +10,7 @@ namespace InventoryTrackApi.Controllers.Locations
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class LocationController : ControllerBase
     {
         private readonly LocationService _locationService;
@@ -27,7 +27,7 @@ namespace InventoryTrackApi.Controllers.Locations
 
         //// Get Location by Name
         [HttpGet("Name/{name}")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<LineDTO>> GetLocationByName([FromRoute] string name)
         {
             try
@@ -49,7 +49,7 @@ namespace InventoryTrackApi.Controllers.Locations
 
         // Get paged locations
         [HttpGet]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<IEnumerable<LocationDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
         {
             _logger.LogInformation($"Get All Locations");
@@ -60,7 +60,7 @@ namespace InventoryTrackApi.Controllers.Locations
 
         // Get location by ID
         [HttpGet("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<LocationDTO>> GetLocation([FromRoute]int id)
         {
             _logger.LogInformation($"Get Location By Id : {id}");
@@ -75,7 +75,7 @@ namespace InventoryTrackApi.Controllers.Locations
 
         // Create a new location
         [HttpPost]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<LocationDTO>> CreateLocation(LocationDTO locationDto)
         {
             _logger.LogInformation($"CreateLocation request for Location: {locationDto}");
@@ -106,7 +106,7 @@ namespace InventoryTrackApi.Controllers.Locations
 
         // Update a location
         [HttpPut("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> UpdateLocation([FromRoute] int id, LocationDTO locationDto)
         {
             _logger.LogInformation($"UpdateLocation request received for Id : {id}");
@@ -140,7 +140,7 @@ namespace InventoryTrackApi.Controllers.Locations
 
         // Delete a location
         [HttpDelete("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> DeleteLocation([FromRoute]int id)
         {
             await _locationService.DeleteLocationASync(id);

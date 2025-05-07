@@ -20,5 +20,9 @@ namespace InventoryTrackApi.Models
         public int ProductId { get; set; }
         [JsonIgnore]
         public virtual Product? Product { get; set; }
+
+        public decimal PurchasePrice { get; set; } = 0; 
+
+        public decimal SalePrice { get; set; } = 0;
     }
 }

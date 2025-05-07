@@ -66,17 +66,26 @@ namespace InventoryTrackApi.Services
         }
 
         // Create a new product
+
         public async Task CreateProductAsync(Product product)
         {
+            bool exists = await _productRepository.ExistsAsync(p =>
+                p.Barcode == product.Barcode || p.Name == product.Name);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Product with the same barcode or name already exists.");
+            }
+
             await _productRepository.CreateAsync(product);
         }
 
-        // Update an existing product
+        //Update an existing product
         public async Task UpdateProductAsync(Product product)
         {
             var existingProduct = await _productRepository.GetByIdAsync(product.ProductId);
 
-            if (existingProduct != null)
+            if (existingProduct == null)
             {
                 throw new InvalidOperationException("Product Not Found");
             }
@@ -101,6 +110,7 @@ namespace InventoryTrackApi.Services
             await _productRepository.UpdateAsync(existingProduct);
         }
 
+        
         //Update Quantity In Products
         public async Task<Product> UpdateProductQuantityAsync(int id, decimal quantityUpdated)
         {

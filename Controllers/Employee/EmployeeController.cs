@@ -10,7 +10,7 @@ namespace InventoryTrackApi.Controllers.Employee
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class EmployeeController : ControllerBase
     {
         private readonly EmployeeService _employeeService;
@@ -26,7 +26,7 @@ namespace InventoryTrackApi.Controllers.Employee
 
         // Get paged employees
         [HttpGet]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetPagedEmployees(int pageNumber = 1, int pageSize = 10)
         {
             var pagedEmployees = await _employeeService.GetPagedEmployeeAsync(pageNumber, pageSize);
@@ -35,7 +35,7 @@ namespace InventoryTrackApi.Controllers.Employee
 
         // Get employee by ID
         [HttpGet("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<EmployeeDTO>> GetEmployee([FromRoute]int id)
         {
             var employee = await _employeeService.GetEmployeeByIdAsync(id);
@@ -46,9 +46,31 @@ namespace InventoryTrackApi.Controllers.Employee
             return Ok(employee);
         }
 
+        //// Get product by Name
+        [HttpGet("Name/{name}")]
+        //[Authorize]
+        public async Task<ActionResult<EmployeeDTO>> GetEmployeeByName([FromRoute] string name)
+        {
+            try
+            {
+                var employee = await _employeeService.GetEmployeeByNameAsync(name);
+                return Ok(employee);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving Employee name");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
         // Create a new employee
         [HttpPost]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<EmployeeDTO>> CreateEmployee(EmployeeDTO employeeDto)
         {
             if (!ModelState.IsValid)
@@ -117,7 +139,7 @@ namespace InventoryTrackApi.Controllers.Employee
 
         // Update an existing employee
         [HttpPut("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> UpdateEmployee([FromRoute]int id, EmployeeDTO employeeDto)
         {
             if (id != employeeDto.EmployeeId)
@@ -138,7 +160,7 @@ namespace InventoryTrackApi.Controllers.Employee
 
         // Delete an employee
         [HttpDelete("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             var existingEmployee = await _employeeService.GetEmployeeByIdAsync(id);

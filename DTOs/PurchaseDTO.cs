@@ -14,6 +14,7 @@ namespace InventoryTrackApi.DTOs
         public decimal AmountPaid { get; set; } = 0m;
         public decimal OutstandingBalance => TotalAmount - AmountPaid;
         public string? SupplierName { get; set; }
-        
+
+        public int SaasClientId { get; set; }
     }
 }

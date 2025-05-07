@@ -47,7 +47,7 @@ namespace InventoryTrackApi.Services
             existingCashTransaction.Amount = cashTransaction.Amount;
             existingCashTransaction.TransactionTime = cashTransaction.TransactionTime;
             existingCashTransaction.Description = cashTransaction.Description;
-
+            existingCashTransaction.SaasClientId = cashTransaction.SaasClientId;
             //Call the repository to update the exissting
             await _cashTransactionRepository.UpdateAsync(existingCashTransaction);
         }

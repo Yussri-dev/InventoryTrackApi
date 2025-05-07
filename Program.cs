@@ -1,5 +1,6 @@
 using InventoryTrackApi.Data;
 using InventoryTrackApi.Middlewares;
+using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
 using InventoryTrackApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -32,18 +33,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //-------------------------------------------
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ProductBatchService>();
+
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<LineService>();
 builder.Services.AddScoped<ShelfService>();
 builder.Services.AddScoped<TaxService>();
 builder.Services.AddScoped<UnitService>();
 builder.Services.AddScoped<LocationService>();
+
 builder.Services.AddScoped<CashRegisterService>();
 builder.Services.AddScoped<CashShiftService>();
 builder.Services.AddScoped<CashTransactionService>();
+
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<SupplierService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<SaasClientService>();
+
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<InventoryMouvementService>();
 
@@ -58,16 +65,12 @@ builder.Services.AddScoped<SalePaymentService>();
 builder.Services.AddScoped<ReturnService>();
 builder.Services.AddScoped<ReturnItemService>();
 
-builder.Services.AddScoped<UserService>();
 
 
 
 //builder.Services.AddScoped<ReturnPaymentService>();
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
-
-
 
 builder.Services.AddLogging();
 
@@ -76,6 +79,17 @@ builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.AddControllers();
 builder.Services.AddControllers().AddNewtonsoftJson();
 
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:7119") // Blazor WebAssembly app URL
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -104,7 +118,7 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.ListenAnyIP(5000); // HTTP
-    serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // HTTPS
+    //serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // HTTPS
 });
 
 

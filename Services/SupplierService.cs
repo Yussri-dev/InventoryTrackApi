@@ -27,6 +27,12 @@ namespace InventoryTrackApi.Services
         //Create a new Supplier
         public async Task CreateSupplierAsync(Supplier supplier)
         {
+            bool exists = await _supplierRepository.ExistsAsync(p => p.Name == supplier.Name);
+
+            if (exists)
+            {
+                throw new InvalidOperationException("Supplier with the same Rate already exists.");
+            }
             await _supplierRepository.CreateAsync(supplier);
         }
 

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace InventoryTrackApi.Models
 {
@@ -44,7 +45,13 @@ namespace InventoryTrackApi.Models
         public DateTime DateModified { get; set; } = DateTime.Now;
 
         public bool IsActivate { get; set; } = true;
+        [Required]
+        public int SaasClientId { get; set; }
 
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<Purchase> Purchases { get; set; }
     }
 }

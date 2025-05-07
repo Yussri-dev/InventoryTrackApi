@@ -1,7 +1,9 @@
-﻿using InventoryTrackApi.DTOs;
+﻿using AutoMapper;
+using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,19 +11,25 @@ namespace InventoryTrackApi.Controllers.Purchases
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize]
     public class PurchaseItemController : ControllerBase
     {
         private readonly PurchaseItemService _purchaseItemService;
         private readonly ILogger<PurchaseItemController> _logger;
+        private readonly IMapper _mapper;
 
-        public PurchaseItemController(PurchaseItemService purchaseItemService, ILogger<PurchaseItemController> logger)
+        public PurchaseItemController(PurchaseItemService purchaseItemService, 
+            ILogger<PurchaseItemController> logger,
+            IMapper mapper)
         {
-            _purchaseItemService = purchaseItemService;
-            _logger = logger;
+            _purchaseItemService = purchaseItemService?? throw new ArgumentNullException(nameof(purchaseItemService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // Get paged purchaseItems
         [HttpGet]
+        //[Authorize]
         public async Task<ActionResult<IEnumerable<PurchaseItemDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
         {
             var purchaseItems = await _purchaseItemService.GetPagedPurchaseItemsAsync(pageNumber, pageSize);
@@ -30,6 +38,7 @@ namespace InventoryTrackApi.Controllers.Purchases
 
         // Get purchaseItem by ID
         [HttpGet("{id}")]
+        //[Authorize]
         public async Task<ActionResult<PurchaseItemDTO>> GetPurchaseItem(int id)
         {
             var purchaseItem = await _purchaseItemService.GetPurchaseItemByIdAsync(id);
@@ -42,6 +51,9 @@ namespace InventoryTrackApi.Controllers.Purchases
 
         // Create a new purchaseItem
         [HttpPost]
+        //[Authorize]
+
+        /*
         public async Task<ActionResult<PurchaseItemDTO>> CreatePurchaseItem(PurchaseItemDTO purchaseItemDto)
         {
             if (!ModelState.IsValid)
@@ -80,40 +92,74 @@ namespace InventoryTrackApi.Controllers.Purchases
             }
 
         }
+        */
 
         // Update a purchaseItem
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePurchaseItem(int id, PurchaseItemDTO purchaseItemDto)
+        //[Authorize]
+        public async Task<IActionResult> UpdatePurchaseItem([FromRoute] int id, PurchaseItemDTO purchaseItemDto)
         {
+            _logger.LogInformation($"Update PurchaseItem request received for Id : {id}");
             if (id != purchaseItemDto.PurchaseItemId)
             {
-                return BadRequest("Purchase Item ID mismatch.");
+                _logger.LogWarning($"PurchaseItem ID mismatch : Route Id {id} does not match DTO ID {purchaseItemDto.PurchaseItemId}");
+                return BadRequest("PurchaseItem ID mismatch");
             }
-
-            var existingPurchaseItem = await _purchaseItemService.GetPurchaseItemByIdAsync(id);
-            if (existingPurchaseItem == null)
+            try
             {
-                return NotFound("Purchase Item not found.");
+                var existingPurchaseItem = await _purchaseItemService.GetPurchaseItemByIdAsync(id);
+                if (existingPurchaseItem == null)
+                {
+                    _logger.LogWarning($"PurchaseItem with ID : {id} not fount");
+                    return NotFound("PurchaseItem Not Found");
+                }
+
+                _logger.LogInformation($"Updating purchaseItem with Id {id}");
+                var purchaseItem = _mapper.Map<PurchaseItem>(purchaseItemDto);
+                await _purchaseItemService.UpdatePurchaseItemAsync(purchaseItem);
+
+                _logger.LogInformation($"purchaseItem with ID {id} successfully updated");
+                return Ok(purchaseItem);
             }
-
-            var purchaseItem = new PurchaseItem
+            catch (Exception ex)
             {
-                PurchaseItemId = id,
-                PurchaseId = purchaseItemDto.PurchaseId,
-                ProductId = purchaseItemDto.ProductId,
-                Quantity = purchaseItemDto.Quantity,
-                Price = purchaseItemDto.Price,
-                Discount = purchaseItemDto.Discount,
-                TaxAmount = purchaseItemDto.TaxAmount,
-                Total = purchaseItemDto.Total
-            };
-
-            await _purchaseItemService.UpdatePurchaseItemAsync(purchaseItem);
-            return NoContent();
+                _logger.LogError(ex, $"Error occurred while updating PurchaseItem with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
+        
+        //public async Task<IActionResult> UpdatePurchaseItem(int id, PurchaseItemDTO purchaseItemDto)
+        //{
+        //    if (id != purchaseItemDto.PurchaseItemId)
+        //    {
+        //        return BadRequest("Purchase Item ID mismatch.");
+        //    }
+
+        //    var existingPurchaseItem = await _purchaseItemService.GetPurchaseItemByIdAsync(id);
+        //    if (existingPurchaseItem == null)
+        //    {
+        //        return NotFound("Purchase Item not found.");
+        //    }
+
+        //    var purchaseItem = new PurchaseItem
+        //    {
+        //        PurchaseItemId = id,
+        //        PurchaseId = purchaseItemDto.PurchaseId,
+        //        ProductId = purchaseItemDto.ProductId,
+        //        Quantity = purchaseItemDto.Quantity,
+        //        Price = purchaseItemDto.Price,
+        //        Discount = purchaseItemDto.Discount,
+        //        TaxAmount = purchaseItemDto.TaxAmount,
+        //        Total = purchaseItemDto.Total
+        //    };
+
+        //    await _purchaseItemService.UpdatePurchaseItemAsync(purchaseItem);
+        //    return NoContent();
+        //}
 
         // Delete a purchaseItem
         [HttpDelete("{id}")]
+        //[Authorize]
         public async Task<IActionResult> DeletePurchaseItem(int id)
         {
             await _purchaseItemService.DeletePurchaseItemAsync(id);
@@ -121,7 +167,8 @@ namespace InventoryTrackApi.Controllers.Purchases
         }
 
         [HttpGet("PurchaseItemsDateRange")]
-        public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedPurchaseItemsByDateRangeAsync(
+        //[Authorize]
+        public async Task<ActionResult<IEnumerable<PurchaseItemDTO>>> GetPagedPurchaseItemsByDateRangeAsync(
             [FromQuery] string startDate, [FromQuery] string endDate)
         {
             if (!DateHelper.TryParseDate(startDate, out var startPurchasesDate))

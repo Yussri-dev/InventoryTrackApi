@@ -93,6 +93,7 @@ namespace InventoryTrackApi.Services
         public async Task UpdateSaleItemAsync(SaleItem saleItem)
         {
             var existingSaleItem = await _saleItemRepository.GetByIdAsync(saleItem.SaleItemId);
+            
             if (existingSaleItem == null)
             {
                 throw new InvalidOperationException("Sale Item Not Found");
@@ -104,6 +105,7 @@ namespace InventoryTrackApi.Services
             existingSaleItem.Discount = saleItem.Discount;
             existingSaleItem.TaxAmount = saleItem.TaxAmount;
             existingSaleItem.Total = saleItem.Total;
+            existingSaleItem.SaasClientId = saleItem.SaasClientId;
 
             await _saleItemRepository.UpdateAsync(existingSaleItem);
         }

@@ -13,6 +13,7 @@ namespace InventoryTrackApi.Repositories
         Task<int> CountAsync(Expression<Func<T, bool>> predicate);
         Task<int> CountAsync();
         Task<decimal> CalculateSumAsync(Expression<Func<T, bool>> filter, Expression<Func<T, decimal>> selector);
+        Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
 
         #endregion
 

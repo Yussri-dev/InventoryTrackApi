@@ -30,8 +30,8 @@ namespace InventoryTrackApi.Controllers.Units
             return Ok(units);
         }
 
-        //// Get product by Name
-        [HttpGet("ByName/{name}")]
+        //// Get unit by Name
+        [HttpGet("Name/{name}")]
         public async Task<ActionResult<UnitDTO>> GetUnitByName(string name)
         {
             try
@@ -61,39 +61,7 @@ namespace InventoryTrackApi.Controllers.Units
             }
             return Ok(unit);
         }
-        /*
-         [HttpPost]
-        public async Task<ActionResult<UnitDTO>> CreateUnit(UnitDTO unitDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                var unit = new Unit
-                {
-                    Name = unitDto.Name,
-                };
-
-                await _unitService.CreateUnitAsync(unit);
-
-                var responseDto = new UnitDTO
-                {
-                    Name = unit.Name
-                };
-
-                return CreatedAtAction(nameof(GetUnit), new { id = unit.UnitId }, responseDto);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating employee");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-         */
+        
         // Create a new unit
         [HttpPost]
         public async Task<ActionResult<UnitDTO>> CreateUnit(UnitDTO unitDto)
@@ -121,44 +89,79 @@ namespace InventoryTrackApi.Controllers.Units
                 );
             }
         }
+
         // Update a unit
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUnit(int id, UnitDTO unitDto)
+        //[Authorize]
+        public async Task<IActionResult> UpdateUnit([FromRoute] int id, UnitDTO unitDto)
         {
+            _logger.LogInformation($"Update Unit request received for Id : {id}");
             if (id != unitDto.UnitId)
             {
-                return BadRequest("Unit ID mismatch.");
+                _logger.LogWarning($"Unit ID mismatch : Route Id {id} does not match DTO ID {unitDto.UnitId}");
+                return BadRequest("Unit ID mismatch");
             }
-
-            var existingEmployee = await _unitService.GetUnitByIdAsync(id);
-            if (existingEmployee == null)
+            try
             {
-                return NotFound("Unit not found.");
+                var existingUnit = await _unitService.GetUnitByIdAsync(id);
+                if (existingUnit == null)
+                {
+                    _logger.LogWarning($"Unit with ID : {id} not fount");
+                    return NotFound("Unit Not Found");
+                }
+
+                _logger.LogInformation($"Updating unit with Id {id}");
+                var unit = _mapper.Map<Unit>(unitDto);
+                await _unitService.UpdateUnitAsync(unit);
+
+                _logger.LogInformation($"unit with ID {id} successfully updated");
+                return Ok(unit);
             }
-
-            var purchase = _mapper.Map<Unit>(unitDto);
-            await _unitService.UpdateUnitAsync(purchase);
-            return NoContent();
-            //if (id != unitDto.UnitId)
-            //{
-            //    return BadRequest("Unit ID mismatch.");
-            //}
-
-            //var existingUnit = await _unitService.GetUnitByIdAsync(id);
-            //if (existingUnit == null)
-            //{
-            //    return NotFound("Unit not found.");
-            //}
-
-            //var unit = new Unit
-            //{
-            //    UnitId = id,
-            //    Name = unitDto.Name,
-            //};
-
-            //await _unitService.UpdateUnitAsync(unit);
-            //return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while updating Unit with ID {id}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
+
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> UpdateUnit(int id, UnitDTO unitDto)
+        //{
+        //    if (id != unitDto.UnitId)
+        //    {
+        //        return BadRequest("Unit ID mismatch.");
+        //    }
+
+        //    var existingEmployee = await _unitService.GetUnitByIdAsync(id);
+        //    if (existingEmployee == null)
+        //    {
+        //        return NotFound("Unit not found.");
+        //    }
+
+        //    var purchase = _mapper.Map<Unit>(unitDto);
+        //    await _unitService.UpdateUnitAsync(purchase);
+        //    return NoContent();
+        //    //if (id != unitDto.UnitId)
+        //    //{
+        //    //    return BadRequest("Unit ID mismatch.");
+        //    //}
+
+        //    //var existingUnit = await _unitService.GetUnitByIdAsync(id);
+        //    //if (existingUnit == null)
+        //    //{
+        //    //    return NotFound("Unit not found.");
+        //    //}
+
+        //    //var unit = new Unit
+        //    //{
+        //    //    UnitId = id,
+        //    //    Name = unitDto.Name,
+        //    //};
+
+        //    //await _unitService.UpdateUnitAsync(unit);
+        //    //return NoContent();
+        //}
 
         // Delete a unit
         [HttpDelete("{id}")]

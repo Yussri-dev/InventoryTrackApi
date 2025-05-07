@@ -47,6 +47,23 @@ namespace InventoryTrackApi.Services
             await _productBatchRepository.UpdateAsync(existingBatch);
         }
 
+        //Update Quantity In Products
+        public async Task<ProductBatch> UpdateProductBatchQuantityAsync(int id, decimal quantityUpdated)
+        {
+            var existingProduct = await _productBatchRepository.GetByIdAsync(id);
+
+            if (existingProduct == null)
+            {
+                throw new InvalidOperationException("Product Batch not found.");
+            }
+
+            existingProduct.Quantity += quantityUpdated;
+
+            await _productBatchRepository.UpdateAsync(existingProduct);
+
+            return existingProduct;
+        }
+
         //Delete a product Batch By Id
         public async Task DeleteProductBatchAsync(int id)
         {

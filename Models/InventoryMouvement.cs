@@ -41,6 +41,12 @@ namespace InventoryTrackApi.Models
         /// </summary>
         //[JsonIgnore]
         //public virtual Product? Product { get; set; }
+        [Required]
+        public int SaasClientId { get; set; }
+
+        [JsonIgnore]
+        public virtual SaasClient SaasClient { get; set; }
+
         public virtual ICollection<Product> Products { get; set; }
 
         [JsonIgnore]
