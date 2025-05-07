@@ -2,7 +2,7 @@ name: Deploy ASP.NET Core API to Azure
 
 on:
   push:
-    branches: [ main ]  # Adjust if your main branch has a different name
+    branches: [ master ]  # Adjust if your main branch has a different name
   workflow_dispatch:    # Allows you to run this workflow manually from the Actions tab
 
 jobs:
