@@ -124,6 +124,27 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 
 var app = builder.Build();
 
+if (app.Environment.IsProduction())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            var context = services.GetRequiredService<InventoryDbContext>();
+            context.Database.Migrate();
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Une erreur s'est produite lors de la migration de la base de données.");
+
+            if (app.Environment.IsDevelopment())
+                throw;
+        }
+    }
+}
+
 // Add the custom exception handling middleware
 app.UseMiddleware<ExceptionHandler>();
 // Configure the HTTP request pipeline.
