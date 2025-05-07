@@ -19,23 +19,28 @@ namespace InventoryTrackApi.Middlewares
             }
             catch (Exception ex)
             {
-                
+
                 Console.WriteLine($"Unhandled Exception: {ex.Message}");
-                await HandleExceptionAsync(context);
+                await HandleExceptionAsync(context, ex);
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context)
+        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
 
             var errorResponse = new
             {
-                message = "An internal server error occurred.\nPlease try again later."
+                message = "An internal server error occurred. Please try again later.",
+
+                // Optional: include details in development environment
+                detail = exception.Message // remove in production if exposing exception details is not safe
             };
 
-            return context.Response.WriteAsync(JsonConvert.SerializeObject(errorResponse));
+            var result = JsonConvert.SerializeObject(errorResponse);
+            return context.Response.WriteAsync(result);
         }
+
     }
 }
