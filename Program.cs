@@ -85,7 +85,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("https://localhost:7119") // Blazor WebAssembly app URL
+            policy.AllowAnyOrigin() // Blazor WebAssembly app URL
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
