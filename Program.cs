@@ -97,19 +97,6 @@ builder.Services.AddSwaggerGen();
 //enabling Authorization
 builder.Services.AddAuthorization();
 
-//builder.Services.AddDbContext<InventoryDbContext>(options =>
-//{
-//    options.UseInMemoryDatabase("InventoryTrackApiDB");
-
-//    //i ve used Query No Tracking To Avoid the Problem In Updating Data Entries In Db Context
-//    //options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-//});
-
-//builder.Services.AddDbContext<InventoryDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
-
 
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
@@ -158,6 +145,7 @@ if (app.Environment.IsProduction())
 
 // Add the custom exception handling middleware
 app.UseMiddleware<ExceptionHandler>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
