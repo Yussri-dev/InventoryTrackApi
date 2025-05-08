@@ -35,7 +35,7 @@ namespace InventoryTrackApi.Middlewares
                 message = "An internal server error occurred. Please try again later.",
 
                 // Optional: include details in development environment
-                detail = exception.Message // remove in production if exposing exception details is not safe
+                detail = exception.ToString() // remove in production if exposing exception details is not safe
             };
 
             var result = JsonConvert.SerializeObject(errorResponse);
