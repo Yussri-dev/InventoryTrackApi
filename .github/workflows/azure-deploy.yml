@@ -31,7 +31,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     steps:
-      - uses: actions/checkout@v3  # Need source code for migrations
+      - uses: actions/checkout@v3
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v3
         with:
@@ -45,9 +45,9 @@ jobs:
       - name: Apply database migrations
         run: |
           dotnet tool restore
-          dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
+          dotnet ef database update --project InventoryTrackApi
         env:
-          ASPNETCORE_ENVIRONMENT: Production
+          ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
