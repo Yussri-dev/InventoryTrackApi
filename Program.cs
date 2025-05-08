@@ -114,13 +114,18 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 
 
 
-// Explicitly configure Kestrel to listen on all network interfaces
+//// Explicitly configure Kestrel to listen on all network interfaces
+//builder.WebHost.ConfigureKestrel(serverOptions =>
+//{
+//    serverOptions.ListenAnyIP(5000); // HTTP
+//    //serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // HTTPS
+//});
+
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.ListenAnyIP(5000); // HTTP
-    //serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // HTTPS
+    serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // Uses dev cert
 });
-
 
 var app = builder.Build();
 
