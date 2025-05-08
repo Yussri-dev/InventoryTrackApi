@@ -20,6 +20,7 @@ jobs:
       - name: Install EF Core CLI
         run: |
           dotnet tool install --global dotnet-ef
+          dotnet tool restore
           export PATH="$PATH:$HOME/.dotnet/tools"
           dotnet ef --version
 
@@ -52,6 +53,7 @@ jobs:
       - name: Install EF Core CLI
         run: |
           dotnet tool install --global dotnet-ef
+          dotnet tool restore
           export PATH="$PATH:$HOME/.dotnet/tools"
           dotnet ef --version
 
