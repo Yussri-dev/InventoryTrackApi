@@ -20,7 +20,8 @@ jobs:
       - name: Install EF Core CLI
         run: |
           dotnet tool install --global dotnet-ef
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef --version
 
       - name: Build with dotnet
         run: dotnet build --configuration Release InventoryTrackApi.csproj
@@ -51,7 +52,8 @@ jobs:
       - name: Install EF Core CLI
         run: |
           dotnet tool install --global dotnet-ef
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef --version
 
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
@@ -59,7 +61,9 @@ jobs:
           name: .net-app
 
       - name: Apply database migrations
-        run: dotnet ef database update --project InventoryTrackApi.csproj
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef database update --project InventoryTrackApi.csproj
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
 
