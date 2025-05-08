@@ -105,15 +105,21 @@ builder.Services.AddAuthorization();
 //    //options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 //});
 
+//builder.Services.AddDbContext<InventoryDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+
+
+var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<InventoryDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddDbContext<InventoryDbContext>(options =>
     options.ConfigureWarnings(warnings =>
         warnings.Ignore(RelationalEventId.PendingModelChangesWarning)));
-
-
-
 //// Explicitly configure Kestrel to listen on all network interfaces
 //builder.WebHost.ConfigureKestrel(serverOptions =>
 //{
