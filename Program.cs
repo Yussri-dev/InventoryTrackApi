@@ -33,40 +33,7 @@ var builder = WebApplication.CreateBuilder(args);
 //        };
 //    });
 
-//-------------------------------------------
-builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<ProductBatchService>();
 
-builder.Services.AddScoped<CategoryService>();
-builder.Services.AddScoped<LineService>();
-builder.Services.AddScoped<ShelfService>();
-builder.Services.AddScoped<TaxService>();
-builder.Services.AddScoped<UnitService>();
-builder.Services.AddScoped<LocationService>();
-
-builder.Services.AddScoped<CashRegisterService>();
-builder.Services.AddScoped<CashShiftService>();
-builder.Services.AddScoped<CashTransactionService>();
-
-builder.Services.AddScoped<CustomerService>();
-builder.Services.AddScoped<EmployeeService>();
-builder.Services.AddScoped<SupplierService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<SaasClientService>();
-
-builder.Services.AddScoped<InventoryService>();
-builder.Services.AddScoped<InventoryMouvementService>();
-
-builder.Services.AddScoped<PurchaseService>();
-builder.Services.AddScoped<PurchaseItemService>();
-builder.Services.AddScoped<PurchasePaymentService>();
-
-builder.Services.AddScoped<SaleService>();
-builder.Services.AddScoped<SaleItemService>();
-builder.Services.AddScoped<SalePaymentService>();
-
-builder.Services.AddScoped<ReturnService>();
-builder.Services.AddScoped<ReturnItemService>();
 
 
 
@@ -93,7 +60,19 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Configuration de la session
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -166,6 +145,41 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"))
 // Injection des dépendances
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<ISessionService, SessionService>();
+//-------------------------------------------
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ProductBatchService>();
+
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<LineService>();
+builder.Services.AddScoped<ShelfService>();
+builder.Services.AddScoped<TaxService>();
+builder.Services.AddScoped<UnitService>();
+builder.Services.AddScoped<LocationService>();
+
+builder.Services.AddScoped<CashRegisterService>();
+builder.Services.AddScoped<CashShiftService>();
+builder.Services.AddScoped<CashTransactionService>();
+
+builder.Services.AddScoped<CustomerService>();
+builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddScoped<SupplierService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<SaasClientService>();
+
+builder.Services.AddScoped<InventoryService>();
+builder.Services.AddScoped<InventoryMouvementService>();
+
+builder.Services.AddScoped<PurchaseService>();
+builder.Services.AddScoped<PurchaseItemService>();
+builder.Services.AddScoped<PurchasePaymentService>();
+
+builder.Services.AddScoped<SaleService>();
+builder.Services.AddScoped<SaleItemService>();
+builder.Services.AddScoped<SalePaymentService>();
+
+builder.Services.AddScoped<ReturnService>();
+builder.Services.AddScoped<ReturnItemService>();
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
