@@ -17,21 +17,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-var key = Encoding.UTF8.GetBytes("My_Secret_Key_For_Inventory_Track_Api_My_Secret_Key_For_Inventory_Track_Api");
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true
-        };
-    });
+//var key = Encoding.UTF8.GetBytes("My_Secret_Key_For_Inventory_Track_Api_My_Secret_Key_For_Inventory_Track_Api");
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        options.RequireHttpsMetadata = false;
+//        options.SaveToken = true;
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuerSigningKey = true,
+//            IssuerSigningKey = new SymmetricSecurityKey(key),
+//            ValidateIssuer = false,
+//            ValidateAudience = false,
+//            ValidateLifetime = true
+//        };
+//    });
 
 //-------------------------------------------
 builder.Services.AddScoped<ProductService>();
