@@ -1,9 +1,12 @@
 using InventoryTrackApi.Data;
+using InventoryTrackApi.Identity;
 using InventoryTrackApi.Middlewares;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
 using InventoryTrackApi.Services;
+using InventoryTrackApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -107,12 +110,62 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 builder.Services.AddDbContext<InventoryDbContext>(options =>
     options.ConfigureWarnings(warnings =>
         warnings.Ignore(RelationalEventId.PendingModelChangesWarning)));
-//// Explicitly configure Kestrel to listen on all network interfaces
-//builder.WebHost.ConfigureKestrel(serverOptions =>
-//{
-//    serverOptions.ListenAnyIP(5000); // HTTP
-//    //serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // HTTPS
-//});
+
+// Configuration de Identity
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    // Options de configuration...
+})
+.AddEntityFrameworkStores<InventoryDbContext>()
+.AddDefaultTokenProviders();
+
+// Check if JWT configuration exists
+Console.WriteLine($"JWT Key: {builder.Configuration["Jwt:Key"]}");
+Console.WriteLine($"JWT Issuer: {builder.Configuration["Jwt:Issuer"]}");
+Console.WriteLine($"JWT Audience: {builder.Configuration["Jwt:Audience"]}");
+
+try
+{
+    // Configuration JWT using safe approach with hardcoded fallback
+    var jwtKey = builder.Configuration["Jwt:Key"] ?? "DefaultSecurityKeyWith32Characters!!!";
+    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "DefaultIssuer";
+    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "DefaultAudience";
+
+    Console.WriteLine("Using JWT Configuration:");
+    Console.WriteLine($"Key: {(string.IsNullOrEmpty(builder.Configuration["Jwt:Key"]) ? "Using default fallback key" : "Using configured key")}");
+    Console.WriteLine($"Issuer: {jwtIssuer}");
+    Console.WriteLine($"Audience: {jwtAudience}");
+
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error configuring JWT: {ex.Message}");
+    throw;
+}
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+// Injection des dépendances
+builder.Services.AddScoped<ITokenService, JwtTokenService>();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {

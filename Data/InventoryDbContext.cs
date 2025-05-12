@@ -1,10 +1,14 @@
 ﻿using InventoryTrackApi.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace InventoryTrackApi.Data
 {
-    public class InventoryDbContext : DbContext
+    public class InventoryDbContext : IdentityDbContext<IdentityUser>
+
+    //DbContext
     {
         public InventoryDbContext(DbContextOptions<InventoryDbContext> options)
             : base(options)
@@ -14,6 +18,8 @@ namespace InventoryTrackApi.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             #region Category, Location, Customer, Supplier
 
             // Ensuring unique names
