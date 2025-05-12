@@ -49,58 +49,59 @@ namespace InventoryTrackApi.Controllers
             return Ok(result);
         }
 
-        //public AuthController(UserService userService, IConfiguration configuration)
-        //{
-        //    _userService = userService?? throw new ArgumentNullException(nameof(userService));
-        //    _configuration = configuration?? throw new ArgumentNullException(nameof(configuration));
-        //}
+        /*
+        public AuthController(UserService userService, IConfiguration configuration)
+        {
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        }
 
-        //[HttpPost("login")]
-        //public async Task<IActionResult> Login([FromBody] UserDTO userDto)
-        //{
-        //    if (userDto == null || string.IsNullOrEmpty(userDto.Username) || string.IsNullOrEmpty(userDto.PasswordHash))
-        //    {
-        //        return BadRequest("Invalid request");
-        //    }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserDTO userDto)
+        {
+            if (userDto == null || string.IsNullOrEmpty(userDto.Username) || string.IsNullOrEmpty(userDto.PasswordHash))
+            {
+                return BadRequest("Invalid request");
+            }
 
-        //    // Get user by username from UserService
-        //    var user = await _userService.GetUserByUsernameAsync(userDto.Username);
-        //    if (user == null)
-        //        return Unauthorized("Invalid username or password");
+            // Get user by username from UserService
+            var user = await _userService.GetUserByUsernameAsync(userDto.Username);
+            if (user == null)
+                return Unauthorized("Invalid username or password");
 
-        //    // Verify password using UserService
-        //    if (!_userService.VerifyPassword(user.PasswordHash, userDto.PasswordHash))
-        //        return Unauthorized("Invalid username or password");
+            // Verify password using UserService
+            if (!_userService.VerifyPassword(user.PasswordHash, userDto.PasswordHash))
+                return Unauthorized("Invalid username or password");
 
-        //    // Generate JWT token
-        //    var jwtSettings = _configuration.GetSection("JwtSettings");
-        //    var key = Encoding.UTF8.GetBytes(jwtSettings["JwtSecretKey"]);
+            // Generate JWT token
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var key = Encoding.UTF8.GetBytes(jwtSettings["JwtSecretKey"]);
 
-        //    if (key.Length < 16)
-        //    {
-        //        return StatusCode(500, "JWT secret key is too short. It must be at least 128 bits (16 bytes).");
-        //    }
+            if (key.Length < 16)
+            {
+                return StatusCode(500, "JWT secret key is too short. It must be at least 128 bits (16 bytes).");
+            }
 
-        //    var tokenHandler = new JwtSecurityTokenHandler();
-        //    var tokenDescriptor = new SecurityTokenDescriptor
-        //    {
-        //        Subject = new ClaimsIdentity(new[]
-        //        {
-        //            new Claim(ClaimTypes.Name, user.Username),
-        //            new Claim(ClaimTypes.Role, user.Role)
-        //        }),
-        //        //Expires = DateTime.UtcNow.AddHours(1),
-        //        Expires = DateTime.UtcNow.AddDays(1),
-        //        SigningCredentials = new SigningCredentials(
-        //            new SymmetricSecurityKey(key),
-        //            SecurityAlgorithms.HmacSha256Signature
-        //        )
-        //    };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Role, user.Role)
+                }),
+                //Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.AddDays(1),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                )
+            };
 
-        //    var token = tokenHandler.CreateToken(tokenDescriptor);
-        //    var tokenString = tokenHandler.WriteToken(token);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
 
-        //    return Ok(tokenString);
-        //}
+            return Ok(tokenString);
+        }*/
     }
 }
