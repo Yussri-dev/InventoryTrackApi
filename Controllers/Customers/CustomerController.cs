@@ -34,6 +34,21 @@ namespace InventoryTrackApi.Controllers.Customers
             return Ok(customers);
         }
 
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetCustomerCount()
+        {
+            try
+            {
+                int count = await _customerService.CountCustomersAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
         [HttpGet("{id}")]
         ////[Authorize]
         public async Task<ActionResult<CustomerDTO>> GetCustomer([FromRoute]int id)

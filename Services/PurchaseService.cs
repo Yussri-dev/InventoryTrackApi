@@ -10,20 +10,37 @@ namespace InventoryTrackApi.Services
     {
         private readonly IGenericRepository<Purchase> _purchaseRepository;
         private readonly IGenericRepository<Supplier> _supplierRepository;
+        private readonly IGenericRepository<PurchaseItem> _purchaseItemRepository;
+        private readonly IGenericRepository<Product> _productRepository;
         private readonly IMapper _mapper;
 
         // Constructor to inject the repository
-        public PurchaseService(IGenericRepository<Purchase> purchaseRepository,
-            IGenericRepository<Supplier> supplierRepository, IMapper mapper)
+        public PurchaseService(
+            IGenericRepository<Purchase> purchaseRepository,
+            IGenericRepository<Supplier> supplierRepository,
+            IGenericRepository<PurchaseItem> purchaseItemRepository,
+            IGenericRepository<Product> productRepository,
+            IMapper mapper)
         {
             _purchaseRepository = purchaseRepository;
             _supplierRepository = supplierRepository;
+            _productRepository = productRepository;
+            _purchaseItemRepository = purchaseItemRepository;
             _mapper = mapper;
         }
         // Get all purchases with pagination
         public async Task<IEnumerable<Purchase>> GetPagedPurchasesAsync(int pageNumber, int pageSize)
         {
             return await _purchaseRepository.GetAllAsync(pageNumber, pageSize);
+        }
+
+        //Get Sum Purchase
+        public async Task<decimal> GetSumByPeriodAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _purchaseRepository.GetSumByPeriodAsync(
+                sale => sale.PurchaseDate >= startDate && sale.PurchaseDate <= endDate,
+                sale => sale.TotalAmount
+            );
         }
 
         // Get a purchase by ID
@@ -79,6 +96,191 @@ namespace InventoryTrackApi.Services
             return await _purchaseRepository.CountAsync();
         }
 
+        public async Task<List<PurchaseFlatDTO>> GetAllPurchaseFlatAsync()
+        {
+            var purchases = await _purchaseRepository.GetAllAsync();
+            var result = new List<PurchaseFlatDTO>();
+
+            foreach (var purchase in purchases)
+            {
+                var purchaseItems = await _purchaseItemRepository.GetByConditionAsync(
+                    pi => pi.PurchaseId == purchase.PurchaseId
+                );
+
+                foreach (var item in purchaseItems)
+                {
+                    var product = await _productRepository.GetByIdAsync(item.ProductId);
+
+                    result.Add(new PurchaseFlatDTO
+                    {
+                        // Purchase info
+                        PurchaseId = purchase.PurchaseId,
+                        PurchaseDate = purchase.PurchaseDate,
+                        SupplierId = purchase.SupplierId,
+                        SupplierName = purchase.Supplier?.Name,
+                        //EmployeeId = purchase.EmployeeId,
+                        //TvaAmount = purchase.TvaAmount,
+                        //TotalAmount = purchase.TotalAmount,
+                        //AmountPaid = purchase.AmountPaid,
+
+                        // Item info
+                        //PurchaseItemId = item.PurchaseItemId,
+                        PurchaseItemId = item.PurchaseItemId,
+                        Quantity = item.Quantity,
+                        Price = item.Price,
+                        Discount = item.Discount,
+                        TaxAmount = item.TaxAmount,
+                        LineTotal = item.Total,
+
+                        // Product info
+                        ProductId = product.ProductId,
+                        ProductName = product.Name,
+                        PurchasePrice = product.PurchasePrice,
+                        SalePrice1 = product.SalePrice1,
+                        SalePrice2 = product.SalePrice2,
+                        SalePrice3 = product.SalePrice3,
+                        Barcode = product.Barcode,
+                        QuantityStock = product.QuantityStock,
+                        QuantityPack = product.QuantityPack
+                    });
+                }
+            }
+
+            return result;
+        }
+
+        //public async Task<List<PurchaseDetailDTO>> GetPurchaseDetailsAsync()
+        //{
+        //    var purchases = await _purchaseRepository.GetAllAsync();
+
+        //    var purchaseDetails = new List<PurchaseDetailDTO>();
+
+        //    foreach (var purchase in purchases)
+        //    {
+        //        var purchaseItems = await _purchaseItemRepository.GetByConditionAsync(
+        //            pi => pi.PurchaseId == purchase.PurchaseId
+        //        );
+
+        //        var itemWithProducts = new List<PurchaseItemWithProductDTO>();
+
+        //        foreach (var item in purchaseItems)
+        //        {
+        //            var product = await _productRepository.GetByIdAsync(item.ProductId);
+
+        //            itemWithProducts.Add(new PurchaseItemWithProductDTO
+        //            {
+        //                PurchaseItem = new PurchaseItemDTO
+        //                {
+        //                    PurchaseItemId = item.PurchaseItemId,
+        //                    PurchaseId = item.PurchaseId,
+        //                    ProductId = item.ProductId,
+        //                    Quantity = item.Quantity,
+        //                    Price = item.Price,
+        //                    Discount = item.Discount,
+        //                    TaxAmount = item.TaxAmount,
+        //                    Total = item.Total,
+        //                    ProductName = item.Product.Name,
+        //                    DateCreated = item.DateCreated,
+        //                    SaasClientId = item.SaasClientId
+        //                },
+        //                Product = new ProductDTO
+        //                {
+        //                    ProductId = product.ProductId,
+        //                    Name = product.Name,
+        //                    PurchasePrice = product.PurchasePrice,
+        //                    SalePrice1 = product.SalePrice1,
+        //                    SalePrice2 = product.SalePrice2,
+        //                    SalePrice3 = product.SalePrice3,
+        //                    Barcode = product.Barcode,
+        //                    QuantityStock = product.QuantityStock,
+        //                    QuantityPack = product.QuantityPack
+        //                }
+        //            });
+        //        }
+
+        //        purchaseDetails.Add(new PurchaseDetailDTO
+        //        {
+        //            Purchase = new PurchaseDTO
+        //            {
+        //                PurchaseId = purchase.PurchaseId,
+        //                PurchaseDate = purchase.PurchaseDate,
+        //                SupplierId = purchase.SupplierId,
+        //                EmployeeId = purchase.EmployeeId,
+        //                TvaAmount = purchase.TvaAmount,
+        //                TotalAmount = purchase.TotalAmount,
+        //                AmountPaid = purchase.AmountPaid,
+        //                SupplierName = purchase.Supplier?.Name,
+        //                SaasClientId = purchase.SaasClientId
+        //            },
+        //            Items = itemWithProducts
+        //        });
+        //    }
+
+        //    return purchaseDetails;
+        //}
+
+        //public async Task<PurchaseDetailDTO> GetPurchaseDetailAsync(int purchaseId)
+        //{
+        //    var purchase = await _purchaseRepository.GetByIdAsync(purchaseId);
+
+        //    var purchaseItems = await _purchaseItemRepository.GetByConditionAsync(
+        //        pi => pi.PurchaseId == purchaseId
+        //    );
+
+        //    var itemWithProducts = new List<PurchaseItemWithProductDTO>();
+
+        //    foreach (var item in purchaseItems)
+        //    {
+        //        var product = await _productRepository.GetByIdAsync(item.ProductId);
+
+        //        itemWithProducts.Add(new PurchaseItemWithProductDTO
+        //        {
+        //            PurchaseItem = new PurchaseItemDTO
+        //            {
+        //                PurchaseItemId = item.PurchaseItemId,
+        //                PurchaseId = item.PurchaseId,
+        //                ProductId = item.ProductId,
+        //                Quantity = item.Quantity,
+        //                Price = item.Price,
+        //                Discount = item.Discount,
+        //                TaxAmount = item.TaxAmount,
+        //                Total = item.Total,
+        //                ProductName = item.Product.Name,
+        //                DateCreated = item.DateCreated,
+        //                SaasClientId = item.SaasClientId
+        //            },
+        //            Product = new ProductDTO
+        //            {
+        //                ProductId = product.ProductId,
+        //                Name = product.Name,
+        //                PurchasePrice = product.PurchasePrice,
+        //                SalePrice1 = product.SalePrice1,
+        //                SalePrice2 = product.SalePrice2,
+        //                SalePrice3 = product.SalePrice3,
+        //                Barcode = product.Barcode,
+        //                QuantityStock = product.QuantityStock,
+        //                QuantityPack = product.QuantityPack,
+        //            }
+        //        });
+        //    }
+
+        //    return new PurchaseDetailDTO
+        //    {
+        //        Purchase = new PurchaseDTO
+        //        {
+        //            PurchaseId = purchase.PurchaseId,
+        //            PurchaseDate = purchase.PurchaseDate,
+        //            SupplierId = purchase.SupplierId,
+        //            EmployeeId = purchase.EmployeeId,
+        //            TvaAmount = purchase.TvaAmount,
+        //            TotalAmount = purchase.TotalAmount,
+        //            AmountPaid = purchase.AmountPaid,
+        //            SupplierName = purchase.Supplier.Name,
+        //            SaasClientId = purchase.SaasClientId
+        //        },
+        //        Items = itemWithProducts
+        //    };
+        //}
 
         public async Task<IEnumerable<PurchaseDTO>> GetPagedPurchasesByDateRangeAsync(DateTime startDate, DateTime endDate)
         {

@@ -14,6 +14,7 @@ namespace InventoryTrackApi.Repositories
         Task<int> CountAsync();
         Task<decimal> CalculateSumAsync(Expression<Func<T, bool>> filter, Expression<Func<T, decimal>> selector);
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+        Task<decimal> GetSumByPeriodAsync(Expression<Func<T, bool>> dateRangeFilter, Expression<Func<T, decimal>> selector);
 
         #endregion
 
@@ -22,8 +23,13 @@ namespace InventoryTrackApi.Repositories
         Task<IEnumerable<T>> GetByBarCodeAsync(Expression<Func<T, bool>> predicate);
         Task<IEnumerable<T>> GetAllAsync(int pageNumber = 1, int pageSize = 10);
         Task<IEnumerable<T>> GetAllByDateRangeAsync(DateTime startDate, DateTime endDate, int pageNumber, int pageSize);
+
         Task<IEnumerable<T>> GetDataByDateRange(Expression<Func<T, bool>> filter);
         Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> filter, params string[] includeProperties);
+
+        Task<IEnumerable<T>> GetPagedWithIncludesAsync(int pageNumber, int pageSize, params string[] includeProperties);
+        Task<IEnumerable<T>> GetPagedWithIncludesWithDateRangeAsync(DateTime startDate, DateTime endDate, params string[] includeProperties);
+
         #endregion
 
         #region CRUD

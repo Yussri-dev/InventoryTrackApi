@@ -19,11 +19,27 @@ namespace InventoryTrackApi.Controllers.Purchases
         private readonly PurchaseService _purchaseService;
         private readonly ILogger<PurchaseController> _logger;
         private readonly IMapper _mapper;
+
         public PurchaseController(PurchaseService purchaseService, ILogger<PurchaseController> logger, IMapper mapper)
         {
             _purchaseService = purchaseService ?? throw new ArgumentNullException(nameof(purchaseService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        }
+        [HttpGet("AllPurchase")]
+        //[Authorize]
+        public async Task<ActionResult<IEnumerable<PurchaseDTO>>> GetPagedAllPurchases()
+        {
+            var purchases = await _purchaseService.GetAllPurchaseFlatAsync();
+            return Ok(purchases);
+        }
+
+
+        [HttpGet("PurchasesAmount")]
+        public async Task<ActionResult<IEnumerable<SummaryDTO>>> GetPurchasesSummaryByPeriod(DateTime startDate, DateTime endDate)
+        {
+            var summaries = await _purchaseService.GetSumByPeriodAsync(startDate, endDate);
+            return Ok(summaries);
         }
 
         // Get paged purchases

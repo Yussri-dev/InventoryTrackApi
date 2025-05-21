@@ -12,20 +12,82 @@ namespace InventoryTrackApi.Services
     public class SaleService
     {
         private readonly IGenericRepository<Sale> _saleRepository;
+        private readonly IGenericRepository<SaleItem> _saleItemRepository;
+        private readonly IGenericRepository<Product> _productRepository;
+        private readonly IGenericRepository<Purchase> _purchaseRepository;
         private readonly IGenericRepository<Customer> _customerRepository;
         private readonly DiscountCalculator _discountCalculator;
         private readonly IMapper _mapper;
         private readonly ILogger<SaleService> _logger;
 
         // Constructor to inject the repository
-        public SaleService(IGenericRepository<Sale> saleRepository,
+        public SaleService(
+            IGenericRepository<Sale> saleRepository,
+            IGenericRepository<SaleItem> saleItemRepository,
+            IGenericRepository<Product> productRepository,
+            IGenericRepository<Purchase> purchaseRepository,
             IGenericRepository<Customer> customerRepository, IMapper mapper, ILogger<SaleService> logger)
         {
             _saleRepository = saleRepository;
+            _saleItemRepository = saleItemRepository;
+            _productRepository = productRepository;
+            _purchaseRepository = purchaseRepository;
             _customerRepository = customerRepository;
             _mapper = mapper;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _discountCalculator = new DiscountCalculator();
+        }
+
+        public async Task<List<SaleFlatDTO>> GetAllSaleFlatAsync()
+        {
+            var purchases = await _saleRepository.GetAllAsync();
+            var result = new List<SaleFlatDTO>();
+
+            foreach (var purchase in purchases)
+            {
+                var purchaseItems = await _saleItemRepository.GetByConditionAsync(
+                    pi => pi.SaleId == purchase.SaleId
+                );
+
+                foreach (var item in purchaseItems)
+                {
+                    var product = await _productRepository.GetByIdAsync(item.ProductId);
+
+                    result.Add(new SaleFlatDTO
+                    {
+                        // Purchase info
+                        SaleId = purchase.SaleId,
+                        SaleDate = purchase.SaleDate,
+                        CustomerId = purchase.CustomerId,
+                        CustomerName = purchase.Customer?.Name,
+                        //EmployeeId = purchase.EmployeeId,
+                        //TvaAmount = purchase.TvaAmount,
+                        //TotalAmount = purchase.TotalAmount,
+                        //AmountPaid = purchase.AmountPaid,
+
+                        // Item info
+                        //PurchaseItemId = item.PurchaseItemId,
+                        SaleItemId = item.SaleItemId,
+                        Quantity = item.Quantity,
+                        Price = item.Price,
+                        Discount = item.Discount,
+                        TaxAmount = item.TaxAmount,
+
+                        // Product info
+                        ProductId = product.ProductId,
+                        ProductName = product.Name,
+                        PurchasePrice = product.PurchasePrice,
+                        SalePrice1 = product.SalePrice1,
+                        SalePrice2 = product.SalePrice2,
+                        SalePrice3 = product.SalePrice3,
+                        Barcode = product.Barcode,
+                        QuantityStock = product.QuantityStock,
+                        QuantityPack = product.QuantityPack
+                    });
+                }
+            }
+
+            return result;
         }
 
         public async Task<int> CountSalesAsync()
@@ -37,6 +99,69 @@ namespace InventoryTrackApi.Services
         public async Task<IEnumerable<Sale>> GetPagedSalesAsync(int pageNumber, int pageSize)
         {
             return await _saleRepository.GetAllAsync(pageNumber, pageSize);
+        }
+
+        public async Task<IEnumerable<MonthlySummaryDTO>> GetMonthlySummaryAsync(DateTime startDate, DateTime endDate)
+        {
+            var result = new List<MonthlySummaryDTO>();
+
+            // Get first day of the start month
+            var currentMonth = new DateTime(startDate.Year, startDate.Month, 1);
+
+            // Get last day of the end month
+            var endMonth = new DateTime(endDate.Year, endDate.Month, 1).AddMonths(1).AddDays(-1);
+
+            while (currentMonth <= endMonth)
+            {
+                var monthStart = currentMonth;
+                var monthEnd = currentMonth.AddMonths(1).AddDays(-1);
+
+                // Get sales data
+                var salesAmount = await _saleRepository.GetSumByPeriodAsync(
+                    sale => sale.SaleDate >= monthStart && sale.SaleDate <= monthEnd,
+                    sale => sale.TotalAmount
+                );
+
+                var salesCount = await _saleRepository.CountAsync(
+                    sale => sale.SaleDate >= monthStart && sale.SaleDate <= monthEnd
+                );
+
+                // Get purchase data
+                var purchasesAmount = await _purchaseRepository.GetSumByPeriodAsync(
+                    purchase => purchase.PurchaseDate >= monthStart && purchase.PurchaseDate <= monthEnd,
+                    purchase => purchase.TotalAmount
+                );
+
+                var purchasesCount = await _purchaseRepository.CountAsync(
+                    purchase => purchase.PurchaseDate >= monthStart && purchase.PurchaseDate <= monthEnd
+                );
+
+                // Add to result
+                result.Add(new MonthlySummaryDTO
+                {
+                    Month = currentMonth.ToString("MMM"),
+                    Year = currentMonth.Year,
+                    MonthYear = currentMonth.ToString("MMM yyyy"),
+                    SalesAmount = salesAmount,
+                    PurchasesAmount = purchasesAmount,
+                    SalesCount = salesCount,
+                    PurchasesCount = purchasesCount
+                });
+
+                // Move to next month
+                currentMonth = currentMonth.AddMonths(1);
+            }
+
+            return result;
+        }
+
+        //Get Sum Sales
+        public async Task<decimal> GetSumByPeriodAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _saleRepository.GetSumByPeriodAsync(
+                sale => sale.SaleDate >= startDate && sale.SaleDate <= endDate,
+                sale => sale.TotalAmount
+            );
         }
 
         // Get a sale by ID

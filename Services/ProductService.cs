@@ -72,6 +72,10 @@ namespace InventoryTrackApi.Services
             bool exists = await _productRepository.ExistsAsync(p =>
                 p.Barcode == product.Barcode || p.Name == product.Name);
 
+            if (product.SalePrice1 == 0 || product.PurchasePrice == 0)
+            {
+                throw new InvalidOperationException("Product with sale or purchase equals 0.");
+            }
             if (exists)
             {
                 throw new InvalidOperationException("Product with the same barcode or name already exists.");

@@ -34,6 +34,20 @@ namespace InventoryTrackApi.Controllers.Categories
             return Ok(categories);
         }
 
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetCategoryCount()
+        {
+            try
+            {
+                int count = await _categoryService.CountCategoriesAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         // Get category by ID
         [HttpGet("{id}")]
         //[Authorize]

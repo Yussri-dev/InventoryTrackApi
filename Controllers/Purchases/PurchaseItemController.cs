@@ -30,7 +30,7 @@ namespace InventoryTrackApi.Controllers.Purchases
         // Get paged purchaseItems
         [HttpGet]
         //[Authorize]
-        public async Task<ActionResult<IEnumerable<PurchaseItemDTO>>> GetPagedCategories(int pageNumber = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<PurchaseItemDTO>>> GetPagedPurchaseItem(int pageNumber = 1, int pageSize = 10)
         {
             var purchaseItems = await _purchaseItemService.GetPagedPurchaseItemsAsync(pageNumber, pageSize);
             return Ok(purchaseItems);
@@ -49,8 +49,46 @@ namespace InventoryTrackApi.Controllers.Purchases
             return Ok(purchaseItem);
         }
 
-        // Create a new purchaseItem
+        // Create a new saleItem
         [HttpPost]
+        public async Task<ActionResult<PurchaseItemDTO>> CreatePurchaseItem(PurchaseItemDTO purchaseItemDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for Create Purchase Item.");
+                return ValidationProblem(ModelState);
+            }
+            try
+            {
+                var purchase = _mapper.Map<PurchaseItem>(purchaseItemDto);
+                await _purchaseItemService.CreatePurchaseItemAsync(purchase);
+
+                var respondDto = _mapper.Map<PurchaseItemDTO>(purchase);
+                return CreatedAtAction(nameof(GetPurchaseItem), new { id = purchase.PurchaseItemId }, respondDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Creating Purchase: {Message}", ex.Message);
+                return Problem(
+                    title: "An error occurred while creating the purchase.",
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
+
+        }
+        //[HttpGet("purchaseItems")]
+        //public async Task<ActionResult<PurchaseItemDTO>> GetPurchaseItemWithPurchaseAndProduct()
+        //{
+        //    var purchaseItems = await _purchaseItemService.GetPagedPurchaseItemsAsync(int pageNumber = 1, int pageSize = 10);
+        //    if (purchaseItems == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return Ok(purchaseItems);
+        //}
+        // Create a new purchaseItem
+        //[HttpPost]
         //[Authorize]
 
         /*

@@ -18,6 +18,10 @@ namespace InventoryTrackApi.Services
             return await _categoryRepository.GetAllAsync(pageNumber, pageSize);
         }
 
+        public async Task<int> CountCategoriesAsync()
+        {
+            return await _categoryRepository.CountAsync();
+        }
         //Get a product by Name
         public async Task<IEnumerable<Category>> GetCategoryByNameAsync(string name)
         {

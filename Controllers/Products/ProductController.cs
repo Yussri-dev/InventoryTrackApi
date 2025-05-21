@@ -321,6 +321,21 @@ namespace InventoryTrackApi.Controllers.Products
 
         [HttpGet("count")]
         //[Authorize]
+        public async Task<ActionResult<int>> GetProductCount()
+        {
+            try
+            {
+                int count = await _productService.CountProductsAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("countSale")]
+        //[Authorize]
         public async Task<ActionResult<int>> GetSaleCount()
         {
             try

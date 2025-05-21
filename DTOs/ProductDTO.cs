@@ -10,7 +10,7 @@ namespace InventoryTrackApi.DTOs
         public string Name { get; set; } = string.Empty;
         public decimal MinStock { get; set; }
         public decimal MaxStock { get; set; }
-        public string PackUnitType { get; set; } = string.Empty;
+        public string PackUnitType { get; set; } = "Box";
         public decimal QuantityStock { get; set; }
         public decimal QuantityPack { get; set; }
         public string Barcode { get; set; } = string.Empty;
@@ -34,13 +34,13 @@ namespace InventoryTrackApi.DTOs
         public int CategoryId { get; set; }
         public string CategoryName { get; set; } = string.Empty;
 
-        public int UnitId { get; set; }
+        public int UnitId { get; set; } = 1;
         public string UnitName { get; set; } = string.Empty;
 
         public int TaxId { get; set; }
         public decimal TaxRate { get; set; }
 
-        public int LineId { get; set; }
+        public int LineId { get; set; } = 1;
         public string LineName { get; set; } = string.Empty;
     }
 }

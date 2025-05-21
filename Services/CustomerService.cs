@@ -25,6 +25,11 @@ namespace InventoryTrackApi.Services
             return await _customerRepository.GetAllAsync(pageNumber, pageSize);
         }
 
+        public async Task<int> CountCustomersAsync()
+        {
+            return await _customerRepository.CountAsync();
+        }
+
         public async Task<Customer> GetCustomerByIdAsync(int id)
         {
             return await _customerRepository.GetByIdAsync(id);

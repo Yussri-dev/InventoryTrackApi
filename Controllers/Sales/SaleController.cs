@@ -29,12 +29,46 @@ namespace InventoryTrackApi.Controllers.Sales
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        [HttpGet("AllSale")]
+        //[Authorize]
+        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedAllSales()
+        {
+            var purchases = await _saleService.GetAllSaleFlatAsync();
+            return Ok(purchases);
+        }
+
+        [HttpGet("monthly-summary")]
+        public async Task<ActionResult<IEnumerable<MonthlySummaryDTO>>> GetMonthlySummary(
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+        {
+            var start = startDate ?? DateTime.Today.AddMonths(-6);
+            var end = endDate ?? DateTime.Today;
+
+            try
+            {
+                var monthlySummaries = await _saleService.GetMonthlySummaryAsync(start, end);
+                return Ok(monthlySummaries);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving monthly summary", error = ex.Message });
+            }
+        }
+
         // Get paged sales
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedSales(int pageNumber = 1, int pageSize = 10)
         {
             var sales = await _saleService.GetPagedSalesAsync(pageNumber, pageSize);
             return Ok(sales);
+        }
+
+        [HttpGet("SalesAmount")]
+        public async Task<ActionResult<IEnumerable<SummaryDTO>>> GetSalesSummaryByPeriod(DateTime startDate, DateTime endDate)
+        {
+            var summaries = await _saleService.GetSumByPeriodAsync(startDate, endDate);
+            return Ok(summaries);
         }
 
         // Get sale by ID

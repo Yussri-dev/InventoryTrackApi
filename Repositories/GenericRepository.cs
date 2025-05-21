@@ -18,6 +18,44 @@ namespace InventoryTrackApi.Repositories
             _context.Database.EnsureCreated();
         }
 
+        public async Task<IEnumerable<T>> GetPagedWithIncludesAsync(int pageNumber, int pageSize, params string[] includeProperties)
+        {
+            IQueryable<T> query = _dbSet;
+
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
+            }
+
+            return await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<T>> GetPagedWithIncludesWithDateRangeAsync(DateTime startDate, DateTime endDate, params string[] includeProperties)
+        {
+            IQueryable<T> query = _dbSet;
+
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
+            }
+
+            var parameter = Expression.Parameter(typeof(T), "entity");
+            var property = Expression.Property(parameter, "DateCreated");
+            var lambda = Expression.Lambda<Func<T, bool>>(
+                Expression.AndAlso(
+                    Expression.GreaterThanOrEqual(property, Expression.Constant(startDate)),
+                    Expression.LessThanOrEqual(property, Expression.Constant(endDate))
+                ),
+                parameter
+            );
+
+            query = query.Where(lambda);
+
+            return await query.ToListAsync();
+        }
         public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.AnyAsync(predicate);
@@ -203,7 +241,7 @@ namespace InventoryTrackApi.Repositories
 
         }
 
-        
+
         public async Task<decimal> GetQuantityAsync(int id)
         {
             var entity = await _dbSet.FindAsync(id);
@@ -216,7 +254,7 @@ namespace InventoryTrackApi.Repositories
             return (entity as Product)?.QuantityStock ?? throw new InvalidOperationException("Invalid entity type for quantity retrieval.");
         }
 
-        
+
         public async Task<decimal> CalculateSumAsync(
                 Expression<Func<T, bool>> filter,
                 Expression<Func<T, decimal>> selector)
@@ -266,5 +304,26 @@ namespace InventoryTrackApi.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        //public async Task<decimal> GetSumByPeriodAsync<TProperty>(
+        //    Expression<Func<T, bool>> dateRangeFilter,
+        //    Expression<Func<T, decimal>> selector)
+        //{
+        //    IQueryable<T> query = _dbSet;
+
+        //    query = query.Where(dateRangeFilter);
+
+        //    return await query.SumAsync(selector);
+        //}
+
+        public async Task<decimal> GetSumByPeriodAsync(
+            Expression<Func<T, bool>> dateRangeFilter,
+            Expression<Func<T, decimal>> selector)
+        {
+            IQueryable<T> query = _dbSet;
+            query = query.Where(dateRangeFilter);
+            return await query.SumAsync(selector);
+        }
+
     }
 }
