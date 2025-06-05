@@ -21,8 +21,19 @@ namespace InventoryTrackApi.Models
         public decimal CashIn { get; set; }
         public decimal CashOut { get; set; }
 
+        public bool IsActive => ShiftEnd == null;
+
+        //knowing how much cash should be physically in the drawer at any point.
+        [NotMapped]
+        public decimal DrawerBalance => OpeningBalance + CashIn - CashOut;
+
+
         [DefaultValue("DateTime.Now")]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+
+        public int? CreatedById { get; set; }
+        public DateTime? ModifiedDate { get; set; }
+
 
         [Required]
         public int CashRegisterId { get; set; }

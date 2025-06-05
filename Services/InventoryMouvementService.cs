@@ -1,39 +1,49 @@
 ﻿using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
+using InventoryTrackApi.Services.Interfaces;
 
 namespace InventoryTrackApi.Services
 {
     public class InventoryMouvementService
     {
-        private readonly IGenericRepository<InventoryMouvement> _inventoryMouvementRepository;
-
-        public InventoryMouvementService(IGenericRepository<InventoryMouvement> inventoryMouvementRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        public InventoryMouvementService(IUnitOfWork unitOfWork)
         {
-            _inventoryMouvementRepository = inventoryMouvementRepository;
+            _unitOfWork = unitOfWork;
         }
 
         // Get All InventoryMouvement With Pagination
         public async Task<IEnumerable<InventoryMouvement>> GetPagedInventoryMouvementAsync(int pageNumber, int pageSize)
         {
-            return await _inventoryMouvementRepository.GetAllAsync(pageNumber, pageSize);
+            return await _unitOfWork.InventoryMouvements.GetAllAsync(pageNumber, pageSize);
         }
 
         //Get Inventory By Id
         public async Task<InventoryMouvement> GetInventoryMouvementByIdAsync(int id)
         {
-            return await _inventoryMouvementRepository.GetByIdAsync(id);
+            return await _unitOfWork.InventoryMouvements.GetByIdAsync(id);
         }
 
         //Create a new InventoryMouvement
         public async Task CreateInventoryMouvementAsync(InventoryMouvement inventoryMouvement)
         {
-            await _inventoryMouvementRepository.CreateAsync(inventoryMouvement);
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                await _unitOfWork.InventoryMouvements.CreateAsync(inventoryMouvement);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
         }
 
         //Update an existing Inventory Mouvement
         public async Task UpdateInventoryMouvementAsync(InventoryMouvement inventoryMouvement)
         {
-            var existingInventoryMouvement = await _inventoryMouvementRepository.GetByIdAsync(inventoryMouvement.InventoryMouvementId);
+            var existingInventoryMouvement = await _unitOfWork.InventoryMouvements.GetByIdAsync(inventoryMouvement.InventoryMouvementId);
             if (existingInventoryMouvement == null)
             {
                 throw new InvalidOperationException("Inventory Mouvement Not Found");
@@ -42,13 +52,13 @@ namespace InventoryTrackApi.Services
             existingInventoryMouvement.Quantity = inventoryMouvement.Quantity;
             existingInventoryMouvement.MouvementDate = inventoryMouvement.MouvementDate;
 
-            await _inventoryMouvementRepository.UpdateAsync(existingInventoryMouvement);
+            await _unitOfWork.InventoryMouvements.UpdateAsync(existingInventoryMouvement);
         }
 
         //Delete an Inventory Mouvement
         public async Task DeleteInventoryMouvementAsync(int id)
         {
-            await _inventoryMouvementRepository.DeleteAsync(id);
+            await _unitOfWork.InventoryMouvements.DeleteAsync(id);
         }
 
     }

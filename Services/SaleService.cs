@@ -1,57 +1,48 @@
 ﻿using AutoMapper;
+using InventoryTrackApi.Data;
 using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Queries;
 using InventoryTrackApi.Repositories;
+using InventoryTrackApi.Services.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Transactions;
 
 namespace InventoryTrackApi.Services
 {
     public class SaleService
     {
-        private readonly IGenericRepository<Sale> _saleRepository;
-        private readonly IGenericRepository<SaleItem> _saleItemRepository;
-        private readonly IGenericRepository<Product> _productRepository;
-        private readonly IGenericRepository<Purchase> _purchaseRepository;
-        private readonly IGenericRepository<Customer> _customerRepository;
-        private readonly DiscountCalculator _discountCalculator;
         private readonly IMapper _mapper;
-        private readonly ILogger<SaleService> _logger;
-
-        // Constructor to inject the repository
-        public SaleService(
-            IGenericRepository<Sale> saleRepository,
-            IGenericRepository<SaleItem> saleItemRepository,
-            IGenericRepository<Product> productRepository,
-            IGenericRepository<Purchase> purchaseRepository,
-            IGenericRepository<Customer> customerRepository, IMapper mapper, ILogger<SaleService> logger)
+        private readonly DiscountCalculator _discountCalculator;
+        private readonly IUnitOfWork _unitOfWork;
+        public SaleService(IUnitOfWork unitOfWork)
         {
-            _saleRepository = saleRepository;
-            _saleItemRepository = saleItemRepository;
-            _productRepository = productRepository;
-            _purchaseRepository = purchaseRepository;
-            _customerRepository = customerRepository;
-            _mapper = mapper;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _discountCalculator = new DiscountCalculator();
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<SaleFlatDTO>> GetAllSaleFlatAsync()
+        public async Task<List<SaleFlatDTO>> GetAllSaleFlatAsync(DateTime startDate, DateTime endDate)
         {
-            var purchases = await _saleRepository.GetAllAsync();
+            // Define the filter using the entity type (Purchase)
+            Expression<Func<Sale, bool>> dateFilter = purchase =>
+                purchase.SaleDate >= startDate.Date && purchase.SaleDate < endDate.Date.AddDays(1);
+
+            //var purchases = await _saleRepository.GetDataByDateRange(dateFilter);
+            var purchases = await _unitOfWork.Sales.GetDataByDateRange(dateFilter);
             var result = new List<SaleFlatDTO>();
 
             foreach (var purchase in purchases)
             {
-                var purchaseItems = await _saleItemRepository.GetByConditionAsync(
-                    pi => pi.SaleId == purchase.SaleId
+                //var purchaseItems = await _saleItemRepository.GetByConditionAsync(pi => pi.SaleId == purchase.SaleId
+                var purchaseItems = await _unitOfWork.SaleItems.GetByConditionAsync(pi => pi.SaleId == purchase.SaleId
+
                 );
 
                 foreach (var item in purchaseItems)
                 {
-                    var product = await _productRepository.GetByIdAsync(item.ProductId);
+                    var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
 
                     result.Add(new SaleFlatDTO
                     {
@@ -92,13 +83,13 @@ namespace InventoryTrackApi.Services
 
         public async Task<int> CountSalesAsync()
         {
-            return await _saleRepository.CountAsync();
+            return await _unitOfWork.Sales.CountAsync();
         }
 
         // Get all sales with pagination
         public async Task<IEnumerable<Sale>> GetPagedSalesAsync(int pageNumber, int pageSize)
         {
-            return await _saleRepository.GetAllAsync(pageNumber, pageSize);
+            return await _unitOfWork.Sales.GetAllAsync(pageNumber, pageSize);
         }
 
         public async Task<IEnumerable<MonthlySummaryDTO>> GetMonthlySummaryAsync(DateTime startDate, DateTime endDate)
@@ -117,22 +108,22 @@ namespace InventoryTrackApi.Services
                 var monthEnd = currentMonth.AddMonths(1).AddDays(-1);
 
                 // Get sales data
-                var salesAmount = await _saleRepository.GetSumByPeriodAsync(
+                var salesAmount = await _unitOfWork.Sales.GetSumByPeriodAsync(
                     sale => sale.SaleDate >= monthStart && sale.SaleDate <= monthEnd,
                     sale => sale.TotalAmount
                 );
 
-                var salesCount = await _saleRepository.CountAsync(
+                var salesCount = await _unitOfWork.Sales.CountAsync(
                     sale => sale.SaleDate >= monthStart && sale.SaleDate <= monthEnd
                 );
 
                 // Get purchase data
-                var purchasesAmount = await _purchaseRepository.GetSumByPeriodAsync(
+                var purchasesAmount = await _unitOfWork.Purchases.GetSumByPeriodAsync(
                     purchase => purchase.PurchaseDate >= monthStart && purchase.PurchaseDate <= monthEnd,
                     purchase => purchase.TotalAmount
                 );
 
-                var purchasesCount = await _purchaseRepository.CountAsync(
+                var purchasesCount = await _unitOfWork.Purchases.CountAsync(
                     purchase => purchase.PurchaseDate >= monthStart && purchase.PurchaseDate <= monthEnd
                 );
 
@@ -158,7 +149,7 @@ namespace InventoryTrackApi.Services
         //Get Sum Sales
         public async Task<decimal> GetSumByPeriodAsync(DateTime startDate, DateTime endDate)
         {
-            return await _saleRepository.GetSumByPeriodAsync(
+            return await _unitOfWork.Sales.GetSumByPeriodAsync(
                 sale => sale.SaleDate >= startDate && sale.SaleDate <= endDate,
                 sale => sale.TotalAmount
             );
@@ -167,19 +158,87 @@ namespace InventoryTrackApi.Services
         // Get a sale by ID
         public async Task<Sale> GetSaleByIdAsync(int id)
         {
-            return await _saleRepository.GetByIdAsync(id);
+            return await _unitOfWork.Sales.GetByIdAsync(id);
         }
 
-        // Create a new sale
-        public async Task CreateSaleAsync(Sale sale)
+        //public async Task CreateSaleAsync(Sale sale, string typeSale)
+        //{
+        //    // Assumes both repositories use the SAME DbContext instance
+        //    await _unitOfWork.BeginTransactionAsync();
+
+        //    try
+        //    {
+        //        await _unitOfWork.Sales.CreateAsync(sale);
+        //        var salePayment = new SalePayment
+        //        {
+        //            SaleId = sale.SaleId,
+        //            Amount = sale.TotalAmount,
+        //            PaymentDate = sale.SaleDate,
+        //            PaymentType = typeSale,
+        //            SaasClientId = sale.SaasClientId
+        //        };
+        //        await _unitOfWork.SalePayments.CreateAsync(salePayment);
+
+        //        var cashShift = new CashShift
+        //        {
+        //            CashIn = sale.TotalAmount,
+        //        };
+        //        await _unitOfWork.CommitAsync();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        await _unitOfWork.RollbackAsync();
+        //        throw;
+        //    }
+        //}
+
+        public async Task CreateSaleAsync(Sale sale, string typeSale, int cashRegisterId)
         {
-            await _saleRepository.CreateAsync(sale);
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                await _unitOfWork.Sales.CreateAsync(sale);
+
+                var salePayment = new SalePayment
+                {
+                    SaleId = sale.SaleId,
+                    Amount = sale.TotalAmount,
+                    PaymentDate = sale.SaleDate,
+                    PaymentType = typeSale,
+                    SaasClientId = sale.SaasClientId
+                };
+                await _unitOfWork.SalePayments.CreateAsync(salePayment);
+
+                var activeCashShifts = await _unitOfWork.CashShifts.GetWhereAsync(cs =>
+                    cs.CashRegisterId == cashRegisterId &&
+                    cs.SaasClientId == sale.SaasClientId &&
+                    cs.ShiftEnd == null);
+
+                var activeCashShift = activeCashShifts.FirstOrDefault();
+
+                if (activeCashShift == null)
+                {
+                    throw new InvalidOperationException("No active cash shift found for the register.");
+                }
+
+                activeCashShift.CashIn += sale.TotalAmount;
+                activeCashShift.TotalSales += sale.TotalAmount;
+
+                await _unitOfWork.CashShifts.UpdateAsync(activeCashShift);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
         }
 
         // Update an existing sale
         public async Task UpdateSaleAsync(Sale sale)
         {
-            var existingSale = await _saleRepository.GetByIdAsync(sale.SaleId);
+            var existingSale = await _unitOfWork.Sales.GetByIdAsync(sale.SaleId);
 
             if (existingSale == null)
             {
@@ -193,13 +252,13 @@ namespace InventoryTrackApi.Services
             existingSale.TotalAmount = sale.TotalAmount;
             existingSale.AmountPaid = sale.AmountPaid;
 
-            await _saleRepository.UpdateAsync(existingSale);
+            await _unitOfWork.Sales.UpdateAsync(existingSale);
         }
 
         // Delete a sale by ID
         public async Task DeleteSaleAsync(int id)
         {
-            await _saleRepository.DeleteAsync(id);
+            await _unitOfWork.Sales.DeleteAsync(id);
         }
 
         public async Task<decimal> CalculateSalesDiscountsAsync(decimal totalAmount, decimal discountPourcentage)
@@ -228,7 +287,7 @@ namespace InventoryTrackApi.Services
             Expression<Func<Sale, bool>> dateFilter = sale =>
                 sale.DateCreated.Date >= startDate.Date && sale.DateCreated.Date <= endDate.Date;
 
-            var sales = await _saleRepository.GetByConditionAsync(dateFilter, "Customer");
+            var sales = await _unitOfWork.Sales.GetByConditionAsync(dateFilter, "Customer");
 
             var saleDTOs = _mapper.Map<IEnumerable<SaleDTO>>(sales);
 
@@ -266,17 +325,17 @@ namespace InventoryTrackApi.Services
                 }
             }
 
-            await _saleRepository.SaveChangesAsync(); 
+            await _unitOfWork.Sales.SaveChangesAsync();
 
             Console.WriteLine($"Remaining payment after distribution: {remainingPayment}");
         }
-        
+
         private async Task<List<Sale>> GetOutstandingSalesAsync(int customerId)
         {
             Expression<Func<Sale, bool>> customerIdFilter = sale =>
                 sale.CustomerId == customerId && sale.TotalAmount > sale.AmountPaid;
 
-            var outstandingSales = await _saleRepository.GetByConditionAsync(customerIdFilter, "Customer");
+            var outstandingSales = await _unitOfWork.Sales.GetByConditionAsync(customerIdFilter, "Customer");
 
             return outstandingSales.ToList();
         }
@@ -323,11 +382,12 @@ namespace InventoryTrackApi.Services
             Expression<Func<Sale, bool>> customerIdFilter = customer =>
                 customer.CustomerId == customerId && customer.TotalAmount > customer.AmountPaid;
 
-            var sales = await _saleRepository.GetByConditionAsync(customerIdFilter, "Customer");
+            var sales = await _unitOfWork.Sales.GetByConditionAsync(customerIdFilter, "Customer");
 
             var saleDTOs = _mapper.Map<IEnumerable<SaleDTO>>(sales);
 
             return saleDTOs;
         }
+
     }
 }

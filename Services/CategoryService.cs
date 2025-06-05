@@ -1,57 +1,68 @@
 ﻿using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
+using InventoryTrackApi.Services.Interfaces;
 
 namespace InventoryTrackApi.Services
 {
     public class CategoryService
     {
-        private readonly IGenericRepository<Category> _categoryRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        // Constructor to inject the repository
-        public CategoryService(IGenericRepository<Category> categoryRepository)
+        public CategoryService(IUnitOfWork unitOfWork)
         {
-            _categoryRepository = categoryRepository;
+            _unitOfWork = unitOfWork;
         }
         // Get all categorys with pagination
         public async Task<IEnumerable<Category>> GetPagedCategoriesAsync(int pageNumber, int pageSize)
         {
-            return await _categoryRepository.GetAllAsync(pageNumber, pageSize);
+            return await _unitOfWork.Categories.GetAllAsync(pageNumber, pageSize);
         }
 
         public async Task<int> CountCategoriesAsync()
         {
-            return await _categoryRepository.CountAsync();
+            return await _unitOfWork.Categories.CountAsync();
         }
         //Get a product by Name
         public async Task<IEnumerable<Category>> GetCategoryByNameAsync(string name)
         {
             //return await _productRepository.GetByNameAsync(p => EF.Functions.Like(p.Name, name));
-            return await _categoryRepository.GetByNameAsync(p => p.Name.Contains(name));
+            return await _unitOfWork.Categories.GetByNameAsync(p => p.Name.Contains(name));
         }
 
         // Get a category by ID
         public async Task<Category> GetCategoryByIdAsync(int id)
         {
-            return await _categoryRepository.GetByIdAsync(id);
+            return await _unitOfWork.Categories.GetByIdAsync(id);
         }
 
         // Create a new category
         public async Task CreateCategoryAsync(Category category)
         {
-            bool exists = await _categoryRepository.ExistsAsync(p => p.Name == category.Name);
-
-            if (exists)
+            await _unitOfWork.BeginTransactionAsync();
+            try
             {
-                throw new InvalidOperationException("Category with the same Rate already exists.");
+                bool exists = await _unitOfWork.Categories.ExistsAsync(p => p.Name == category.Name);
+
+                if (exists)
+                {
+                    throw new InvalidOperationException("Category with the same Rate already exists.");
+                }
+
+                await _unitOfWork.Categories.CreateAsync(category);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
             }
 
-            await _categoryRepository.CreateAsync(category);
         }
 
         // Update an existing category
         public async Task UpdateCategoryAsync(Category category)
         {
-            var existingCategory = await _categoryRepository.GetByIdAsync(category.CategoryId);
+            var existingCategory = await _unitOfWork.Categories.GetByIdAsync(category.CategoryId);
 
             if (existingCategory == null)
             {
@@ -60,13 +71,13 @@ namespace InventoryTrackApi.Services
 
             existingCategory.Name = category.Name;
             //
-            await _categoryRepository.UpdateAsync(existingCategory);
+            await _unitOfWork.Categories.UpdateAsync(existingCategory);
         }
 
         // Delete a category by ID
         public async Task DeleteCategoryAsync(int id)
         {
-            await _categoryRepository.DeleteAsync(id);
+            await _unitOfWork.Categories.DeleteAsync(id);
         }
     }
 }

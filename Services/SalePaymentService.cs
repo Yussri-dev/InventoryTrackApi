@@ -1,23 +1,29 @@
 ﻿using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
+using InventoryTrackApi.Services.Interfaces;
 using System.Linq.Expressions;
 
 namespace InventoryTrackApi.Services
 {
     public class SalePaymentService
     {
-        private readonly IGenericRepository<SalePayment> _salePaymentRepository;
+        //private readonly IGenericRepository<SalePayment> _unitOfWork.SalePayments;
 
-        // Constructor to inject the repository
-        public SalePaymentService(IGenericRepository<SalePayment> salePaymentRepository)
+        //// Constructor to inject the repository
+        //public SalePaymentService(IGenericRepository<SalePayment> salePaymentRepository)
+        //{
+        //    _unitOfWork.SalePayments = salePaymentRepository;
+        //}
+        private readonly IUnitOfWork _unitOfWork;
+        public SalePaymentService(IUnitOfWork unitOfWork)
         {
-            _salePaymentRepository = salePaymentRepository;
+            _unitOfWork = unitOfWork;
         }
         // Get all salePayments with pagination
         public async Task<IEnumerable<SalePayment>> GetPagedSalePaymentAsync(int pageNumber, int pageSize)
         {
-            return await _salePaymentRepository.GetAllAsync(pageNumber, pageSize);
+            return await _unitOfWork.SalePayments.GetAllAsync(pageNumber, pageSize);
         }
 
         //get paged salePayment 
@@ -28,11 +34,11 @@ namespace InventoryTrackApi.Services
                 SalePayment.DateCreated.Date >= startDate.Date && SalePayment.DateCreated.Date <= endDate.Date;
 
             // Fetch SalePayment entities from the repository
-            var SalePayments = await _salePaymentRepository.GetByConditionAsync(dateFilter);
+            var SalePayments = await _unitOfWork.SalePayments.GetByConditionAsync(dateFilter);
 
             // Fetch Product entities for the SalePayments
             var productIds = SalePayments.Select(s => s.SaleId).Distinct();
-            var products = await _salePaymentRepository.GetByConditionAsync(p => productIds.Contains(p.SaleId));
+            var products = await _unitOfWork.SalePayments.GetByConditionAsync(p => productIds.Contains(p.SaleId));
 
             // Create a dictionary for quick lookup of Product by ProductId
             var productDictionary = products.ToDictionary(p => p.SaleId, p => p);
@@ -52,20 +58,30 @@ namespace InventoryTrackApi.Services
         // Get a salePayment by ID
         public async Task<SalePayment> GetSalePaymentByIdAsync(int id)
         {
-            return await _salePaymentRepository.GetByIdAsync(id);
+            return await _unitOfWork.SalePayments.GetByIdAsync(id);
         }
 
         // Create a new salePayment
         public async Task CreateSalePaymentAsync(SalePayment salePayment)
         {
-            await _salePaymentRepository.CreateAsync(salePayment);
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                await _unitOfWork.SalePayments.CreateAsync(salePayment);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
         }
 
         // Update an existing salePayment
         public async Task UpdateSalePaymentAsync(SalePayment salePayment)
         {
-            var existingSalePayment = await _salePaymentRepository.GetByIdAsync(salePayment.SalePaymentId);
-            
+            var existingSalePayment = await _unitOfWork.SalePayments.GetByIdAsync(salePayment.SalePaymentId);
+
             if (existingSalePayment == null)
             {
                 throw new InvalidOperationException("Sale Payment Not Found");
@@ -76,13 +92,13 @@ namespace InventoryTrackApi.Services
             existingSalePayment.Amount = salePayment.Amount;
             existingSalePayment.PaymentDate = salePayment.PaymentDate;
 
-            await _salePaymentRepository.UpdateAsync(existingSalePayment);
+            await _unitOfWork.SalePayments.UpdateAsync(existingSalePayment);
         }
 
         // Delete a salePayment by ID
         public async Task DeleteSalePaymentAsync(int id)
         {
-            await _salePaymentRepository.DeleteAsync(id);
+            await _unitOfWork.SalePayments.DeleteAsync(id);
         }
     }
 }

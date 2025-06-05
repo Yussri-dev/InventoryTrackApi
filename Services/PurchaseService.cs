@@ -2,42 +2,34 @@
 using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
+using InventoryTrackApi.Services.Interfaces;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Linq.Expressions;
 
 namespace InventoryTrackApi.Services
 {
     public class PurchaseService
     {
-        private readonly IGenericRepository<Purchase> _purchaseRepository;
-        private readonly IGenericRepository<Supplier> _supplierRepository;
-        private readonly IGenericRepository<PurchaseItem> _purchaseItemRepository;
-        private readonly IGenericRepository<Product> _productRepository;
         private readonly IMapper _mapper;
-
+        private readonly IUnitOfWork _unitOfWork;
         // Constructor to inject the repository
-        public PurchaseService(
-            IGenericRepository<Purchase> purchaseRepository,
-            IGenericRepository<Supplier> supplierRepository,
-            IGenericRepository<PurchaseItem> purchaseItemRepository,
-            IGenericRepository<Product> productRepository,
-            IMapper mapper)
+
+        public PurchaseService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _purchaseRepository = purchaseRepository;
-            _supplierRepository = supplierRepository;
-            _productRepository = productRepository;
-            _purchaseItemRepository = purchaseItemRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+
         // Get all purchases with pagination
         public async Task<IEnumerable<Purchase>> GetPagedPurchasesAsync(int pageNumber, int pageSize)
         {
-            return await _purchaseRepository.GetAllAsync(pageNumber, pageSize);
+            return await _unitOfWork.Purchases.GetAllAsync(pageNumber, pageSize);
         }
 
         //Get Sum Purchase
         public async Task<decimal> GetSumByPeriodAsync(DateTime startDate, DateTime endDate)
         {
-            return await _purchaseRepository.GetSumByPeriodAsync(
+            return await _unitOfWork.Purchases.GetSumByPeriodAsync(
                 sale => sale.PurchaseDate >= startDate && sale.PurchaseDate <= endDate,
                 sale => sale.TotalAmount
             );
@@ -46,27 +38,65 @@ namespace InventoryTrackApi.Services
         // Get a purchase by ID
         public async Task<Purchase> GetPurchaseByIdAsync(int id)
         {
-            return await _purchaseRepository.GetByIdAsync(id);
+            return await _unitOfWork.Purchases.GetByIdAsync(id);
         }
 
         // Create a new purchase
-        public async Task CreatePurchaseAsync(Purchase purchase)
+        public async Task CreatePurchaseAsync(Purchase purchase, string typePurchase, int cashRegisterId)
         {
-            await _purchaseRepository.CreateAsync(purchase);
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                await _unitOfWork.Purchases.CreateAsync(purchase);
+
+                var purchasePayment = new PurchasePayment
+                {
+                    PurchaseId = purchase.PurchaseId,
+                    Amount = purchase.AmountPaid,
+                    PaymentDate = purchase.PurchaseDate,
+                    PaymentType = typePurchase,
+                    SaasClientId = purchase.SaasClientId
+                };
+
+                await _unitOfWork.PurchasePayments.CreateAsync(purchasePayment);
+
+                var activeCashShifts = await _unitOfWork.CashShifts.GetWhereAsync(
+                    cs => cs.CashRegisterId == cashRegisterId &&
+                          cs.SaasClientId == purchase.SaasClientId &&
+                          cs.ShiftEnd == null);
+
+                var activeCashShift = activeCashShifts.FirstOrDefault();
+
+                if (activeCashShift == null)
+                {
+                    throw new InvalidOperationException("No active cash shift found for the register.");
+                }
+
+                activeCashShift.CashOut += purchase.AmountPaid;
+                activeCashShift.ModifiedDate = DateTime.UtcNow;
+
+                await _unitOfWork.CashShifts.UpdateAsync(activeCashShift);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
         }
 
         // Update an existing purchase
         public async Task UpdatePurchaseAsync(Purchase purchase)
         {
-           
+
             if (purchase == null)
             {
                 throw new ArgumentNullException(nameof(purchase), "Purchase cannot be null");
             }
 
-            var existingPurchase = await _purchaseRepository.GetByIdAsync(purchase.PurchaseId);
+            var existingPurchase = await _unitOfWork.Purchases.GetByIdAsync(purchase.PurchaseId);
 
-            if (existingPurchase == null) 
+            if (existingPurchase == null)
             {
                 throw new InvalidOperationException("Purchase Not Found");
             }
@@ -81,35 +111,39 @@ namespace InventoryTrackApi.Services
             existingPurchase.EmployeeId = purchase.EmployeeId;
             existingPurchase.SaasClientId = purchase.SaasClientId;
 
-            await _purchaseRepository.UpdateAsync(existingPurchase);
-            
+            await _unitOfWork.Purchases.UpdateAsync(existingPurchase);
+
         }
 
         // Delete a purchase by ID
         public async Task DeletePurchaseAsync(int id)
         {
-            await _purchaseRepository.DeleteAsync(id);
+            await _unitOfWork.Purchases.DeleteAsync(id);
         }
 
         public async Task<int> CountPurchasesAsync()
         {
-            return await _purchaseRepository.CountAsync();
+            return await _unitOfWork.Purchases.CountAsync();
         }
 
-        public async Task<List<PurchaseFlatDTO>> GetAllPurchaseFlatAsync()
+        public async Task<List<PurchaseFlatDTO>> GetAllPurchaseFlatAsync(DateTime startDate, DateTime endDate)
         {
-            var purchases = await _purchaseRepository.GetAllAsync();
+            // Define the filter using the entity type (Purchase)
+            Expression<Func<Purchase, bool>> dateFilter = purchase =>
+                purchase.PurchaseDate >= startDate.Date && purchase.PurchaseDate < endDate.Date.AddDays(1);
+
+            var purchases = await _unitOfWork.Purchases.GetDataByDateRange(dateFilter);
             var result = new List<PurchaseFlatDTO>();
 
             foreach (var purchase in purchases)
             {
-                var purchaseItems = await _purchaseItemRepository.GetByConditionAsync(
+                var purchaseItems = await _unitOfWork.PurchaseItems.GetByConditionAsync(
                     pi => pi.PurchaseId == purchase.PurchaseId
                 );
 
                 foreach (var item in purchaseItems)
                 {
-                    var product = await _productRepository.GetByIdAsync(item.ProductId);
+                    var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
 
                     result.Add(new PurchaseFlatDTO
                     {
@@ -130,8 +164,8 @@ namespace InventoryTrackApi.Services
                         Price = item.Price,
                         Discount = item.Discount,
                         TaxAmount = item.TaxAmount,
-                        LineTotal = item.Total,
-
+                        //LineTotal = item.Total,
+                        TotalAmount = item.Total,
                         // Product info
                         ProductId = product.ProductId,
                         ProductName = product.Name,
@@ -289,7 +323,7 @@ namespace InventoryTrackApi.Services
                 Purchase.DateCreated.Date >= startDate.Date && Purchase.DateCreated.Date <= endDate.Date;
 
             // Fetch Purchases with customer names
-            var Purchases = await _purchaseRepository.GetByConditionAsync(dateFilter, "Supplier");
+            var Purchases = await _unitOfWork.Purchases.GetByConditionAsync(dateFilter, "Supplier");
 
             // Map to DTO using AutoMapper
             var PurchaseDTOs = _mapper.Map<IEnumerable<PurchaseDTO>>(Purchases);

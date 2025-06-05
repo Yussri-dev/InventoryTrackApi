@@ -1,51 +1,61 @@
 ﻿using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
+using InventoryTrackApi.Services.Interfaces;
 
 namespace InventoryTrackApi.Services
 {
     public class LocationService
     {
-        private readonly IGenericRepository<Location> _locationRepository;
-
-        public LocationService(IGenericRepository<Location> locationRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        public LocationService(IUnitOfWork unitOfWork)
         {
-            _locationRepository = locationRepository;
+            _unitOfWork = unitOfWork;
         }
-
         //Get All Locations with Paination
         public async Task<IEnumerable<Location>> GetPagedLocationAsync(int pageNumber, int pageSize)
         {
-            return await _locationRepository.GetAllAsync(pageNumber, pageSize);
+            return await _unitOfWork.Locations.GetAllAsync(pageNumber, pageSize);
         }
 
         //Get a Location by Name
         public async Task<IEnumerable<Location>> GetLocationByNameAsync(string name)
         {
-            return await _locationRepository.GetByNameAsync(p => p.Name.Contains(name));
+            return await _unitOfWork.Locations.GetByNameAsync(p => p.Name.Contains(name));
         }
 
         //Get a location By Id
         public async Task<Location> GetLocationByIdAsync(int id)
         {
-            return await _locationRepository.GetByIdAsync(id);
+            return await _unitOfWork.Locations.GetByIdAsync(id);
         }
 
         //Create a new Location
         public async Task CreateLocationAsync(Location location)
         {
-            bool exists = await _locationRepository.ExistsAsync(p => p.Name == location.Name);
+            await _unitOfWork.BeginTransactionAsync();
 
-            if (exists)
+            try
             {
-                throw new InvalidOperationException("Location with the same Rate already exists.");
+                bool exists = await _unitOfWork.Locations.ExistsAsync(p => p.Name == location.Name);
+
+                if (exists)
+                {
+                    throw new InvalidOperationException("Location with the same Rate already exists.");
+                }
+                await _unitOfWork.Locations.CreateAsync(location);
+                await _unitOfWork.CommitAsync();
             }
-            await _locationRepository.CreateAsync(location);
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
         }
 
         //Update an existing Location
         public async Task UpdateLocationAsync(Location location)
         {
-            var existingLocation = await _locationRepository.GetByIdAsync(location.LocationId);
+            var existingLocation = await _unitOfWork.Locations.GetByIdAsync(location.LocationId);
             if (existingLocation == null)
             {
                 throw new InvalidOperationException("Location Not Found");
@@ -62,13 +72,13 @@ namespace InventoryTrackApi.Services
             existingLocation.DateModified = location.DateModified;
             existingLocation.SaasClientId = location.SaasClientId;
 
-            await _locationRepository.UpdateAsync(existingLocation);
+            await _unitOfWork.Locations.UpdateAsync(existingLocation);
         }
 
         //Delete a product By Id
         public async Task DeleteLocationASync(int id)
         {
-            await _locationRepository.DeleteAsync(id);
+            await _unitOfWork.Locations.DeleteAsync(id);
         }
     }
 }

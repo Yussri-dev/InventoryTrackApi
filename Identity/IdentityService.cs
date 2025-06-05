@@ -36,48 +36,19 @@ namespace InventoryTrackApi.Identity
 
             var user = await _userManager.FindByEmailAsync(request.Email);
             var roles = await _userManager.GetRolesAsync(user);
-
+            var idUser = await _userManager.GetUserIdAsync(user);
             // Générer le token JWT
-            var token = _tokenService.GenerateJwtToken(user.Id, user.UserName, roles);
+            var token = _tokenService.GenerateJwtToken(idUser, user.UserName, roles);
 
             return new AuthResponseDto
             {
                 IsSuccess = true,
                 Token = token,
                 UserName = user.UserName,
+                IdUser = idUser,
                 Roles = roles.ToList()
             };
         }
-
-        //public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
-        //{
-        //    var user = new ApplicationUser
-        //    {
-        //        UserName = dto.Email,
-        //        Email = dto.Email,
-        //        FirstName = dto.FirstName,
-        //        LastName = dto.LastName
-        //    };
-
-        //    var result = await _userManager.CreateAsync(user, dto.Password);
-
-        //    if (!result.Succeeded)
-        //    {
-        //        return new AuthResponseDto
-        //        {
-        //            IsSuccess = false,
-        //            ErrorMessage = string.Join(", ", result.Errors.Select(e => e.Description))
-        //        };
-        //    }
-
-        //    return new AuthResponseDto
-        //    {
-        //        IsSuccess = true,
-        //        UserName = user.UserName,
-        //        Token = "mock_token_or_generate_one",
-        //        Roles = new List<string> { "User" }
-        //    };
-        //}
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
         {
@@ -108,7 +79,7 @@ namespace InventoryTrackApi.Identity
             var roles = await _userManager.GetRolesAsync(user);
 
             // Optional: Generate real token
-            var token = _tokenService.GenerateJwtToken(user.Id, user.UserName, roles);
+            var token = _tokenService.GenerateJwtToken(user.Id.ToString(), user.UserName, roles);
 
             return new AuthResponseDto
             {

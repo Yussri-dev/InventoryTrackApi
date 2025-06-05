@@ -15,29 +15,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-//var key = Encoding.UTF8.GetBytes("My_Secret_Key_For_Inventory_Track_Api_My_Secret_Key_For_Inventory_Track_Api");
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.RequireHttpsMetadata = false;
-//        options.SaveToken = true;
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuerSigningKey = true,
-//            IssuerSigningKey = new SymmetricSecurityKey(key),
-//            ValidateIssuer = false,
-//            ValidateAudience = false,
-//            ValidateLifetime = true
-//        };
-//    });
-
-
-
-
-
-
 //builder.Services.AddScoped<ReturnPaymentService>();
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -55,7 +32,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.AllowAnyOrigin() // Blazor WebAssembly app URL
+            policy.AllowAnyOrigin()
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -146,6 +123,9 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"))
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
+
 //-------------------------------------------
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ProductBatchService>();
@@ -183,9 +163,12 @@ builder.Services.AddScoped<ReturnItemService>();
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5000); // HTTP
-    serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // Uses dev cert
+    serverOptions.ListenAnyIP(5000); 
+    serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps());
 });
+
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ICacheService, CacheService>();
 
 var app = builder.Build();
 

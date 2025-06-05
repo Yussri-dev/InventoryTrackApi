@@ -51,6 +51,12 @@ namespace InventoryTrackApi.Controllers.Users
             return Ok(users);
         }
 
+        [HttpGet("user")]
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsersSaas()
+        {
+            var users = await _userService.GetSaasClientInUser();
+            return Ok(users);
+        }
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUserById(int id)
         {

@@ -361,7 +361,7 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
 
 
             #region User
-            //-------------Supplier----------------
+            //-------------User----------------
 
             CreateMap<User, UserDTO>().ReverseMap();
 
@@ -384,6 +384,22 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             #endregion
+
+            #region SaasClient
+            //-------------SaasClient----------------
+
+            CreateMap<SaasClient, SaasClientDTO>().ReverseMap();
+
+            CreateMap<SaasClientDTO, SaasClient>()
+           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            //CreateMap<UserDTO, User>()
+            //.ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+            //.ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+            //.ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
 
         }
     }

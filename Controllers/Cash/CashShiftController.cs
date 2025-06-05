@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using InventoryTrackApi.Calculations;
 using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
+using InventoryTrackApi.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,13 +14,16 @@ namespace InventoryTrackApi.Controllers.Cash
     public class CashShiftController : ControllerBase
     {
         private readonly CashShiftService _cashShiftService;
+        private readonly CashCountCalculator _calculator;
         private readonly ILogger<CashShiftController> _logger;
         private readonly IMapper _mapper;
+
         public CashShiftController(CashShiftService cashShiftService, ILogger<CashShiftController> logger, IMapper mapper)
         {
             _cashShiftService = cashShiftService ?? throw new ArgumentNullException(nameof(cashShiftService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _calculator = new CashCountCalculator();
         }
 
         //Get Paged CashShift
@@ -41,11 +46,20 @@ namespace InventoryTrackApi.Controllers.Cash
             return Ok(cashShift);
         }
 
+        [HttpGet("Drawer/{idUser}")]
+        public async Task<ActionResult<IEnumerable<CashShiftDTO>>> GetCashShiftByIdAndDate([FromRoute]int idUser)
+        {
+            var cashShift = await _cashShiftService.GetCashShiftByIdAndDateAsync(idUser);
+            if (cashShift == null)
+            {
+                return NotFound();
+            }
+            return Ok(cashShift);
+        }
         //Create a new CashShift
         [HttpPost]
         public async Task<ActionResult<CashShiftDTO>> CreateCashShift(CashShiftDTO cashShiftDto)
         {
-
             _logger.LogInformation($"Create CashShift request for Cash Shift: {cashShiftDto}");
 
             if (!ModelState.IsValid)
@@ -70,54 +84,32 @@ namespace InventoryTrackApi.Controllers.Cash
                     );
                 throw;
             }
-            /*
-            if (!ModelState.IsValid)
+        }
+
+        [HttpPost("close/{shiftId}")]
+        public async Task<ActionResult<CashShiftCloseResultDto>> CloseShift([FromRoute] int shiftId, [FromBody] CashShiftActualDto request)
+        {
+            if (request.Cash == 0)
             {
-                return BadRequest(ModelState);
+                _logger.LogWarning("Cash count data is null");
+                return BadRequest("Cash count data is required.");
             }
 
             try
             {
-                var cashShift = new CashShift
-                {
-                    CashRegisterId = cashShiftDto.CashRegisterId,
-                    EmployeeId = cashShiftDto.EmployeeId,
-                    ShiftDate = cashShiftDto.ShiftDate,
-                    ShiftStart = cashShiftDto.ShiftStart,
-                    ShiftEnd = cashShiftDto.ShiftEnd,
-                    OpeningBalance = cashShiftDto.OpeningBalance,
-                    ClosingBalance = cashShiftDto.ClosingBalance,
-                    TotalSales = cashShiftDto.TotalSales,
-                    TotalRefunds = cashShiftDto.TotalRefunds,
-                    CashIn = cashShiftDto.CashIn,
-                    CashOut = cashShiftDto.CashOut,
-                };
-
-                await _cashShiftService.CreateCashShiftAsync(cashShift);
-
-                var responseDto = new CashShiftDTO
-                {
-                    CashRegisterId = cashShift.CashRegisterId,
-                    EmployeeId = cashShift.EmployeeId,
-                    ShiftDate = cashShift.ShiftDate,
-                    ShiftStart = cashShift.ShiftStart,
-                    ShiftEnd = cashShift.ShiftEnd,
-                    OpeningBalance = cashShift.OpeningBalance,
-                    ClosingBalance = cashShift.ClosingBalance,
-                    TotalSales = cashShift.TotalSales,
-                    TotalRefunds = cashShift.TotalRefunds,
-                    CashIn = cashShift.CashIn,
-                    CashOut = cashShift.CashOut,
-                };
-
-                return CreatedAtAction(nameof(GetCashShift), new { id = cashShift.CashShiftId }, responseDto);
+                var result = await _cashShiftService.CloseCashShiftAsync(shiftId, request.Cash);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, $"Invalid operation closing shift {shiftId}");
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating employee");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogError(ex, $"Error closing shift {shiftId}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Internal server error: {ex.Message}");
             }
-            */
         }
 
         //Update a CashShift
@@ -185,6 +177,15 @@ namespace InventoryTrackApi.Controllers.Cash
             */
         }
 
+        [HttpPost("calculate")]
+        public ActionResult<CashCountResultDto> Calculate([FromBody] CashCountDto dto)
+        {
+            if (dto == null)
+                return BadRequest("Invalid input.");
+
+            var result = _calculator.CalculateTotals(dto);
+            return Ok(result);
+        }
         //Delete a Cash Shift
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCashShift(int id)

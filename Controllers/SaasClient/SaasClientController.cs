@@ -48,7 +48,7 @@ namespace InventoryTrackApi.Controllers.SaasClient
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving unit by name");
+                _logger.LogError(ex, "Error retrieving client by name");
                 return StatusCode(500, "Internal server error");
             }
         }

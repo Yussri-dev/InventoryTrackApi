@@ -26,9 +26,11 @@ namespace InventoryTrackApi.Repositories
 
         Task<IEnumerable<T>> GetDataByDateRange(Expression<Func<T, bool>> filter);
         Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> filter, params string[] includeProperties);
+        Task<T> GetByDataConditionAsync(Expression<Func<T, bool>> filter, params string[] includeProperties);
 
         Task<IEnumerable<T>> GetPagedWithIncludesAsync(int pageNumber, int pageSize, params string[] includeProperties);
         Task<IEnumerable<T>> GetPagedWithIncludesWithDateRangeAsync(DateTime startDate, DateTime endDate, params string[] includeProperties);
+        Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate);
 
         #endregion
 

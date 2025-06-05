@@ -2,6 +2,7 @@
 using InventoryTrackApi.Data;
 using InventoryTrackApi.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq.Expressions;
 
 namespace InventoryTrackApi.Repositories
@@ -15,6 +16,7 @@ namespace InventoryTrackApi.Repositories
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dbSet = _context.Set<T>();
+
             _context.Database.EnsureCreated();
         }
 
@@ -305,16 +307,10 @@ namespace InventoryTrackApi.Repositories
             await _context.SaveChangesAsync();
         }
 
-        //public async Task<decimal> GetSumByPeriodAsync<TProperty>(
-        //    Expression<Func<T, bool>> dateRangeFilter,
-        //    Expression<Func<T, decimal>> selector)
-        //{
-        //    IQueryable<T> query = _dbSet;
-
-        //    query = query.Where(dateRangeFilter);
-
-        //    return await query.SumAsync(selector);
-        //}
+        public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.Where(predicate).ToListAsync();
+        }
 
         public async Task<decimal> GetSumByPeriodAsync(
             Expression<Func<T, bool>> dateRangeFilter,
@@ -325,5 +321,12 @@ namespace InventoryTrackApi.Repositories
             return await query.SumAsync(selector);
         }
 
+        public async Task<T> GetByDataConditionAsync(Expression<Func<T, bool>> filter, params string[] includeProperties)
+        {
+            var query = _dbSet.Where(filter).FirstOrDefaultAsync();
+
+
+            return await query;
+        }
     }
 }

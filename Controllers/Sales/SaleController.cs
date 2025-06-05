@@ -29,11 +29,28 @@ namespace InventoryTrackApi.Controllers.Sales
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        //[HttpGet("AllSale")]
+        ////[Authorize]
+        //public async Task<ActionResult<IEnumerable<SaleFlatDTO>>> GetPagedAllSales()
+        //{
+        //    var purchases = await _saleService.GetAllSaleFlatAsync();
+        //    return Ok(purchases);
+        //}
+
         [HttpGet("AllSale")]
         //[Authorize]
-        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedAllSales()
+        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedAllSales([FromQuery] string startDate, string endDate)
         {
-            var purchases = await _saleService.GetAllSaleFlatAsync();
+            if (!DateHelper.TryParseDate(startDate, out var startPurchasesDate))
+            {
+                return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
+            }
+
+            if (!DateHelper.TryParseDate(endDate, out var endPurchasesDate))
+            {
+                return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
+            }
+            var purchases = await _saleService.GetAllSaleFlatAsync(startPurchasesDate, endPurchasesDate);
             return Ok(purchases);
         }
 
@@ -82,7 +99,7 @@ namespace InventoryTrackApi.Controllers.Sales
             }
             return Ok(sale);
         }
-        
+
         // Create a new sale
         [HttpPost]
         public async Task<ActionResult<SaleDTO>> CreateSale(SaleDTO saleDto)
@@ -95,7 +112,7 @@ namespace InventoryTrackApi.Controllers.Sales
             try
             {
                 var sale = _mapper.Map<Sale>(saleDto);
-                await _saleService.CreateSaleAsync(sale);
+                await _saleService.CreateSaleAsync(sale, "Cash", 3);
 
                 var respondDto = _mapper.Map<SaleDTO>(sale);
                 return CreatedAtAction(nameof(GetSale), new { id = sale.SaleId }, respondDto);
@@ -109,50 +126,6 @@ namespace InventoryTrackApi.Controllers.Sales
                     statusCode: StatusCodes.Status500InternalServerError
                 );
             }
-
-            /*
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                // Calculate the discounted total
-                var discountedTotal = await _saleService.CalculateSalesDiscountsAsync(saleDto.TotalAmount, saleDto.DiscountPercentage);
-
-                var sale = new Sale
-                {
-                    SaleDate = saleDto.SaleDate,
-                    SaleId = saleDto.SaleId,
-                    EmployeeId = saleDto.EmployeeId,
-                    TvaAmount = saleDto.TvaAmount,
-                    TotalAmount = discountedTotal,
-                    AmountPaid = saleDto.AmountPaid,
-                    DiscountPercentage = saleDto.DiscountPercentage,
-                };
-                await _saleService.CreateSaleAsync(sale);
-
-                var responseDto = new SaleDTO
-                {
-                    SaleDate = sale.SaleDate,
-                    SaleId = sale.SaleId,
-                    EmployeeId = sale.EmployeeId,
-                    TvaAmount = sale.TvaAmount,
-                    TotalAmount = discountedTotal,
-                    AmountPaid = sale.AmountPaid,
-                    DiscountPercentage = sale.DiscountPercentage
-
-                };
-                return CreatedAtAction(nameof(GetSale), new { id = sale.SaleId }, saleDto);
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating Sale");
-                return StatusCode(500, $"Internal Server Error : {ex.Message}");
-            }
-            */
-
 
         }
 

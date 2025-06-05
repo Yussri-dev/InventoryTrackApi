@@ -31,6 +31,7 @@ namespace InventoryTrackApi.Controllers.Customers
         public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetPagedCustomers(int pageNumber = 1, int pageSize = 10)
         {
             var customers = await _customerService.GetPagedCustomersAsync(pageNumber, pageSize);
+
             return Ok(customers);
         }
 
@@ -248,6 +249,37 @@ namespace InventoryTrackApi.Controllers.Customers
             return Ok(customers);
         }
 
+        //By SaasClient -----------------------------------------
+
+        [HttpGet("Customers/{id}")]
+        //[AllowAnonymous]
+        ////[Authorize]
+        public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetCustomers(int id)
+        {
+            var customers = await _customerService.GetCustomersAsync(id);
+
+            return Ok(customers);
+        }
+
+        [HttpGet("Name/{name}/{Id}")]
+        ////[Authorize]
+        public async Task<ActionResult<CustomerDTO>> GetCustomersByName(string name)
+        {
+            try
+            {
+                var customer = await _customerService.GetCustomerByNameAsync(name);
+                return Ok(customer);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving customer by name");
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
     }
 }
