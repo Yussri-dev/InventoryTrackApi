@@ -51,7 +51,7 @@ namespace InventoryTrackApi.Services
                         SaleDate = purchase.SaleDate,
                         CustomerId = purchase.CustomerId,
                         CustomerName = purchase.Customer?.Name,
-                        //EmployeeId = purchase.EmployeeId,
+                        //UserId = purchase.UserId,
                         //TvaAmount = purchase.TvaAmount,
                         //TotalAmount = purchase.TotalAmount,
                         //AmountPaid = purchase.AmountPaid,
@@ -92,7 +92,7 @@ namespace InventoryTrackApi.Services
             return await _unitOfWork.Sales.GetAllAsync(pageNumber, pageSize);
         }
 
-        public async Task<IEnumerable<MonthlySummaryDTO>> GetMonthlySummaryAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<MonthlySummaryDTO>> GetMonthlySummaryAsync(string userId, DateTime startDate, DateTime endDate)
         {
             var result = new List<MonthlySummaryDTO>();
 
@@ -101,7 +101,8 @@ namespace InventoryTrackApi.Services
 
             // Get last day of the end month
             var endMonth = new DateTime(endDate.Year, endDate.Month, 1).AddMonths(1).AddDays(-1);
-
+            //string userId = "2f9aed4c-a3db-4b32-aeac-0e30e156b180";
+            //string userId = "75763e19-9fb7-4eff-bc39-a0d2a5d7a1a9";
             while (currentMonth <= endMonth)
             {
                 var monthStart = currentMonth;
@@ -109,22 +110,22 @@ namespace InventoryTrackApi.Services
 
                 // Get sales data
                 var salesAmount = await _unitOfWork.Sales.GetSumByPeriodAsync(
-                    sale => sale.SaleDate >= monthStart && sale.SaleDate <= monthEnd,
+                    sale => sale.SaleDate >= monthStart && sale.SaleDate <= monthEnd && sale.UserId == userId,
                     sale => sale.TotalAmount
                 );
 
                 var salesCount = await _unitOfWork.Sales.CountAsync(
-                    sale => sale.SaleDate >= monthStart && sale.SaleDate <= monthEnd
+                    sale => sale.SaleDate >= monthStart && sale.SaleDate <= monthEnd && sale.UserId == userId
                 );
 
                 // Get purchase data
                 var purchasesAmount = await _unitOfWork.Purchases.GetSumByPeriodAsync(
-                    purchase => purchase.PurchaseDate >= monthStart && purchase.PurchaseDate <= monthEnd,
+                    purchase => purchase.PurchaseDate >= monthStart && purchase.PurchaseDate <= monthEnd && purchase.UserId == userId,
                     purchase => purchase.TotalAmount
                 );
 
                 var purchasesCount = await _unitOfWork.Purchases.CountAsync(
-                    purchase => purchase.PurchaseDate >= monthStart && purchase.PurchaseDate <= monthEnd
+                    purchase => purchase.PurchaseDate >= monthStart && purchase.PurchaseDate <= monthEnd && purchase.UserId == userId
                 );
 
                 // Add to result
@@ -247,7 +248,7 @@ namespace InventoryTrackApi.Services
 
             existingSale.SaleDate = sale.SaleDate;
             existingSale.CustomerId = sale.CustomerId;
-            existingSale.EmployeeId = sale.EmployeeId;
+            existingSale.UserId = sale.UserId;
             existingSale.TvaAmount = sale.TvaAmount;
             existingSale.TotalAmount = sale.TotalAmount;
             existingSale.AmountPaid = sale.AmountPaid;

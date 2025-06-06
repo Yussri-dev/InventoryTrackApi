@@ -29,9 +29,11 @@ namespace InventoryTrackApi.Services
         //Get Sum Purchase
         public async Task<decimal> GetSumByPeriodAsync(DateTime startDate, DateTime endDate)
         {
+            //string userId = "2f9aed4c-a3db-4b32-aeac-0e30e156b180";
+            //string userId = "75763e19-9fb7-4eff-bc39-a0d2a5d7a1a9";
             return await _unitOfWork.Purchases.GetSumByPeriodAsync(
-                sale => sale.PurchaseDate >= startDate && sale.PurchaseDate <= endDate,
-                sale => sale.TotalAmount
+                p => p.PurchaseDate >= startDate && p.PurchaseDate <= endDate,
+                p => p.TotalAmount
             );
         }
 
@@ -62,8 +64,7 @@ namespace InventoryTrackApi.Services
 
                 var activeCashShifts = await _unitOfWork.CashShifts.GetWhereAsync(
                     cs => cs.CashRegisterId == cashRegisterId &&
-                          cs.SaasClientId == purchase.SaasClientId &&
-                          cs.ShiftEnd == null);
+                          cs.SaasClientId == purchase.SaasClientId);
 
                 var activeCashShift = activeCashShifts.FirstOrDefault();
 
@@ -108,7 +109,7 @@ namespace InventoryTrackApi.Services
             existingPurchase.AmountPaid = purchase.AmountPaid;
             //existingPurchase.OutstandingBalance = purchase.TotalAmount - purchase.AmountPaid;
             existingPurchase.SupplierId = purchase.SupplierId;
-            existingPurchase.EmployeeId = purchase.EmployeeId;
+            existingPurchase.UserId = purchase.UserId;
             existingPurchase.SaasClientId = purchase.SaasClientId;
 
             await _unitOfWork.Purchases.UpdateAsync(existingPurchase);
@@ -126,11 +127,11 @@ namespace InventoryTrackApi.Services
             return await _unitOfWork.Purchases.CountAsync();
         }
 
-        public async Task<List<PurchaseFlatDTO>> GetAllPurchaseFlatAsync(DateTime startDate, DateTime endDate)
+        public async Task<List<PurchaseFlatDTO>> GetAllPurchaseFlatAsync(string userId, DateTime startDate, DateTime endDate)
         {
             // Define the filter using the entity type (Purchase)
             Expression<Func<Purchase, bool>> dateFilter = purchase =>
-                purchase.PurchaseDate >= startDate.Date && purchase.PurchaseDate < endDate.Date.AddDays(1);
+                purchase.PurchaseDate >= startDate.Date && purchase.PurchaseDate < endDate.Date.AddDays(1) && purchase.UserId == userId;
 
             var purchases = await _unitOfWork.Purchases.GetDataByDateRange(dateFilter);
             var result = new List<PurchaseFlatDTO>();
@@ -152,7 +153,7 @@ namespace InventoryTrackApi.Services
                         PurchaseDate = purchase.PurchaseDate,
                         SupplierId = purchase.SupplierId,
                         SupplierName = purchase.Supplier?.Name,
-                        //EmployeeId = purchase.EmployeeId,
+                        //UserId = purchase.UserId,
                         //TvaAmount = purchase.TvaAmount,
                         //TotalAmount = purchase.TotalAmount,
                         //AmountPaid = purchase.AmountPaid,
@@ -239,7 +240,7 @@ namespace InventoryTrackApi.Services
         //                PurchaseId = purchase.PurchaseId,
         //                PurchaseDate = purchase.PurchaseDate,
         //                SupplierId = purchase.SupplierId,
-        //                EmployeeId = purchase.EmployeeId,
+        //                UserId = purchase.UserId,
         //                TvaAmount = purchase.TvaAmount,
         //                TotalAmount = purchase.TotalAmount,
         //                AmountPaid = purchase.AmountPaid,
@@ -305,7 +306,7 @@ namespace InventoryTrackApi.Services
         //            PurchaseId = purchase.PurchaseId,
         //            PurchaseDate = purchase.PurchaseDate,
         //            SupplierId = purchase.SupplierId,
-        //            EmployeeId = purchase.EmployeeId,
+        //            UserId = purchase.UserId,
         //            TvaAmount = purchase.TvaAmount,
         //            TotalAmount = purchase.TotalAmount,
         //            AmountPaid = purchase.AmountPaid,
@@ -318,6 +319,8 @@ namespace InventoryTrackApi.Services
 
         public async Task<IEnumerable<PurchaseDTO>> GetPagedPurchasesByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
+            //string userId = "2f9aed4c-a3db-4b32-aeac-0e30e156b180";
+            //string userId = "75763e19-9fb7-4eff-bc39-a0d2a5d7a1a9";
             // Define the filter using the entity type (Purchase)
             Expression<Func<Purchase, bool>> dateFilter = Purchase =>
                 Purchase.DateCreated.Date >= startDate.Date && Purchase.DateCreated.Date <= endDate.Date;

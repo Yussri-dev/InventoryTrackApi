@@ -41,8 +41,8 @@ namespace InventoryTrackApi.Models
         [JsonIgnore]
         public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
 
-        [JsonIgnore]
-        public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
+        //[JsonIgnore]
+        //public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
 
         [JsonIgnore]
         public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
@@ -61,6 +61,9 @@ namespace InventoryTrackApi.Models
 
         [JsonIgnore]
         public virtual ICollection<PurchasePayment> PurchasePayments { get; set; } = new List<PurchasePayment>();
+
+        [JsonIgnore]
+        public virtual ICollection<ApplicationUser> ApplicationUsers { get; set; } = new List<ApplicationUser>();
 
         [JsonIgnore]
         public virtual ICollection<Return> Returns { get; set; } = new List<Return>();

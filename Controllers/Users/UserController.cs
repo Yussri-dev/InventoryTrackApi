@@ -57,10 +57,24 @@ namespace InventoryTrackApi.Controllers.Users
             var users = await _userService.GetSaasClientInUser();
             return Ok(users);
         }
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<UserDTO>> GetUserById(int id)
+        //{
+        //    if (id <= 0)
+        //        return BadRequest("Invalid user ID.");
+
+        //    var user = await _userService.GetUserByIdAsync(id);
+
+        //    if (user == null)
+        //        return NotFound("User not found.");
+
+        //    return Ok(user);
+        //}
+
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDTO>> GetUserById(int id)
+        public async Task<ActionResult<UserDTO>> GetUserById(string id)
         {
-            if (id <= 0)
+            if (string.IsNullOrEmpty(id))
                 return BadRequest("Invalid user ID.");
 
             var user = await _userService.GetUserByIdAsync(id);
@@ -76,7 +90,7 @@ namespace InventoryTrackApi.Controllers.Users
         public async Task<IActionResult> UpdateUser([FromRoute] int id, UserDTO userDto)
         {
             _logger.LogInformation($"Update User request received for Id : {id}");
-            if (id != userDto.Id)
+            if (id.ToString() != userDto.Id)
             {
                 _logger.LogWarning($"User ID mismatch : Route Id {id} does not match DTO ID {userDto.Id}");
                 return BadRequest("User ID mismatch");

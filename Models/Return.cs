@@ -17,7 +17,9 @@ namespace InventoryTrackApi.Models
         [Required]
         public int CustomerId { get; set; }
         [Required]
-        public int EmployeeId { get; set; }
+        //public string UserId { get; set; }
+        public string UserId { get; set; }
+
         [Required]
         public string Reason { get; set; }
         [Required]
@@ -35,8 +37,9 @@ namespace InventoryTrackApi.Models
         [JsonIgnore]
         public virtual Sale? Sale { get; set; }
 
+        [ForeignKey("UserId")]
         [JsonIgnore]
-        public virtual Employee? Employee { get; set; }
+        public virtual ApplicationUser User { get; set; }
 
         [Required]
         public int SaasClientId { get; set; }

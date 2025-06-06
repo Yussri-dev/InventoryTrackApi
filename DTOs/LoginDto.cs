@@ -8,6 +8,7 @@ namespace InventoryTrackApi.DTOs
         [EmailAddress]
         public string Email { get; set; }
         public int IdUser { get; set; }
+        public int SaasClientId { get; set; }
 
         [Required]
         public string Password { get; set; }

@@ -20,6 +20,15 @@ namespace InventoryTrackApi.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            #region ApplicationUser
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.SaasClient)
+                .WithMany(c => c.ApplicationUsers)
+                .HasForeignKey(u => u.SaasClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+            #endregion
+
+
             #region Category, Location, Customer, Supplier
 
             // Ensuring unique names
@@ -86,19 +95,19 @@ namespace InventoryTrackApi.Data
 
             #endregion
 
-            #region Employee Relationships
+            #region User Relationships
 
-            modelBuilder.Entity<Employee>()
-                .HasMany(e => e.CashRegisters)
-                .WithOne(c => c.Employee)
-                .HasForeignKey(c => c.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevents accidental deletion of Employee affecting CashRegisters
+            //modelBuilder.Entity<User>()
+            //    .HasMany(e => e.CashRegisters)
+            //    .WithOne(c => c.User)
+            //    .HasForeignKey(c => c.UserId)
+            //    .OnDelete(DeleteBehavior.Restrict); // Prevents accidental deletion of User affecting CashRegisters
 
-            modelBuilder.Entity<Employee>()
-                .HasMany(e => e.CashShifts)
-                .WithOne(cs => cs.Employee)
-                .HasForeignKey(cs => cs.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict); // Ensures Employee deletion doesn’t affect shifts
+            //modelBuilder.Entity<User>()
+            //    .HasMany(e => e.CashShifts)
+            //    .WithOne(cs => cs.User)
+            //    .HasForeignKey(cs => cs.UserId)
+            //    .OnDelete(DeleteBehavior.Restrict); // Ensures User deletion doesn’t affect shifts
 
             #endregion
 
@@ -118,12 +127,12 @@ namespace InventoryTrackApi.Data
                 .HasForeignKey(c => c.LocationId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
 
-            // CashRegister → Employee (Optional)
+            // CashRegister → User (Optional)
             modelBuilder.Entity<CashRegister>()
-                .HasOne(c => c.Employee)
+                .HasOne(c => c.User)
                 .WithMany(e => e.CashRegisters)
-                .HasForeignKey(c => c.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict); // Allows unregistering an employee without deleting CashRegister
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict); // Allows unregistering an User without deleting CashRegister
 
             #endregion
 
@@ -171,9 +180,9 @@ namespace InventoryTrackApi.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Purchase>()
-                .HasOne(p => p.Employee)
+                .HasOne(p => p.User)
                 .WithMany(e => e.Purchases)
-                .HasForeignKey(p => p.EmployeeId)
+                .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PurchaseItem>()
@@ -215,11 +224,11 @@ namespace InventoryTrackApi.Data
                 .HasForeignKey(s => s.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Sale>()
-                .HasOne(s => s.Employee)
-                .WithMany(e => e.Sales)
-                .HasForeignKey(s => s.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<Sale>()
+            //    .HasOne(s => s.User)
+            //    .WithMany(e => e.Sales)
+            //    .HasForeignKey(s => s.UserId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<SaleItem>()
                 .HasOne(si => si.Sale)
@@ -251,9 +260,9 @@ namespace InventoryTrackApi.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Return>()
-                .HasOne(r => r.Employee)
+                .HasOne(r => r.User)
                 .WithMany(e => e.Returns)
-                .HasForeignKey(r => r.EmployeeId)
+                .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ReturnItem>()
@@ -298,7 +307,7 @@ namespace InventoryTrackApi.Data
         public DbSet<CashShift> CashShifts { get; set; }
         public DbSet<CashTransaction> CashTransactions { get; set; }
         public DbSet<Customer> Customers { get; set; }
-        public DbSet<Employee> Employees { get; set; }
+        //public DbSet<User> Users { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
         public DbSet<InventoryMouvement> InventoryMouvements { get; set; }
         public DbSet<Location> Locations { get; set; }

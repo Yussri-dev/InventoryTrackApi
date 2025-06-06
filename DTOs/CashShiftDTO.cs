@@ -17,7 +17,7 @@ namespace InventoryTrackApi.DTOs
         public decimal CashOut { get; set; }
         public DateTime DateCreated { get; set; }
         public int CashRegisterId { get; set; }
-        public int EmployeeId { get; set; }
+        public string UserId { get; set; }
         public string? NameComplete { get; set; }
 
         public int SaasClientId { get; set; }

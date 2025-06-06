@@ -16,7 +16,9 @@ namespace InventoryTrackApi.Models
         [Required]
         public int CustomerId { get; set; }
         [Required]
-        public int EmployeeId { get; set; }
+        //public string UserId { get; set; }
+        public string UserId { get; set; }
+
         [Required]
         public decimal TvaAmount { get; set; } = 0m;
         [Required]
@@ -30,8 +32,11 @@ namespace InventoryTrackApi.Models
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public virtual Customer? Customer { get; set; }
+        //public virtual User? User { get; set; }
+
+        [ForeignKey("UserId")]
         [JsonIgnore]
-        public virtual Employee? Employee { get; set; }
+        public virtual ApplicationUser User { get; set; }
 
         [Required]
         public int SaasClientId { get; set; }

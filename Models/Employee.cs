@@ -9,7 +9,7 @@ namespace InventoryTrackApi.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int EmployeeId { get; set; }
+        public string UserId { get; set; }
         [Required]
         public string FirstName { get; set; } = string.Empty;
         [Required]

@@ -193,7 +193,7 @@ namespace InventoryTrackApi.Data
             modelBuilder.Entity<Employee>().HasData(
                 new Employee
                 {
-                    EmployeeId = 1,
+                    UserId = 1,
                     FirstName = "Admin",
                     LastName = "User",
                     //NameComplete = 
@@ -205,7 +205,7 @@ namespace InventoryTrackApi.Data
                 },
                 new Employee
                 {
-                    EmployeeId = 2,
+                    UserId = 2,
                     FirstName = "John",
                     LastName = "Doe",
                     Role = "Cashier",
@@ -216,7 +216,7 @@ namespace InventoryTrackApi.Data
                 },
                 new Employee
                 {
-                    EmployeeId = 3,
+                    UserId = 3,
                     FirstName = "Jane",
                     LastName = "Smith",
                     Role = "Manager",
@@ -275,7 +275,7 @@ namespace InventoryTrackApi.Data
                    Name = "Main Register",
                    IsActive = true,
                    LocationId = 1,
-                   EmployeeId = 1
+                   UserId = 1
                },
                new CashRegister
                {
@@ -283,7 +283,7 @@ namespace InventoryTrackApi.Data
                    Name = "Secondary Register",
                    IsActive = true,
                    LocationId = 2,
-                   EmployeeId = 2
+                   UserId = 2
                }
             );
 
@@ -301,7 +301,7 @@ namespace InventoryTrackApi.Data
                     CashIn = 200m,
                     CashOut = 100m,
                     CashRegisterId = 1,  // Make sure you have a CashRegister with Id 1 in the seed data
-                    EmployeeId = 1       // Make sure you have an Employee with Id 1 in the seed data
+                    UserId = 1       // Make sure you have an Employee with Id 1 in the seed data
                 },
                 new CashShift
                 {
@@ -315,7 +315,7 @@ namespace InventoryTrackApi.Data
                     CashIn = 300m,
                     CashOut = 50m,
                     CashRegisterId = 2,  // Make sure you have a CashRegister with Id 2 in the seed data
-                    EmployeeId = 2       // Make sure you have an Employee with Id 2 in the seed data
+                    UserId = 2       // Make sure you have an Employee with Id 2 in the seed data
                 }
             );
 
@@ -448,7 +448,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 550.00m, // Total amount for the purchase
                     AmountPaid = 300.00m, // Amount paid
                     SupplierId = 1, // Assume a Supplier with ID 1 exists
-                    EmployeeId = 1 // Assume an Employee with ID 1 exists
+                    UserId = 1 // Assume an Employee with ID 1 exists
                 },
                 new Purchase
                 {
@@ -458,7 +458,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 750.00m, // Total amount for the purchase
                     AmountPaid = 750.00m, // Fully paid
                     SupplierId = 2, // Assume a Supplier with ID 2 exists
-                    EmployeeId = 2 // Assume an Employee with ID 2 exists
+                    UserId = 2 // Assume an Employee with ID 2 exists
                 },
                 new Purchase
                 {
@@ -468,7 +468,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 325.00m, // Total amount for the purchase
                     AmountPaid = 150.00m, // Partially paid
                     SupplierId = 1, // Assume a Supplier with ID 1 exists
-                    EmployeeId = 3 // Assume an Employee with ID 3 exists
+                    UserId = 3 // Assume an Employee with ID 3 exists
                 },
                 new Purchase
                 {
@@ -478,7 +478,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 325.00m, // Total amount for the purchase
                     AmountPaid = 150.00m, // Partially paid
                     SupplierId = 1, // Assume a Supplier with ID 1 exists
-                    EmployeeId = 3 // Assume an Employee with ID 3 exists
+                    UserId = 3 // Assume an Employee with ID 3 exists
                 },
                 new Purchase
                 {
@@ -488,7 +488,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 325.00m, // Total amount for the purchase
                     AmountPaid = 150.00m, // Partially paid
                     SupplierId = 1, // Assume a Supplier with ID 1 exists
-                    EmployeeId = 3 // Assume an Employee with ID 3 exists
+                    UserId = 3 // Assume an Employee with ID 3 exists
                 },
                 new Purchase
                 {
@@ -498,7 +498,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 325.00m, // Total amount for the purchase
                     AmountPaid = 150.00m, // Partially paid
                     SupplierId = 1, // Assume a Supplier with ID 1 exists
-                    EmployeeId = 3 // Assume an Employee with ID 3 exists
+                    UserId = 3 // Assume an Employee with ID 3 exists
                 },
                 new Purchase
                 {
@@ -508,7 +508,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 325.00m, // Total amount for the purchase
                     AmountPaid = 150.00m, // Partially paid
                     SupplierId = 1, // Assume a Supplier with ID 1 exists
-                    EmployeeId = 3 // Assume an Employee with ID 3 exists
+                    UserId = 3 // Assume an Employee with ID 3 exists
                 },
                 new Purchase
                 {
@@ -518,7 +518,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 325.00m, // Total amount for the purchase
                     AmountPaid = 150.00m, // Partially paid
                     SupplierId = 1, // Assume a Supplier with ID 1 exists
-                    EmployeeId = 3 // Assume an Employee with ID 3 exists
+                    UserId = 3 // Assume an Employee with ID 3 exists
                 },
                 new Purchase
                 {
@@ -528,7 +528,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 325.00m, // Total amount for the purchase
                     AmountPaid = 150.00m, // Partially paid
                     SupplierId = 1, // Assume a Supplier with ID 1 exists
-                    EmployeeId = 3 // Assume an Employee with ID 3 exists
+                    UserId = 3 // Assume an Employee with ID 3 exists
                 },
                 new Purchase
                 {
@@ -538,7 +538,7 @@ namespace InventoryTrackApi.Data
                     TotalAmount = 325.00m, // Total amount for the purchase
                     AmountPaid = 150.00m, // Partially paid
                     SupplierId = 1, // Assume a Supplier with ID 1 exists
-                    EmployeeId = 3 // Assume an Employee with ID 3 exists
+                    UserId = 3 // Assume an Employee with ID 3 exists
                 }
             );
 
@@ -670,7 +670,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 1,
                     SaleDate = new DateTime(2024, 1, 1),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 20.00m,
                     TotalAmount = 120.00m,
                     AmountPaid = 100.00m
@@ -680,7 +680,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 2,
                     SaleDate = new DateTime(2024, 1, 2),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 30.00m,
                     TotalAmount = 150.00m,
                     AmountPaid = 120.00m
@@ -690,7 +690,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 3,
                     SaleDate = new DateTime(2024, 1, 3),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 25.00m,
                     TotalAmount = 200.00m,
                     AmountPaid = 150.00m
@@ -700,7 +700,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 4,
                     SaleDate = new DateTime(2024, 1, 4),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 15.00m,
                     TotalAmount = 100.00m,
                     AmountPaid = 50.00m
@@ -710,7 +710,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 5,
                     SaleDate = new DateTime(2024, 1, 5),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 50.00m,
                     TotalAmount = 300.00m,
                     AmountPaid = 200.00m
@@ -720,7 +720,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 6,
                     SaleDate = new DateTime(2024, 1, 6),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 10.00m,
                     TotalAmount = 50.00m,
                     AmountPaid = 30.00m
@@ -730,7 +730,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 7,
                     SaleDate = new DateTime(2024, 1, 7),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 40.00m,
                     TotalAmount = 250.00m,
                     AmountPaid = 180.00m
@@ -740,7 +740,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 8,
                     SaleDate = new DateTime(2024, 1, 8),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 35.00m,
                     TotalAmount = 220.00m,
                     AmountPaid = 200.00m
@@ -750,7 +750,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 9,
                     SaleDate = new DateTime(2024, 1, 9),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 45.00m,
                     TotalAmount = 270.00m,
                     AmountPaid = 230.00m
@@ -760,7 +760,7 @@ namespace InventoryTrackApi.Data
                     SaleId = 10,
                     SaleDate = new DateTime(2024, 1, 10),
                     CustomerId = 1,
-                    EmployeeId = 1,
+                    UserId = 1,
                     TvaAmount = 60.00m,
                     TotalAmount = 320.00m,
                     AmountPaid = 300.00m

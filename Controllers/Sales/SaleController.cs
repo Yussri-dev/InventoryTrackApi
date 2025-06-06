@@ -55,16 +55,15 @@ namespace InventoryTrackApi.Controllers.Sales
         }
 
         [HttpGet("monthly-summary")]
-        public async Task<ActionResult<IEnumerable<MonthlySummaryDTO>>> GetMonthlySummary(
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null)
+        public async Task<ActionResult<IEnumerable<MonthlySummaryDTO>>> GetMonthlySummary([FromQuery] string userId,
+            [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
         {
             var start = startDate ?? DateTime.Today.AddMonths(-6);
             var end = endDate ?? DateTime.Today;
 
             try
             {
-                var monthlySummaries = await _saleService.GetMonthlySummaryAsync(start, end);
+                var monthlySummaries = await _saleService.GetMonthlySummaryAsync(userId,start, end);
                 return Ok(monthlySummaries);
             }
             catch (Exception ex)
@@ -112,7 +111,7 @@ namespace InventoryTrackApi.Controllers.Sales
             try
             {
                 var sale = _mapper.Map<Sale>(saleDto);
-                await _saleService.CreateSaleAsync(sale, "Cash", 3);
+                await _saleService.CreateSaleAsync(sale, "Cash", 4);
 
                 var respondDto = _mapper.Map<SaleDTO>(sale);
                 return CreatedAtAction(nameof(GetSale), new { id = sale.SaleId }, respondDto);
@@ -121,7 +120,7 @@ namespace InventoryTrackApi.Controllers.Sales
             {
                 _logger.LogError(ex, "Error Creating Sale: {Message}", ex.Message);
                 return Problem(
-                    title: "An error occurred while creating the purchase.",
+                    title: "An error occurred while creating the sale.",
                     detail: ex.Message,
                     statusCode: StatusCodes.Status500InternalServerError
                 );

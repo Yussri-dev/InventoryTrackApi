@@ -8,11 +8,54 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace InventoryTrackApi.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCatalog : Migration
+    public partial class initialcatalog : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AspNetRoles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastLoginTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
@@ -102,6 +145,112 @@ namespace InventoryTrackApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AspNetRoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserLogins",
+                columns: table => new
+                {
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Customers",
                 columns: table => new
                 {
@@ -133,32 +282,6 @@ namespace InventoryTrackApi.Migrations
                         principalTable: "SaasClients",
                         principalColumn: "SaasClientId",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Employees",
-                columns: table => new
-                {
-                    EmployeeId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SaasClientId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Employees", x => x.EmployeeId);
-                    table.ForeignKey(
-                        name: "FK_Employees_SaasClients_SaasClientId",
-                        column: x => x.SaasClientId,
-                        principalTable: "SaasClients",
-                        principalColumn: "SaasClientId",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -227,15 +350,14 @@ namespace InventoryTrackApi.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SaasClientId = table.Column<int>(type: "int", nullable: false)
+                    SaasClientId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -317,81 +439,6 @@ namespace InventoryTrackApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Sales",
-                columns: table => new
-                {
-                    SaleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SaleDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
-                    TvaAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    AmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DiscountPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SaasClientId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Sales", x => x.SaleId);
-                    table.ForeignKey(
-                        name: "FK_Sales_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "CustomerId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Sales_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Sales_SaasClients_SaasClientId",
-                        column: x => x.SaasClientId,
-                        principalTable: "SaasClients",
-                        principalColumn: "SaasClientId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CashRegisters",
-                columns: table => new
-                {
-                    CashRegisterId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    LocationId = table.Column<int>(type: "int", nullable: false),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SaasClientId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CashRegisters", x => x.CashRegisterId);
-                    table.ForeignKey(
-                        name: "FK_CashRegisters_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_CashRegisters_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "LocationId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_CashRegisters_SaasClients_SaasClientId",
-                        column: x => x.SaasClientId,
-                        principalTable: "SaasClients",
-                        principalColumn: "SaasClientId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "InventoryMouvements",
                 columns: table => new
                 {
@@ -423,6 +470,48 @@ namespace InventoryTrackApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CashRegisters",
+                columns: table => new
+                {
+                    CashRegisterId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    LocationId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SaasClientId = table.Column<int>(type: "int", nullable: false),
+                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CashRegisters", x => x.CashRegisterId);
+                    table.ForeignKey(
+                        name: "FK_CashRegisters_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CashRegisters_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
+                        principalColumn: "LocationId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CashRegisters_SaasClients_SaasClientId",
+                        column: x => x.SaasClientId,
+                        principalTable: "SaasClients",
+                        principalColumn: "SaasClientId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CashRegisters_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Purchases",
                 columns: table => new
                 {
@@ -434,17 +523,18 @@ namespace InventoryTrackApi.Migrations
                     AmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SupplierId = table.Column<int>(type: "int", nullable: false),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
-                    SaasClientId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SaasClientId = table.Column<int>(type: "int", nullable: false),
+                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Purchases", x => x.PurchaseId);
                     table.ForeignKey(
-                        name: "FK_Purchases_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeId",
+                        name: "FK_Purchases_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Purchases_SaasClients_SaasClientId",
@@ -458,6 +548,56 @@ namespace InventoryTrackApi.Migrations
                         principalTable: "Supplier",
                         principalColumn: "SupplierId",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Purchases_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Sales",
+                columns: table => new
+                {
+                    SaleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SaleDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TvaAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DiscountPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SaasClientId = table.Column<int>(type: "int", nullable: false),
+                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sales", x => x.SaleId);
+                    table.ForeignKey(
+                        name: "FK_Sales_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Sales_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "CustomerId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Sales_SaasClients_SaasClientId",
+                        column: x => x.SaasClientId,
+                        principalTable: "SaasClients",
+                        principalColumn: "SaasClientId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Sales_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -524,6 +664,150 @@ namespace InventoryTrackApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "InventoryMouvementProduct",
+                columns: table => new
+                {
+                    InventoryMouvementsInventoryMouvementId = table.Column<int>(type: "int", nullable: false),
+                    ProductsProductId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InventoryMouvementProduct", x => new { x.InventoryMouvementsInventoryMouvementId, x.ProductsProductId });
+                    table.ForeignKey(
+                        name: "FK_InventoryMouvementProduct_InventoryMouvements_InventoryMouvementsInventoryMouvementId",
+                        column: x => x.InventoryMouvementsInventoryMouvementId,
+                        principalTable: "InventoryMouvements",
+                        principalColumn: "InventoryMouvementId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_InventoryMouvementProduct_Products_ProductsProductId",
+                        column: x => x.ProductsProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CashShifts",
+                columns: table => new
+                {
+                    CashShiftId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ShiftDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ShiftStart = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ShiftEnd = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    OpeningBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ClosingBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalSales = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalRefunds = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CashIn = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CashOut = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedById = table.Column<int>(type: "int", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CashRegisterId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SaasClientId = table.Column<int>(type: "int", nullable: false),
+                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CashShifts", x => x.CashShiftId);
+                    table.ForeignKey(
+                        name: "FK_CashShifts_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CashShifts_CashRegisters_CashRegisterId",
+                        column: x => x.CashRegisterId,
+                        principalTable: "CashRegisters",
+                        principalColumn: "CashRegisterId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CashShifts_SaasClients_SaasClientId",
+                        column: x => x.SaasClientId,
+                        principalTable: "SaasClients",
+                        principalColumn: "SaasClientId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CashShifts_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PurchaseItems",
+                columns: table => new
+                {
+                    PurchaseItemId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PurchaseId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TaxAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SaasClientId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PurchaseItems", x => x.PurchaseItemId);
+                    table.ForeignKey(
+                        name: "FK_PurchaseItems_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PurchaseItems_Purchases_PurchaseId",
+                        column: x => x.PurchaseId,
+                        principalTable: "Purchases",
+                        principalColumn: "PurchaseId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PurchaseItems_SaasClients_SaasClientId",
+                        column: x => x.SaasClientId,
+                        principalTable: "SaasClients",
+                        principalColumn: "SaasClientId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "purchasePayments",
+                columns: table => new
+                {
+                    PurchasePaymentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PurchaseId = table.Column<int>(type: "int", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaymentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SaasClientId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_purchasePayments", x => x.PurchasePaymentId);
+                    table.ForeignKey(
+                        name: "FK_purchasePayments_Purchases_PurchaseId",
+                        column: x => x.PurchaseId,
+                        principalTable: "Purchases",
+                        principalColumn: "PurchaseId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_purchasePayments_SaasClients_SaasClientId",
+                        column: x => x.SaasClientId,
+                        principalTable: "SaasClients",
+                        principalColumn: "SaasClientId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Return",
                 columns: table => new
                 {
@@ -532,28 +816,29 @@ namespace InventoryTrackApi.Migrations
                     SaleId = table.Column<int>(type: "int", nullable: false),
                     ReturnDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RefundAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ReturnMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SaasClientId = table.Column<int>(type: "int", nullable: false)
+                    SaasClientId = table.Column<int>(type: "int", nullable: false),
+                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Return", x => x.ReturnId);
                     table.ForeignKey(
+                        name: "FK_Return_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Return_Customers_CustomerId",
                         column: x => x.CustomerId,
                         principalTable: "Customers",
                         principalColumn: "CustomerId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Return_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Return_SaasClients_SaasClientId",
@@ -567,6 +852,11 @@ namespace InventoryTrackApi.Migrations
                         principalTable: "Sales",
                         principalColumn: "SaleId",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Return_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -647,135 +937,30 @@ namespace InventoryTrackApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CashShifts",
+                name: "CashTransactions",
                 columns: table => new
                 {
-                    CashShiftId = table.Column<int>(type: "int", nullable: false)
+                    CashTransactionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ShiftDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ShiftStart = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ShiftEnd = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    OpeningBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ClosingBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalSales = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalRefunds = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CashIn = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CashOut = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CashRegisterId = table.Column<int>(type: "int", nullable: false),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
-                    SaasClientId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CashShifts", x => x.CashShiftId);
-                    table.ForeignKey(
-                        name: "FK_CashShifts_CashRegisters_CashRegisterId",
-                        column: x => x.CashRegisterId,
-                        principalTable: "CashRegisters",
-                        principalColumn: "CashRegisterId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CashShifts_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_CashShifts_SaasClients_SaasClientId",
-                        column: x => x.SaasClientId,
-                        principalTable: "SaasClients",
-                        principalColumn: "SaasClientId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "InventoryMouvementProduct",
-                columns: table => new
-                {
-                    InventoryMouvementsInventoryMouvementId = table.Column<int>(type: "int", nullable: false),
-                    ProductsProductId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_InventoryMouvementProduct", x => new { x.InventoryMouvementsInventoryMouvementId, x.ProductsProductId });
-                    table.ForeignKey(
-                        name: "FK_InventoryMouvementProduct_InventoryMouvements_InventoryMouvementsInventoryMouvementId",
-                        column: x => x.InventoryMouvementsInventoryMouvementId,
-                        principalTable: "InventoryMouvements",
-                        principalColumn: "InventoryMouvementId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_InventoryMouvementProduct_Products_ProductsProductId",
-                        column: x => x.ProductsProductId,
-                        principalTable: "Products",
-                        principalColumn: "ProductId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PurchaseItems",
-                columns: table => new
-                {
-                    PurchaseItemId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PurchaseId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TaxAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SaasClientId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PurchaseItems", x => x.PurchaseItemId);
-                    table.ForeignKey(
-                        name: "FK_PurchaseItems_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "ProductId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_PurchaseItems_Purchases_PurchaseId",
-                        column: x => x.PurchaseId,
-                        principalTable: "Purchases",
-                        principalColumn: "PurchaseId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_PurchaseItems_SaasClients_SaasClientId",
-                        column: x => x.SaasClientId,
-                        principalTable: "SaasClients",
-                        principalColumn: "SaasClientId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "purchasePayments",
-                columns: table => new
-                {
-                    PurchasePaymentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PurchaseId = table.Column<int>(type: "int", nullable: false),
-                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CashShiftId = table.Column<int>(type: "int", nullable: false),
+                    TransactionType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PaymentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TransactionTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SaasClientId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_purchasePayments", x => x.PurchasePaymentId);
+                    table.PrimaryKey("PK_CashTransactions", x => x.CashTransactionId);
                     table.ForeignKey(
-                        name: "FK_purchasePayments_Purchases_PurchaseId",
-                        column: x => x.PurchaseId,
-                        principalTable: "Purchases",
-                        principalColumn: "PurchaseId",
+                        name: "FK_CashTransactions_CashShifts_CashShiftId",
+                        column: x => x.CashShiftId,
+                        principalTable: "CashShifts",
+                        principalColumn: "CashShiftId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_purchasePayments_SaasClients_SaasClientId",
+                        name: "FK_CashTransactions_SaasClients_SaasClientId",
                         column: x => x.SaasClientId,
                         principalTable: "SaasClients",
                         principalColumn: "SaasClientId",
@@ -855,54 +1040,23 @@ namespace InventoryTrackApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "CashTransactions",
-                columns: table => new
-                {
-                    CashTransactionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CashShiftId = table.Column<int>(type: "int", nullable: false),
-                    TransactionType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TransactionTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SaasClientId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CashTransactions", x => x.CashTransactionId);
-                    table.ForeignKey(
-                        name: "FK_CashTransactions_CashShifts_CashShiftId",
-                        column: x => x.CashShiftId,
-                        principalTable: "CashShifts",
-                        principalColumn: "CashShiftId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_CashTransactions_SaasClients_SaasClientId",
-                        column: x => x.SaasClientId,
-                        principalTable: "SaasClients",
-                        principalColumn: "SaasClientId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.InsertData(
                 table: "Categories",
                 columns: new[] { "CategoryId", "DateCreated", "Name" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(4681), "Electronics" },
-                    { 2, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5084), "Clothing" },
-                    { 3, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5085), "Groceries" },
-                    { 4, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5086), "Furniture" },
-                    { 5, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5087), "Books" },
-                    { 6, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5088), "Sacs" },
-                    { 7, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5089), "Data" },
-                    { 8, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5089), "Bread" },
-                    { 9, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5090), "Jacket" },
-                    { 10, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5091), "T-Shirts" },
-                    { 11, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5092), "Jeans" },
-                    { 12, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(5093), "Mobile" }
+                    { 1, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9634), "Electronics" },
+                    { 2, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9963), "Clothing" },
+                    { 3, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9964), "Groceries" },
+                    { 4, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9964), "Furniture" },
+                    { 5, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9965), "Books" },
+                    { 6, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9966), "Sacs" },
+                    { 7, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9966), "Data" },
+                    { 8, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9967), "Bread" },
+                    { 9, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9968), "Jacket" },
+                    { 10, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9968), "T-Shirts" },
+                    { 11, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9969), "Jeans" },
+                    { 12, new DateTime(2025, 6, 5, 11, 11, 36, 518, DateTimeKind.Utc).AddTicks(9970), "Mobile" }
                 });
 
             migrationBuilder.InsertData(
@@ -910,11 +1064,11 @@ namespace InventoryTrackApi.Migrations
                 columns: new[] { "LineId", "DateCreated", "Name" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 3, 12, 22, 42, 33, 225, DateTimeKind.Utc).AddTicks(9672), "Electronics Line" },
-                    { 2, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(9), "Clothing Line" },
-                    { 3, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(10), "Grocery Line" },
-                    { 4, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(11), "Furniture Line" },
-                    { 5, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(12), "Toys Line" }
+                    { 1, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(4995), "Electronics Line" },
+                    { 2, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(5327), "Clothing Line" },
+                    { 3, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(5328), "Grocery Line" },
+                    { 4, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(5328), "Furniture Line" },
+                    { 5, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(5329), "Toys Line" }
                 });
 
             migrationBuilder.InsertData(
@@ -922,9 +1076,9 @@ namespace InventoryTrackApi.Migrations
                 columns: new[] { "ShelfId", "DateCreated", "Name" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(451), "Shelf 1" },
-                    { 2, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(680), "Shelf 2" },
-                    { 3, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(681), "Shelf 3" }
+                    { 1, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(6159), "Shelf 1" },
+                    { 2, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(6358), "Shelf 2" },
+                    { 3, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(6359), "Shelf 3" }
                 });
 
             migrationBuilder.InsertData(
@@ -932,9 +1086,9 @@ namespace InventoryTrackApi.Migrations
                 columns: new[] { "TaxId", "DateCreated", "TaxRate" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1088), 10m },
-                    { 2, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1381), 20m },
-                    { 3, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1400), 30m }
+                    { 1, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(7174), 10m },
+                    { 2, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(8087), 20m },
+                    { 3, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(8088), 30m }
                 });
 
             migrationBuilder.InsertData(
@@ -942,9 +1096,9 @@ namespace InventoryTrackApi.Migrations
                 columns: new[] { "UnitId", "DateCreated", "Name" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1745), "Unit 1" },
-                    { 2, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1956), "Unit 2" },
-                    { 3, new DateTime(2025, 3, 12, 22, 42, 33, 226, DateTimeKind.Utc).AddTicks(1957), "Unit 3" }
+                    { 1, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(8441), "Unit 1" },
+                    { 2, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(8628), "Unit 2" },
+                    { 3, new DateTime(2025, 6, 5, 11, 11, 36, 519, DateTimeKind.Utc).AddTicks(8629), "Unit 3" }
                 });
 
             migrationBuilder.InsertData(
@@ -952,15 +1106,49 @@ namespace InventoryTrackApi.Migrations
                 columns: new[] { "ProductId", "Barcode", "CategoryId", "CreatedBy", "DateCreated", "DateModified", "DiscountPercentage", "ImageUrl", "IsActivate", "IsBuyThreeForFiveEligible", "IsSecondItemDiscountEligible", "LineId", "MaxStock", "MinStock", "ModifiedBy", "Name", "PackUnitType", "ProductUnitId", "PurchasePrice", "QuantityPack", "QuantityStock", "SalePrice1", "SalePrice2", "SalePrice3", "ShelfId", "TaxId", "UnitId" },
                 values: new object[,]
                 {
-                    { 1, "1234567890123", 1, "Admin", new DateTime(2025, 3, 12, 23, 42, 33, 227, DateTimeKind.Local).AddTicks(9777), new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(1), 0m, "https://example.com/productA.jpg", true, false, false, 1, 100m, 10m, "Admin", "Product A", "Box", 1, 100.00m, 1m, 50m, 150.00m, 160.00m, 170.00m, 1, 1, 1 },
-                    { 2, "2234567890123", 2, "Admin", new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(624), new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(626), 0m, "https://example.com/productB.jpg", true, false, false, 2, 5m, 5m, "Admin", "Product B", "Piece", 2, 50.00m, 1m, 30m, 70.00m, 75.00m, 80.00m, 2, 2, 2 },
-                    { 3, "3234567890123", 3, "Admin", new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(635), new DateTime(2025, 3, 12, 23, 42, 33, 228, DateTimeKind.Local).AddTicks(636), 0m, "https://example.com/productC.jpg", true, false, false, 3, 5m, 5m, "Admin", "Product C", "Piece", 3, 200.00m, 1m, 60m, 250.00m, 260.00m, 270.00m, 3, 3, 3 }
+                    { 1, "1234567890123", 1, "Admin", new DateTime(2025, 6, 5, 13, 11, 36, 523, DateTimeKind.Local).AddTicks(1388), new DateTime(2025, 6, 5, 13, 11, 36, 523, DateTimeKind.Local).AddTicks(1934), 0m, "https://example.com/productA.jpg", true, false, false, 1, 100m, 10m, "Admin", "Product A", "Box", 1, 100.00m, 1m, 50m, 150.00m, 160.00m, 170.00m, 1, 1, 1 },
+                    { 2, "2234567890123", 2, "Admin", new DateTime(2025, 6, 5, 13, 11, 36, 523, DateTimeKind.Local).AddTicks(3552), new DateTime(2025, 6, 5, 13, 11, 36, 523, DateTimeKind.Local).AddTicks(3554), 0m, "https://example.com/productB.jpg", true, false, false, 2, 5m, 5m, "Admin", "Product B", "Piece", 2, 50.00m, 1m, 30m, 70.00m, 75.00m, 80.00m, 2, 2, 2 },
+                    { 3, "3234567890123", 3, "Admin", new DateTime(2025, 6, 5, 13, 11, 36, 523, DateTimeKind.Local).AddTicks(3565), new DateTime(2025, 6, 5, 13, 11, 36, 523, DateTimeKind.Local).AddTicks(3567), 0m, "https://example.com/productC.jpg", true, false, false, 3, 5m, 5m, "Admin", "Product C", "Piece", 3, 200.00m, 1m, 60m, 250.00m, 260.00m, 270.00m, 3, 3, 3 }
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CashRegisters_EmployeeId",
-                table: "CashRegisters",
-                column: "EmployeeId");
+                name: "IX_AspNetRoleClaims_RoleId",
+                table: "AspNetRoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                table: "AspNetRoles",
+                column: "NormalizedName",
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserClaims_UserId",
+                table: "AspNetUserClaims",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserLogins_UserId",
+                table: "AspNetUserLogins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_RoleId",
+                table: "AspNetUserRoles",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "EmailIndex",
+                table: "AspNetUsers",
+                column: "NormalizedEmail");
+
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
+                table: "AspNetUsers",
+                column: "NormalizedUserName",
+                unique: true,
+                filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CashRegisters_LocationId",
@@ -973,19 +1161,34 @@ namespace InventoryTrackApi.Migrations
                 column: "SaasClientId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CashRegisters_UserId",
+                table: "CashRegisters",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CashRegisters_UserId1",
+                table: "CashRegisters",
+                column: "UserId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CashShifts_CashRegisterId",
                 table: "CashShifts",
                 column: "CashRegisterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CashShifts_EmployeeId",
-                table: "CashShifts",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CashShifts_SaasClientId",
                 table: "CashShifts",
                 column: "SaasClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CashShifts_UserId",
+                table: "CashShifts",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CashShifts_UserId1",
+                table: "CashShifts",
+                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CashTransactions_CashShiftId",
@@ -1012,11 +1215,6 @@ namespace InventoryTrackApi.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Customers_SaasClientId",
                 table: "Customers",
-                column: "SaasClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Employees_SaasClientId",
-                table: "Employees",
                 column: "SaasClientId");
 
             migrationBuilder.CreateIndex(
@@ -1128,11 +1326,6 @@ namespace InventoryTrackApi.Migrations
                 column: "SaasClientId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Purchases_EmployeeId",
-                table: "Purchases",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Purchases_SaasClientId",
                 table: "Purchases",
                 column: "SaasClientId");
@@ -1143,14 +1336,19 @@ namespace InventoryTrackApi.Migrations
                 column: "SupplierId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Purchases_UserId",
+                table: "Purchases",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Purchases_UserId1",
+                table: "Purchases",
+                column: "UserId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Return_CustomerId",
                 table: "Return",
                 column: "CustomerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Return_EmployeeId",
-                table: "Return",
-                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Return_SaasClientId",
@@ -1161,6 +1359,16 @@ namespace InventoryTrackApi.Migrations
                 name: "IX_Return_SaleId",
                 table: "Return",
                 column: "SaleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Return_UserId",
+                table: "Return",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Return_UserId1",
+                table: "Return",
+                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReturnItem_ProductId",
@@ -1223,14 +1431,19 @@ namespace InventoryTrackApi.Migrations
                 column: "CustomerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Sales_EmployeeId",
-                table: "Sales",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Sales_SaasClientId",
                 table: "Sales",
                 column: "SaasClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sales_UserId",
+                table: "Sales",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sales_UserId1",
+                table: "Sales",
+                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Supplier_Name",
@@ -1252,6 +1465,21 @@ namespace InventoryTrackApi.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AspNetRoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserLogins");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserRoles");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserTokens");
+
             migrationBuilder.DropTable(
                 name: "CashTransactions");
 
@@ -1283,7 +1511,7 @@ namespace InventoryTrackApi.Migrations
                 name: "SalePayments");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "CashShifts");
@@ -1328,10 +1556,13 @@ namespace InventoryTrackApi.Migrations
                 name: "Locations");
 
             migrationBuilder.DropTable(
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
                 name: "Customers");
 
             migrationBuilder.DropTable(
-                name: "Employees");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "SaasClients");

@@ -47,7 +47,7 @@ namespace InventoryTrackApi.Services
             
             existingReturn.ReturnDate = returnModel.ReturnDate;
             existingReturn.CustomerId = returnModel.CustomerId;
-            existingReturn.EmployeeId = returnModel.EmployeeId;
+            existingReturn.UserId = returnModel.UserId;
             existingReturn.Reason = returnModel.Reason;
             existingReturn.Status = returnModel.Status;
             existingReturn.RefundAmount = returnModel.RefundAmount;

@@ -5,7 +5,7 @@ namespace InventoryTrackApi.Models
 {
     public class User
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public required string Username { get; set; }
         public required string Email { get; set; }
         public required string PasswordHash { get; set; }
@@ -18,5 +18,10 @@ namespace InventoryTrackApi.Models
 
         [JsonIgnore]
         public virtual SaasClient SaasClient { get; set; }
+        public virtual ICollection<Sale> Sales { get; set; }
+        public virtual ICollection<Return> Returns { get; set; }
+        public virtual ICollection<Purchase> Purchases { get; set; }
+        public virtual ICollection<CashShift> CashShifts { get; set; }
+        public virtual ICollection<CashRegister> CashRegisters { get; set; }
     }
 }

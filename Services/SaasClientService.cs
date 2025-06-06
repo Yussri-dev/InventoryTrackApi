@@ -48,7 +48,7 @@ namespace InventoryTrackApi.Services
 
                 if (exists)
                 {
-                    throw new InvalidOperationException("Saas Client with the same Rate already exists.");
+                    throw new InvalidOperationException("Saas Client with the same Name already exists.");
                 }
                 await _unitOfWork.SaasClients.CreateAsync(saas);
                 await _unitOfWork.CommitAsync();

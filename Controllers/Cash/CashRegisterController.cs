@@ -85,7 +85,7 @@ namespace InventoryTrackApi.Controllers.Cash
                 {
                     Name = cashRegisterDto.Name,
                     LocationId = cashRegisterDto.LocationId,
-                    EmployeeId = cashRegisterDto.EmployeeId,
+                    UserId = cashRegisterDto.UserId,
                     IsActive = cashRegisterDto.IsActive
                 };
 
@@ -95,7 +95,7 @@ namespace InventoryTrackApi.Controllers.Cash
                 {
                     Name = cashRegister.Name,
                     LocationId = cashRegister.LocationId,
-                    EmployeeId = cashRegister.EmployeeId,
+                    UserId = cashRegister.UserId,
                     IsActive = cashRegister.IsActive
                 };
 
@@ -157,7 +157,7 @@ namespace InventoryTrackApi.Controllers.Cash
                 CashRegisterId = id,
                 Name = cashRegisterDto.Name,
                 LocationId = cashRegisterDto.LocationId,
-                EmployeeId = cashRegisterDto.EmployeeId,
+                UserId = cashRegisterDto.UserId,
                 IsActive = cashRegisterDto.IsActive
             };
 

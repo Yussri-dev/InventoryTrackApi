@@ -8,7 +8,7 @@
         public int SaleId { get; set; }
         public DateTime SaleDate { get; set; } = DateTime.Now;
         public int CustomerId { get; set; }
-        public int EmployeeId { get; set; }
+        public string UserId { get; set; }
         public decimal TvaAmount { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal AmountPaid { get; set; }

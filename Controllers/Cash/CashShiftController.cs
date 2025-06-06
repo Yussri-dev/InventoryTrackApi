@@ -47,7 +47,7 @@ namespace InventoryTrackApi.Controllers.Cash
         }
 
         [HttpGet("Drawer/{idUser}")]
-        public async Task<ActionResult<IEnumerable<CashShiftDTO>>> GetCashShiftByIdAndDate([FromRoute]int idUser)
+        public async Task<ActionResult<IEnumerable<CashShiftDTO>>> GetCashShiftByIdAndDate([FromRoute]string idUser)
         {
             var cashShift = await _cashShiftService.GetCashShiftByIdAndDateAsync(idUser);
             if (cashShift == null)
@@ -159,7 +159,7 @@ namespace InventoryTrackApi.Controllers.Cash
             {
                 CashShiftId = id,
                 CashRegisterId = cashShiftDto.CashRegisterId,
-                EmployeeId = cashShiftDto.EmployeeId,
+                UserId = cashShiftDto.UserId,
                 ShiftDate = cashShiftDto.ShiftDate,
                 ShiftStart = cashShiftDto.ShiftStart,
                 ShiftEnd = cashShiftDto.ShiftEnd,

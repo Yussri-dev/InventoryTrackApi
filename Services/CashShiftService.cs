@@ -27,12 +27,12 @@ namespace InventoryTrackApi.Services
             return await _unitOfWork.CashShifts.GetByIdAsync(id);
         }
 
-        public async Task<CashShift> GetCashShiftByIdAndDateAsync(int userid)
+        public async Task<CashShift> GetCashShiftByIdAndDateAsync(string userid)
         {
             Expression<Func<CashShift, bool>> cashShiftFilter =
-                cashShift => 
-                cashShift.ShiftDate == DateTime.Now.Date && 
-                cashShift.EmployeeId == userid;
+                cashShift =>
+                cashShift.ShiftDate.Date == DateTime.Now.Date &&
+                cashShift.UserId == userid;
            
             return await _unitOfWork.CashShifts.GetByDataConditionAsync(cashShiftFilter);
         }

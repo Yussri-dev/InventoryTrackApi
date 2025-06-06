@@ -28,7 +28,7 @@ namespace InventoryTrackApi.Controllers.Purchases
         }
         [HttpGet("AllPurchase")]
         //[Authorize]
-        public async Task<ActionResult<IEnumerable<PurchaseDTO>>> GetPagedAllPurchases([FromQuery] string startDate, string endDate)
+        public async Task<ActionResult<IEnumerable<PurchaseDTO>>> GetPagedAllPurchases([FromQuery]string userId,[FromQuery] string startDate, [FromQuery] string endDate)
         {
             if (!DateHelper.TryParseDate(startDate, out var startPurchasesDate))
             {
@@ -39,7 +39,7 @@ namespace InventoryTrackApi.Controllers.Purchases
             {
                 return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
             }
-            var purchases = await _purchaseService.GetAllPurchaseFlatAsync(startPurchasesDate, endPurchasesDate);
+            var purchases = await _purchaseService.GetAllPurchaseFlatAsync(userId,startPurchasesDate, endPurchasesDate);
             return Ok(purchases);
         }
 
@@ -87,7 +87,7 @@ namespace InventoryTrackApi.Controllers.Purchases
             try
             {
                 var purchase = _mapper.Map<Purchase>(purchaseDto);
-                await _purchaseService.CreatePurchaseAsync(purchase, "Cash",3);
+                await _purchaseService.CreatePurchaseAsync(purchase, "Cash",4);
 
                 var respondDto = _mapper.Map<PurchaseDTO>(purchase);
                 return CreatedAtAction(nameof(GetPurchase), new { id = purchase.PurchaseId }, respondDto);

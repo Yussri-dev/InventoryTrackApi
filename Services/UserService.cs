@@ -51,6 +51,12 @@ namespace InventoryTrackApi.Services
             return _mapper.Map<UserDTO>(user);
         }
 
+        public async Task<UserDTO> GetUserByIdAsync(string id)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(id);
+            return _mapper.Map<UserDTO>(user);
+        }
+
         // Get user by username (for login purposes)
         public async Task<UserDTO> GetUserByUsernameAsync(string username)
         {

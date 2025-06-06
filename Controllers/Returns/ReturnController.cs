@@ -57,7 +57,7 @@ namespace InventoryTrackApi.Controllers.Returns
                 {
                     ReturnDate = ReturnDto.returnDate,
                     CustomerId = ReturnDto.CustomerId,
-                    EmployeeId = ReturnDto.EmployeeId,
+                    UserId = ReturnDto.UserId,
                     RefundAmount = ReturnDto.RefundAmount,
                     Reason = ReturnDto.Reason,
                     ReturnMethod = ReturnDto.ReturnMethod,
@@ -71,7 +71,7 @@ namespace InventoryTrackApi.Controllers.Returns
                 {
                     returnDate = Return.ReturnDate,
                     CustomerId = Return.CustomerId,
-                    EmployeeId = Return.EmployeeId,
+                    UserId = Return.UserId,
                     RefundAmount = ReturnDto.RefundAmount,
                     Reason = ReturnDto.Reason,
                     ReturnMethod = ReturnDto.ReturnMethod,
@@ -112,7 +112,7 @@ namespace InventoryTrackApi.Controllers.Returns
                 ReturnId = id,
                 ReturnDate = ReturnDto.returnDate,
                 CustomerId = ReturnDto.CustomerId,
-                EmployeeId = ReturnDto.EmployeeId,
+                UserId = ReturnDto.UserId,
                 RefundAmount = ReturnDto.RefundAmount,
                 Reason = ReturnDto.Reason,
                 ReturnMethod = ReturnDto.ReturnMethod,

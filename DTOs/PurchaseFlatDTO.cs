@@ -9,7 +9,7 @@
         public DateTime PurchaseDate { get; set; }
         public int SupplierId { get; set; }
         public string SupplierName { get; set; }
-        public int EmployeeId { get; set; }
+        public string UserId { get; set; }
         public decimal TvaAmount { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal AmountPaid { get; set; }

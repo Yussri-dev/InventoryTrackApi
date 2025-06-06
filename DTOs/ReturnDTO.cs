@@ -9,7 +9,7 @@ namespace InventoryTrackApi.DTOs
         public int SaleId { get; set; }
         public DateTime returnDate { get; set; }
         public int CustomerId { get; set; }
-        public int EmployeeId { get; set; }
+        public string UserId { get; set; }
         public string Reason { get; set; }
         public string Status { get; set; }
         public decimal RefundAmount { get; set; }

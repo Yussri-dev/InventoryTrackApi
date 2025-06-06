@@ -27,7 +27,7 @@ namespace InventoryTrackApi.Controllers.Employee
         // Get paged employees
         [HttpGet]
         //[Authorize]
-        public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetPagedEmployees(int pageNumber = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetPagedEmployees(int pageNumber = 1, int pageSize = 10)
         {
             var pagedEmployees = await _employeeService.GetPagedEmployeeAsync(pageNumber, pageSize);
             return Ok(pagedEmployees);
@@ -36,7 +36,7 @@ namespace InventoryTrackApi.Controllers.Employee
         // Get employee by ID
         [HttpGet("{id}")]
         //[Authorize]
-        public async Task<ActionResult<EmployeeDTO>> GetEmployee([FromRoute]int id)
+        public async Task<ActionResult<UserDTO>> GetEmployee([FromRoute]int id)
         {
             var employee = await _employeeService.GetEmployeeByIdAsync(id);
             if (employee == null)
@@ -49,7 +49,7 @@ namespace InventoryTrackApi.Controllers.Employee
         //// Get product by Name
         [HttpGet("Name/{name}")]
         //[Authorize]
-        public async Task<ActionResult<EmployeeDTO>> GetEmployeeByName([FromRoute] string name)
+        public async Task<ActionResult<UserDTO>> GetEmployeeByName([FromRoute] string name)
         {
             try
             {
@@ -71,7 +71,7 @@ namespace InventoryTrackApi.Controllers.Employee
         // Create a new employee
         [HttpPost]
         //[Authorize]
-        public async Task<ActionResult<EmployeeDTO>> CreateEmployee(EmployeeDTO employeeDto)
+        public async Task<ActionResult<UserDTO>> CreateEmployee(UserDTO employeeDto)
         {
             if (!ModelState.IsValid)
             {
@@ -83,7 +83,7 @@ namespace InventoryTrackApi.Controllers.Employee
                 var employee = _mapper.Map<Models.Employee>(employeeDto);
                 await _employeeService.CreateEmployeeAsync(employee);
 
-                var respondDto = _mapper.Map<EmployeeDTO>(employee);
+                var respondDto = _mapper.Map<UserDTO>(employee);
                 return CreatedAtAction(nameof(GetEmployee), new { id = employee }, respondDto);
             }
             catch (Exception ex)
@@ -118,7 +118,7 @@ namespace InventoryTrackApi.Controllers.Employee
 
                 var responseDto = new EmployeeDTO
                 {
-                    EmployeeId = employee.EmployeeId,
+                    UserId = employee.UserId,
                     FirstName = employee.FirstName,
                     LastName = employee.LastName,
                     Role = employee.Role,
@@ -126,7 +126,7 @@ namespace InventoryTrackApi.Controllers.Employee
                     Phone = employee.Phone
                 };
 
-                return CreatedAtAction(nameof(GetEmployee), new { id = employee.EmployeeId }, responseDto);
+                return CreatedAtAction(nameof(GetEmployee), new { id = employee.UserId }, responseDto);
             }
             catch (Exception ex)
             {
@@ -140,9 +140,9 @@ namespace InventoryTrackApi.Controllers.Employee
         // Update an existing employee
         [HttpPut("{id}")]
         //[Authorize]
-        public async Task<IActionResult> UpdateEmployee([FromRoute]int id, EmployeeDTO employeeDto)
+        public async Task<IActionResult> UpdateEmployee([FromRoute]int id, UserDTO employeeDto)
         {
-            if (id != employeeDto.EmployeeId)
+            if (id.ToString() != employeeDto.Id)
             {
                 return BadRequest("Purchase ID mismatch.");
             }

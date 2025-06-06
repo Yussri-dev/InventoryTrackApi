@@ -16,7 +16,7 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             CreateMap<CashRegister, CashRegisterDTO>().ReverseMap();
 
             CreateMap<CashRegister, CashRegisterDTO>()
-             .ForMember(emp => emp.NameComplete, opt => opt.MapFrom(src => src.Employee.NameComplete))
+             .ForMember(emp => emp.NameComplete, opt => opt.MapFrom(src => src.User.Email))
              .ForMember(loc => loc.NameLocation, opt => opt.MapFrom(src => src.Location.Name));
 
             CreateMap<CashRegisterDTO, CashRegister>()
@@ -32,8 +32,8 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
             CreateMap<CashShift, CashShiftDTO>().ReverseMap();
 
             CreateMap<CashShift, CashShiftDTO>()
-            .ForMember(dest => dest.EmployeeId, opt => opt.MapFrom(src => src.EmployeeId))
-            .ForMember(dest => dest.NameComplete, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.NameComplete : string.Empty))
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+            .ForMember(dest => dest.NameComplete, opt => opt.MapFrom(src => src.User != null ? src.User.Email : string.Empty))
             .ReverseMap();
 
             CreateMap<CashShiftDTO, CashShift>()
@@ -95,19 +95,19 @@ namespace InventoryTrackApi.MappingProfiles.Helpers
 
 
 
-            #region Employee
-            //-------------Employee----------------
-            CreateMap<Employee, EmployeeDTO>().ReverseMap();
+           // #region Employee
+           // //-------------Employee----------------
+           // CreateMap<Employee, UserDTO>().ReverseMap();
 
-            CreateMap<EmployeeDTO, Employee>()
-           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+           // CreateMap<UserDTO, Employee>()
+           //.ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<EmployeeDTO, Employee>()
-           .ForMember(dest => dest.SaasClient, opt => opt.Ignore())
-           .ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
-           .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+           // CreateMap<UserDTO, Employee>()
+           //.ForMember(dest => dest.SaasClient, opt => opt.Ignore())
+           //.ForMember(dest => dest.SaasClientId, opt => opt.MapFrom(src => src.SaasClientId))
+           //.ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            #endregion
+            //#endregion
 
             #region Inventory
             //Inventory

@@ -54,7 +54,7 @@ namespace InventoryTrackApi.Services
         //Update an Existing Employee
         public async Task UpdateEmployeeAsync(Employee employee)
         {
-            var existingEmployee = await _unitOfWork.Employees.GetByIdAsync(employee.EmployeeId);
+            var existingEmployee = await _unitOfWork.Employees.GetByIdAsync(employee.UserId);
 
             if (existingEmployee == null)
             {

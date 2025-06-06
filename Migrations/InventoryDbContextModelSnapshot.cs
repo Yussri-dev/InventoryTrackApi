@@ -48,9 +48,6 @@ namespace InventoryTrackApi.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -64,13 +61,22 @@ namespace InventoryTrackApi.Migrations
                     b.Property<int>("SaasClientId")
                         .HasColumnType("int");
 
-                    b.HasKey("CashRegisterId");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("EmployeeId");
+                    b.Property<string>("UserId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CashRegisterId");
 
                     b.HasIndex("LocationId");
 
                     b.HasIndex("SaasClientId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("CashRegisters");
                 });
@@ -101,9 +107,6 @@ namespace InventoryTrackApi.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
@@ -128,13 +131,22 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("TotalSales")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId1")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("CashShiftId");
 
                     b.HasIndex("CashRegisterId");
 
-                    b.HasIndex("EmployeeId");
-
                     b.HasIndex("SaasClientId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("CashShifts");
                 });
@@ -206,73 +218,73 @@ namespace InventoryTrackApi.Migrations
                         new
                         {
                             CategoryId = 1,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(2765),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(3754),
                             Name = "Electronics"
                         },
                         new
                         {
                             CategoryId = 2,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3155),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4073),
                             Name = "Clothing"
                         },
                         new
                         {
                             CategoryId = 3,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3156),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4074),
                             Name = "Groceries"
                         },
                         new
                         {
                             CategoryId = 4,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3157),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4074),
                             Name = "Furniture"
                         },
                         new
                         {
                             CategoryId = 5,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3158),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4075),
                             Name = "Books"
                         },
                         new
                         {
                             CategoryId = 6,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3159),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4076),
                             Name = "Sacs"
                         },
                         new
                         {
                             CategoryId = 7,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3159),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4076),
                             Name = "Data"
                         },
                         new
                         {
                             CategoryId = 8,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3160),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4077),
                             Name = "Bread"
                         },
                         new
                         {
                             CategoryId = 9,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3161),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4078),
                             Name = "Jacket"
                         },
                         new
                         {
                             CategoryId = 10,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3161),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4078),
                             Name = "T-Shirts"
                         },
                         new
                         {
                             CategoryId = 11,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3162),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4079),
                             Name = "Jeans"
                         },
                         new
                         {
                             CategoryId = 12,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(3162),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(4079),
                             Name = "Mobile"
                         });
                 });
@@ -353,52 +365,6 @@ namespace InventoryTrackApi.Migrations
                     b.HasIndex("SaasClientId");
 
                     b.ToTable("Customers");
-                });
-
-            modelBuilder.Entity("InventoryTrackApi.Models.Employee", b =>
-                {
-                    b.Property<int>("EmployeeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeId"));
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SaasClientId")
-                        .HasColumnType("int");
-
-                    b.HasKey("EmployeeId");
-
-                    b.HasIndex("SaasClientId");
-
-                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.Inventory", b =>
@@ -511,31 +477,31 @@ namespace InventoryTrackApi.Migrations
                         new
                         {
                             LineId = 1,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(7128),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(7758),
                             Name = "Electronics Line"
                         },
                         new
                         {
                             LineId = 2,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(7535),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(8028),
                             Name = "Clothing Line"
                         },
                         new
                         {
                             LineId = 3,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(7536),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(8029),
                             Name = "Grocery Line"
                         },
                         new
                         {
                             LineId = 4,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(7537),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(8029),
                             Name = "Furniture Line"
                         },
                         new
                         {
                             LineId = 5,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(7537),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(8030),
                             Name = "Toys Line"
                         });
                 });
@@ -727,8 +693,8 @@ namespace InventoryTrackApi.Migrations
                             Barcode = "1234567890123",
                             CategoryId = 1,
                             CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 5, 26, 18, 40, 0, 451, DateTimeKind.Local).AddTicks(7629),
-                            DateModified = new DateTime(2025, 5, 26, 18, 40, 0, 451, DateTimeKind.Local).AddTicks(7888),
+                            DateCreated = new DateTime(2025, 6, 6, 11, 36, 55, 412, DateTimeKind.Local).AddTicks(9142),
+                            DateModified = new DateTime(2025, 6, 6, 11, 36, 55, 412, DateTimeKind.Local).AddTicks(9354),
                             DiscountPercentage = 0m,
                             ImageUrl = "https://example.com/productA.jpg",
                             IsActivate = true,
@@ -757,8 +723,8 @@ namespace InventoryTrackApi.Migrations
                             Barcode = "2234567890123",
                             CategoryId = 2,
                             CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 5, 26, 18, 40, 0, 451, DateTimeKind.Local).AddTicks(8606),
-                            DateModified = new DateTime(2025, 5, 26, 18, 40, 0, 451, DateTimeKind.Local).AddTicks(8608),
+                            DateCreated = new DateTime(2025, 6, 6, 11, 36, 55, 412, DateTimeKind.Local).AddTicks(9933),
+                            DateModified = new DateTime(2025, 6, 6, 11, 36, 55, 412, DateTimeKind.Local).AddTicks(9934),
                             DiscountPercentage = 0m,
                             ImageUrl = "https://example.com/productB.jpg",
                             IsActivate = true,
@@ -787,8 +753,8 @@ namespace InventoryTrackApi.Migrations
                             Barcode = "3234567890123",
                             CategoryId = 3,
                             CreatedBy = "Admin",
-                            DateCreated = new DateTime(2025, 5, 26, 18, 40, 0, 451, DateTimeKind.Local).AddTicks(8617),
-                            DateModified = new DateTime(2025, 5, 26, 18, 40, 0, 451, DateTimeKind.Local).AddTicks(8618),
+                            DateCreated = new DateTime(2025, 6, 6, 11, 36, 55, 412, DateTimeKind.Local).AddTicks(9942),
+                            DateModified = new DateTime(2025, 6, 6, 11, 36, 55, 412, DateTimeKind.Local).AddTicks(9943),
                             DiscountPercentage = 0m,
                             ImageUrl = "https://example.com/productC.jpg",
                             IsActivate = true,
@@ -864,9 +830,6 @@ namespace InventoryTrackApi.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("datetime2");
 
@@ -882,13 +845,22 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("TvaAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("PurchaseId");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("EmployeeId");
+                    b.Property<string>("UserId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PurchaseId");
 
                     b.HasIndex("SaasClientId");
 
                     b.HasIndex("SupplierId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Purchases");
                 });
@@ -989,9 +961,6 @@ namespace InventoryTrackApi.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1016,15 +985,24 @@ namespace InventoryTrackApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId1")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("ReturnId");
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("EmployeeId");
-
                     b.HasIndex("SaasClientId");
 
                     b.HasIndex("SaleId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Return");
                 });
@@ -1176,9 +1154,6 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("DiscountPercentage")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
                     b.Property<int>("SaasClientId")
                         .HasColumnType("int");
 
@@ -1191,13 +1166,22 @@ namespace InventoryTrackApi.Migrations
                     b.Property<decimal>("TvaAmount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId1")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("SaleId");
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("EmployeeId");
-
                     b.HasIndex("SaasClientId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Sales");
                 });
@@ -1319,19 +1303,19 @@ namespace InventoryTrackApi.Migrations
                         new
                         {
                             ShelfId = 1,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(7992),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(8449),
                             Name = "Shelf 1"
                         },
                         new
                         {
                             ShelfId = 2,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(8277),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(8656),
                             Name = "Shelf 2"
                         },
                         new
                         {
                             ShelfId = 3,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(8277),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(8657),
                             Name = "Shelf 3"
                         });
                 });
@@ -1427,19 +1411,19 @@ namespace InventoryTrackApi.Migrations
                         new
                         {
                             TaxId = 1,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(8647),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(8992),
                             TaxRate = 10m
                         },
                         new
                         {
                             TaxId = 2,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(8877),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(9222),
                             TaxRate = 20m
                         },
                         new
                         {
                             TaxId = 3,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(8878),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(9224),
                             TaxRate = 30m
                         });
                 });
@@ -1468,30 +1452,27 @@ namespace InventoryTrackApi.Migrations
                         new
                         {
                             UnitId = 1,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(9143),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(9480),
                             Name = "Unit 1"
                         },
                         new
                         {
                             UnitId = 2,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(9330),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(9651),
                             Name = "Unit 2"
                         },
                         new
                         {
                             UnitId = 3,
-                            DateCreated = new DateTime(2025, 5, 26, 16, 40, 0, 449, DateTimeKind.Utc).AddTicks(9331),
+                            DateCreated = new DateTime(2025, 6, 6, 9, 36, 55, 410, DateTimeKind.Utc).AddTicks(9652),
                             Name = "Unit 3"
                         });
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.User", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1747,6 +1728,11 @@ namespace InventoryTrackApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("SaasClientId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("SaasClientId");
+
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
@@ -1767,12 +1753,6 @@ namespace InventoryTrackApi.Migrations
 
             modelBuilder.Entity("InventoryTrackApi.Models.CashRegister", b =>
                 {
-                    b.HasOne("InventoryTrackApi.Models.Employee", "Employee")
-                        .WithMany("CashRegisters")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("InventoryTrackApi.Models.Location", "Location")
                         .WithMany("CashRegisters")
                         .HasForeignKey("LocationId")
@@ -1785,11 +1765,21 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Employee");
+                    b.HasOne("InventoryTrackApi.Models.ApplicationUser", "User")
+                        .WithMany("CashRegisters")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.User", null)
+                        .WithMany("CashRegisters")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("Location");
 
                     b.Navigation("SaasClient");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.CashShift", b =>
@@ -1800,23 +1790,27 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("InventoryTrackApi.Models.Employee", "Employee")
-                        .WithMany("CashShifts")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
                         .WithMany("CashShifts")
                         .HasForeignKey("SaasClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("InventoryTrackApi.Models.ApplicationUser", "User")
+                        .WithMany("CashRegisterShifts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.User", null)
+                        .WithMany("CashShifts")
+                        .HasForeignKey("UserId1");
+
                     b.Navigation("CashRegister");
 
-                    b.Navigation("Employee");
-
                     b.Navigation("SaasClient");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.CashTransaction", b =>
@@ -1844,17 +1838,6 @@ namespace InventoryTrackApi.Migrations
                         .WithMany("Customers")
                         .HasForeignKey("SaasClientId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("SaasClient");
-                });
-
-            modelBuilder.Entity("InventoryTrackApi.Models.Employee", b =>
-                {
-                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
-                        .WithMany("Employees")
-                        .HasForeignKey("SaasClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("SaasClient");
@@ -1973,12 +1956,6 @@ namespace InventoryTrackApi.Migrations
 
             modelBuilder.Entity("InventoryTrackApi.Models.Purchase", b =>
                 {
-                    b.HasOne("InventoryTrackApi.Models.Employee", "Employee")
-                        .WithMany("Purchases")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
                         .WithMany("Purchases")
                         .HasForeignKey("SaasClientId")
@@ -1991,11 +1968,21 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Employee");
+                    b.HasOne("InventoryTrackApi.Models.ApplicationUser", "User")
+                        .WithMany("Purchases")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.User", null)
+                        .WithMany("Purchases")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("SaasClient");
 
                     b.Navigation("Supplier");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.PurchaseItem", b =>
@@ -2052,12 +2039,6 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InventoryTrackApi.Models.Employee", "Employee")
-                        .WithMany("Returns")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
                         .WithMany("Returns")
                         .HasForeignKey("SaasClientId")
@@ -2070,13 +2051,23 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.HasOne("InventoryTrackApi.Models.ApplicationUser", "User")
+                        .WithMany("Returns")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("Employee");
+                    b.HasOne("InventoryTrackApi.Models.User", null)
+                        .WithMany("Returns")
+                        .HasForeignKey("UserId1");
+
+                    b.Navigation("Customer");
 
                     b.Navigation("SaasClient");
 
                     b.Navigation("Sale");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.ReturnItem", b =>
@@ -2133,23 +2124,27 @@ namespace InventoryTrackApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InventoryTrackApi.Models.Employee", "Employee")
-                        .WithMany("Sales")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
                         .WithMany("Sales")
                         .HasForeignKey("SaasClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("InventoryTrackApi.Models.ApplicationUser", "User")
+                        .WithMany("Sales")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryTrackApi.Models.User", null)
+                        .WithMany("Sales")
+                        .HasForeignKey("UserId1");
+
                     b.Navigation("Customer");
 
-                    b.Navigation("Employee");
-
                     b.Navigation("SaasClient");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InventoryTrackApi.Models.SaleItem", b =>
@@ -2275,6 +2270,17 @@ namespace InventoryTrackApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("InventoryTrackApi.Models.ApplicationUser", b =>
+                {
+                    b.HasOne("InventoryTrackApi.Models.SaasClient", "SaasClient")
+                        .WithMany("ApplicationUsers")
+                        .HasForeignKey("SaasClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SaasClient");
+                });
+
             modelBuilder.Entity("InventoryTrackApi.Models.CashRegister", b =>
                 {
                     b.Navigation("CashShifts");
@@ -2292,19 +2298,6 @@ namespace InventoryTrackApi.Migrations
 
             modelBuilder.Entity("InventoryTrackApi.Models.Customer", b =>
                 {
-                    b.Navigation("Returns");
-
-                    b.Navigation("Sales");
-                });
-
-            modelBuilder.Entity("InventoryTrackApi.Models.Employee", b =>
-                {
-                    b.Navigation("CashRegisters");
-
-                    b.Navigation("CashShifts");
-
-                    b.Navigation("Purchases");
-
                     b.Navigation("Returns");
 
                     b.Navigation("Sales");
@@ -2353,6 +2346,8 @@ namespace InventoryTrackApi.Migrations
 
             modelBuilder.Entity("InventoryTrackApi.Models.SaasClient", b =>
                 {
+                    b.Navigation("ApplicationUsers");
+
                     b.Navigation("CashRegisters");
 
                     b.Navigation("CashShifts");
@@ -2360,8 +2355,6 @@ namespace InventoryTrackApi.Migrations
                     b.Navigation("CashTransactions");
 
                     b.Navigation("Customers");
-
-                    b.Navigation("Employees");
 
                     b.Navigation("Inventories");
 
@@ -2421,6 +2414,32 @@ namespace InventoryTrackApi.Migrations
             modelBuilder.Entity("InventoryTrackApi.Models.Unit", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.User", b =>
+                {
+                    b.Navigation("CashRegisters");
+
+                    b.Navigation("CashShifts");
+
+                    b.Navigation("Purchases");
+
+                    b.Navigation("Returns");
+
+                    b.Navigation("Sales");
+                });
+
+            modelBuilder.Entity("InventoryTrackApi.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("CashRegisterShifts");
+
+                    b.Navigation("CashRegisters");
+
+                    b.Navigation("Purchases");
+
+                    b.Navigation("Returns");
+
+                    b.Navigation("Sales");
                 });
 #pragma warning restore 612, 618
         }

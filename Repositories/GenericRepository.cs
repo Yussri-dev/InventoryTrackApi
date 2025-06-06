@@ -2,6 +2,7 @@
 using InventoryTrackApi.Data;
 using InventoryTrackApi.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Linq.Expressions;
 
@@ -328,5 +329,32 @@ namespace InventoryTrackApi.Repositories
 
             return await query;
         }
+
+        public async Task<T> GetByIdAsync(string id)
+        {
+            var entity = await _dbSet.FindAsync(id);
+            if (entity == null)
+            {
+                // You can replace this with a more specific custom exception
+                throw new KeyNotFoundException($"Entity with ID {id} not found.");
+            }
+
+            return entity;
+        }
+
+        public async Task<T?> FindAsync(
+             Expression<Func<T, bool>> predicate,
+             Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            return await query.FirstOrDefaultAsync(predicate);
+        }
+
     }
 }
