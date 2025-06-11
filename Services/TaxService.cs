@@ -26,6 +26,10 @@ namespace InventoryTrackApi.Services
             return await _unitOfWork.Taxes.GetAllAsync(pageNumber, pageSize);
         }
 
+        public async Task<int> GetTaxCountAsync()
+        {
+            return await _unitOfWork.Taxes.CountAsync();
+        }
         //Get a product by Name
         public async Task<IEnumerable<Tax>> GetTaxByRateAsync(decimal taxe)
         {

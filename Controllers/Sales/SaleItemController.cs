@@ -9,7 +9,10 @@ using System.Linq.Expressions;
 
 namespace InventoryTrackApi.Controllers.Sales
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class SaleItemController : ControllerBase
     {

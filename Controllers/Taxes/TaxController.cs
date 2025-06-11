@@ -22,6 +22,12 @@ namespace InventoryTrackApi.Controllers.Taxes
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        [HttpGet("count")]
+        public async Task<int> GetTaxCount()
+        {
+            return await _taxService.GetTaxCountAsync();
+        }
+
         //GetPaged Taxes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaxDTO>>> GetPagedTaxes(int pageNumber, int pageSize)

@@ -25,6 +25,11 @@ namespace InventoryTrackApi.Controllers.Lines
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        [HttpGet("count")]
+        public async Task<int> GetLineCount()
+        {
+            return await _lineService.GetLinesCountAsync();
+        }
         // Get paged categories
         [HttpGet]
         //[Authorize]

@@ -19,6 +19,11 @@ namespace InventoryTrackApi.Services
             return await _unitOfWork.Lines.GetAllAsync(pageNumber, pageSize);
         }
 
+        public async Task<int> GetLinesCountAsync()
+        {
+            return await _unitOfWork.Lines.CountAsync();
+        }
+
         //Get a product by Name
         public async Task<IEnumerable<Line>> GetLineByNameAsync(string name)
         {

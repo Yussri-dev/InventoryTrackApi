@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryTrackApi.Controllers.Suppliers
 {
+    //[ApiVersion("1.0")]
+    //[ApiVersion("2.0")]
+    //[Route("api/v{version:apiversion}/[controller]")]
     [Route("api/[controller]")]
     [ApiController]
     //[Authorize]
@@ -35,6 +38,21 @@ namespace InventoryTrackApi.Controllers.Suppliers
             return Ok(suppliers);
         }
 
+        [HttpGet("supplierUser")]
+        [MapToApiVersion("2.0")]
+        [HttpGet]
+        //[Authorize]
+        public async Task<ActionResult<IEnumerable<SupplierDTO>>> GetPagesSuppliersByUsers(string userId, int pageNumber = 1, int pageSize = 10)
+        {
+            var suppliers = await _supplierService.GetPagedCutomersAsync(pageNumber, pageSize);
+            return Ok(suppliers);
+        }
+
+        //public IActionResult UserId()
+        //{
+        //    return Ok("Nouvelle fonctionnalité v2");
+        //}
+
         // Get supplier by ID
         [HttpGet("{id}")]
         //[Authorize]
@@ -48,9 +66,14 @@ namespace InventoryTrackApi.Controllers.Suppliers
             return Ok(supplier);
         }
 
+        [HttpGet("count")]
+        public async Task<int> GetSupplierCount()
+        {
+            return await _supplierService.GetSuppliersCountAsync();
+        }
         // Create a new supplier
-        [HttpPost]
         //[Authorize]
+        [HttpPost]
         public async Task<ActionResult<SupplierDTO>> CreateSupplier(SupplierDTO supplierDto)
         {
             _logger.LogInformation($"Create Supplier request for Supplier: {supplierDto}");

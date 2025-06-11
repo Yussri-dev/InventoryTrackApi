@@ -1,18 +1,12 @@
 ﻿using InventoryTrackApi.Models;
 using InventoryTrackApi.Repositories;
 using InventoryTrackApi.Services.Interfaces;
+using System.Linq.Expressions;
 
 namespace InventoryTrackApi.Services
 {
     public class SupplierService
     {
-        //private readonly IGenericRepository<Supplier> _supplierRepository;
-
-        //public SupplierService(IGenericRepository<Supplier> supplierRepository)
-        //{
-        //    _supplierRepository = supplierRepository;
-        //}
-
         private readonly IUnitOfWork _unitOfWork;
         public SupplierService(IUnitOfWork unitOfWork)
         {
@@ -25,11 +19,25 @@ namespace InventoryTrackApi.Services
             return await _unitOfWork.Suppliers.GetAllAsync(pageNumber, pageSize);
         }
 
+        // Get All Suppliers Count
+        public async Task<int> GetSuppliersCountAsync()
+        {
+            return await _unitOfWork.Suppliers.CountAsync();
+        }   
+
         //Get a Supplier by Id
         public async Task<Supplier> GetSupplierByIdAsync(int id)
         {
             return await _unitOfWork.Suppliers.GetByIdAsync(id);
         }
+
+        //Get Supplier By User Id
+        //public async Task<IEnumerable<Supplier>> GetSupplierByUserIdAsync(string userId)
+        //{
+        //    Expression<Func<Supplier, bool>> supplierUserFilter = user =>
+        //    user.userId == userId;
+        //    return await _unitOfWork.Suppliers.GetByConditionAsync(supplierUserFilter, "Supplier");
+        //}
 
         //Create a new Supplier
         public async Task CreateSupplierAsync(Supplier supplier)

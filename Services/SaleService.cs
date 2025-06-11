@@ -162,37 +162,6 @@ namespace InventoryTrackApi.Services
             return await _unitOfWork.Sales.GetByIdAsync(id);
         }
 
-        //public async Task CreateSaleAsync(Sale sale, string typeSale)
-        //{
-        //    // Assumes both repositories use the SAME DbContext instance
-        //    await _unitOfWork.BeginTransactionAsync();
-
-        //    try
-        //    {
-        //        await _unitOfWork.Sales.CreateAsync(sale);
-        //        var salePayment = new SalePayment
-        //        {
-        //            SaleId = sale.SaleId,
-        //            Amount = sale.TotalAmount,
-        //            PaymentDate = sale.SaleDate,
-        //            PaymentType = typeSale,
-        //            SaasClientId = sale.SaasClientId
-        //        };
-        //        await _unitOfWork.SalePayments.CreateAsync(salePayment);
-
-        //        var cashShift = new CashShift
-        //        {
-        //            CashIn = sale.TotalAmount,
-        //        };
-        //        await _unitOfWork.CommitAsync();
-        //    }
-        //    catch (Exception)
-        //    {
-        //        await _unitOfWork.RollbackAsync();
-        //        throw;
-        //    }
-        //}
-
         public async Task CreateSaleAsync(Sale sale, string typeSale, int cashRegisterId)
         {
             await _unitOfWork.BeginTransactionAsync();

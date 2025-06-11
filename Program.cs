@@ -7,6 +7,8 @@ using InventoryTrackApi.Services;
 using InventoryTrackApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -87,11 +89,6 @@ try
     var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "DefaultIssuer";
     var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "DefaultAudience";
 
-    Console.WriteLine("Using JWT Configuration:");
-    Console.WriteLine($"Key: {(string.IsNullOrEmpty(builder.Configuration["Jwt:Key"]) ? "Using default fallback key" : "Using configured key")}");
-    Console.WriteLine($"Issuer: {jwtIssuer}");
-    Console.WriteLine($"Audience: {jwtAudience}");
-
     builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -109,7 +106,13 @@ try
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     });
+
 }
 catch (Exception ex)
 {
@@ -163,12 +166,25 @@ builder.Services.AddScoped<ReturnItemService>();
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5000); 
+    serverOptions.ListenAnyIP(5000);
     serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps());
 });
 
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICacheService, CacheService>();
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+});
+
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddUserSecrets<Program>();
 
 var app = builder.Build();
 
@@ -203,6 +219,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    string[] roles = new[] { "Admin", "User" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
 app.UseSession();
 app.UseHttpsRedirection();
 app.UseAuthentication();

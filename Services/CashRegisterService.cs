@@ -29,6 +29,15 @@ namespace InventoryTrackApi.Services
             return await _unitOfWork.CashRegisters.GetByIdAsync(id);
         }
 
+        public async Task<CashRegister> GetCashRegisterByIdUserAsync(string id)
+        {
+            var cashUser = await _unitOfWork.CashRegisters.GetWhereAsync(
+              cs =>
+              cs.UserId == id);
+
+            return cashUser.FirstOrDefault();
+        }
+
 
         //Create new CashRegister
         public async Task CreateCashRegisterAsync(CashRegister cashRegister)
@@ -47,7 +56,7 @@ namespace InventoryTrackApi.Services
         public async Task UpdateCashRegisterAsync(CashRegister cashRegister)
         {
             var exisitingCashRegister = await _unitOfWork.CashRegisters.GetByIdAsync(cashRegister.CashRegisterId);
-            
+
             //Checking if CashRegister Exists
             if (exisitingCashRegister == null)
             {

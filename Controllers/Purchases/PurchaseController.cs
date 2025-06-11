@@ -13,7 +13,7 @@ namespace InventoryTrackApi.Controllers.Purchases
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class PurchaseController : ControllerBase
     {
         private readonly PurchaseService _purchaseService;
@@ -26,8 +26,9 @@ namespace InventoryTrackApi.Controllers.Purchases
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
+
+        [Authorize(Roles = "Admin")]
         [HttpGet("AllPurchase")]
-        //[Authorize]
         public async Task<ActionResult<IEnumerable<PurchaseDTO>>> GetPagedAllPurchases([FromQuery]string userId,[FromQuery] string startDate, [FromQuery] string endDate)
         {
             if (!DateHelper.TryParseDate(startDate, out var startPurchasesDate))
@@ -43,7 +44,7 @@ namespace InventoryTrackApi.Controllers.Purchases
             return Ok(purchases);
         }
 
-
+        [Authorize(Roles = "Admin")]
         [HttpGet("PurchasesAmount")]
         public async Task<ActionResult<IEnumerable<SummaryDTO>>> GetPurchasesSummaryByPeriod(DateTime startDate, DateTime endDate)
         {
@@ -52,8 +53,8 @@ namespace InventoryTrackApi.Controllers.Purchases
         }
 
         // Get paged purchases
+        [Authorize(Roles = "Admin")]
         [HttpGet]
-        //[Authorize]
         public async Task<ActionResult<IEnumerable<PurchaseDTO>>> GetPagedPurchases(int pageNumber = 1, int pageSize = 10)
         {
             var purchases = await _purchaseService.GetPagedPurchasesAsync(pageNumber, pageSize);
@@ -61,8 +62,8 @@ namespace InventoryTrackApi.Controllers.Purchases
         }
 
         // Get purchase by ID
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
-        //[Authorize]
         public async Task<ActionResult<PurchaseDTO>> GetPurchase(int id)
         {
             var purchase = await _purchaseService.GetPurchaseByIdAsync(id);
@@ -75,8 +76,8 @@ namespace InventoryTrackApi.Controllers.Purchases
         }
 
         // Create a new purchase
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        //[Authorize]
         public async Task<ActionResult<PurchaseDTO>> CreatePurchase(PurchaseDTO purchaseDto)
         {
             if (!ModelState.IsValid)
@@ -102,10 +103,10 @@ namespace InventoryTrackApi.Controllers.Purchases
                 );
             }
         }
-        
+
         // Update a purchase
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        //[Authorize]
         public async Task<IActionResult> UpdatePurchase(int id, PurchaseDTO purchaseDto)
         {
             _logger.LogInformation($"Update Purchase request received for Id : {id}");
@@ -138,16 +139,16 @@ namespace InventoryTrackApi.Controllers.Purchases
         }
 
         // Delete a purchase
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        //[Authorize]
         public async Task<IActionResult> DeletePurchase(int id)
         {
             await _purchaseService.DeletePurchaseAsync(id);
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("count")]
-        //[Authorize]
         public async Task<ActionResult<int>> GetPurchaseCount()
         {
             try
@@ -166,8 +167,8 @@ namespace InventoryTrackApi.Controllers.Purchases
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("PurchasesDateRange")]
-        //[Authorize]
         public async Task<ActionResult<IEnumerable<SaleItemDTO>>> GetPagedPurchasesByDateRangeAsync(
             [FromQuery] string startDate, [FromQuery] string endDate)
         {

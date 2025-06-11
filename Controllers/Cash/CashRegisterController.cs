@@ -44,6 +44,17 @@ namespace InventoryTrackApi.Controllers.Cash
             return Ok(cashRegister);
         }
 
+        [HttpGet("cash/{userId}")]
+        public async Task<ActionResult<CashRegisterDTO>> GetCashRegisterByUserId([FromRoute]string userId)
+        {
+            var cashRegister = await _cashRegisterService.GetCashRegisterByIdUserAsync(userId);
+            if (cashRegister == null)
+            {
+                return NotFound("Cash register user not found.");
+            }
+            return Ok(cashRegister);
+        }
+
         // Create a new Cash Register
         [HttpPost]
         public async Task<ActionResult<CashRegisterDTO>> CreateCashRegister(CashRegisterDTO cashRegisterDto)
@@ -73,40 +84,6 @@ namespace InventoryTrackApi.Controllers.Cash
                     );
                 throw;
             }
-            /*
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                var cashRegister = new CashRegister
-                {
-                    Name = cashRegisterDto.Name,
-                    LocationId = cashRegisterDto.LocationId,
-                    UserId = cashRegisterDto.UserId,
-                    IsActive = cashRegisterDto.IsActive
-                };
-
-                await _cashRegisterService.CreateCashRegisterAsync(cashRegister);
-
-                var responseDto = new CashRegisterDTO
-                {
-                    Name = cashRegister.Name,
-                    LocationId = cashRegister.LocationId,
-                    UserId = cashRegister.UserId,
-                    IsActive = cashRegister.IsActive
-                };
-
-                return CreatedAtAction(nameof(GetCashRegister), new { id = cashRegister.CashRegisterId }, responseDto);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating employee");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-            */
         }
 
         // Update an existing Cash Register
@@ -140,30 +117,6 @@ namespace InventoryTrackApi.Controllers.Cash
                 _logger.LogError(ex, $"Error occurred while updating Category with ID {id}");
                 return StatusCode(500, "Internal server error.");
             }
-            /*
-            if (id != cashRegisterDto.CashRegisterId)
-            {
-                return BadRequest("Cash Register ID mismatch.");
-            }
-
-            var existingCashRegister = await _cashRegisterService.GetCashRegisterByIdAsync(id);
-            if (existingCashRegister == null)
-            {
-                return NotFound("Cash register not found.");
-            }
-
-            var cashRegister = new CashRegister
-            {
-                CashRegisterId = id,
-                Name = cashRegisterDto.Name,
-                LocationId = cashRegisterDto.LocationId,
-                UserId = cashRegisterDto.UserId,
-                IsActive = cashRegisterDto.IsActive
-            };
-
-            await _cashRegisterService.UpdateCashRegisterAsync(cashRegister);
-            return NoContent();
-            */
         }
 
         // Delete a Cash Register

@@ -11,7 +11,10 @@ using System.Net;
 
 namespace InventoryTrackApi.Controllers.Sales
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class SaleController : ControllerBase
     {
@@ -29,13 +32,13 @@ namespace InventoryTrackApi.Controllers.Sales
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        //[HttpGet("AllSale")]
-        ////[Authorize]
-        //public async Task<ActionResult<IEnumerable<SaleFlatDTO>>> GetPagedAllSales()
+        //[HttpGet("new-feature")]
+        //[MapToApiVersion("2.0")]
+        //public IActionResult NewFeatureV2()
         //{
-        //    var purchases = await _saleService.GetAllSaleFlatAsync();
-        //    return Ok(purchases);
+        //    return Ok("Nouvelle fonctionnalité v2");
         //}
+
 
         [HttpGet("AllSale")]
         //[Authorize]

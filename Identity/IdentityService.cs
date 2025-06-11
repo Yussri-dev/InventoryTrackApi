@@ -24,6 +24,7 @@ namespace InventoryTrackApi.Identity
             _unitOfWork = unitOfWork;
         }
 
+
         public async Task<AuthResponseDto> AuthenticateAsync(LoginDto request)
         {
             var result = await _signInManager.PasswordSignInAsync(
@@ -55,7 +56,7 @@ namespace InventoryTrackApi.Identity
             }
             //var idSaasClient = user.
             // Générer le token JWT
-            var token = _tokenService.GenerateJwtToken(idUser, user.UserName);
+            var token = _tokenService.GenerateJwtToken(idUser, user.UserName, roles);
 
             return new AuthResponseDto
             {
@@ -128,7 +129,6 @@ namespace InventoryTrackApi.Identity
         //    };
         //}
 
-
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
         {
             var user = new ApplicationUser
@@ -137,7 +137,7 @@ namespace InventoryTrackApi.Identity
                 Email = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                //SaasClientId = dto.SaasClientId
+                SaasClientId = dto.SaasClientId
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -151,24 +151,84 @@ namespace InventoryTrackApi.Identity
                 };
             }
 
-            //  Assign role to user
-            //var role = "Admin"; // or "User", "Owner", etc.
-            //await _userManager.AddToRoleAsync(user, role);
+            if (dto.Roles != null && dto.Roles.Any())
+            {
+                foreach (var role in dto.Roles)
+                {
+                    if (!await _userManager.IsInRoleAsync(user, role))
+                    {
+                        await _userManager.AddToRoleAsync(user, role);
+                    }
+                }
+            }
+            else
+            {
+                await _userManager.AddToRoleAsync(user, "User");
+            }
 
-            //// Fetch the assigned roles again
-            //var roles = await _userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
 
-            // Optional: Generate real token
-            var token = _tokenService.GenerateJwtToken(user.Id.ToString(), user.UserName);
+            var token = _tokenService.GenerateJwtToken(user.Id.ToString(), user.UserName, roles);
 
             return new AuthResponseDto
             {
                 IsSuccess = true,
                 UserName = user.UserName,
                 Token = token,
-                //Roles = roles.ToList()
+                Roles = roles.ToList()
             };
         }
+
+
+        //public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
+        //{
+        //    var user = new ApplicationUser
+        //    {
+        //        UserName = dto.Email,
+        //        Email = dto.Email,
+        //        FirstName = dto.FirstName,
+        //        LastName = dto.LastName,
+        //        SaasClientId = dto.SaasClientId
+        //    };
+
+        //    var result = await _userManager.CreateAsync(user, dto.Password);
+
+        //    if (!result.Succeeded)
+        //    {
+        //        return new AuthResponseDto
+        //        {
+        //            IsSuccess = false,
+        //            ErrorMessage = string.Join(", ", result.Errors.Select(e => e.Description))
+        //        };
+        //    }
+
+        //    if (dto.Roles != null && dto.Roles.Any())
+        //    {
+        //        foreach (var role in dto.Roles)
+        //        {
+        //            if (!await _userManager.IsInRoleAsync(user, role))
+        //            {
+        //                await _userManager.AddToRoleAsync(user, role);
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        await _userManager.AddToRoleAsync(user, "User");
+        //    }
+
+        //    var roles = await _userManager.GetRolesAsync(user);
+
+        //    var token = _tokenService.GenerateJwtToken(user.Id.ToString(), user.UserName);
+
+        //    return new AuthResponseDto
+        //    {
+        //        IsSuccess = true,
+        //        UserName = user.UserName,
+        //        Token = token,
+        //        Roles = roles.ToList()
+        //    };
+        //}
 
 
     }

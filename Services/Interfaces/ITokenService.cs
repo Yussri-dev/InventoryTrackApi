@@ -2,7 +2,7 @@
 {
     public interface ITokenService
     {
-        //string GenerateJwtToken(string userId, string userName, IList<string> roles);
-        string GenerateJwtToken(string userId, string userName);
+        string GenerateJwtToken(string userId, string userName, IList<string> roles);
+        //string GenerateJwtToken(string userId, string userName);
     }
 }

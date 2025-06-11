@@ -14,5 +14,8 @@ namespace InventoryTrackApi.DTOs
 
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public int SaasClientId { get; set; }
+        public List<string> Roles { get; set; }
+
     }
 }
