@@ -22,7 +22,64 @@ namespace InventoryTrackApi.Services
         {
             _unitOfWork = unitOfWork;
         }
+        public async Task<List<SaleFlatDTO>> GetAllSaleFlatAsync(string userId, DateTime startDate, DateTime endDate)
+        {
+            // Define the filter using the entity type (Purchase)
+            Expression<Func<Sale, bool>> dateFilter = purchase =>
+            purchase.UserId == userId &&
+                purchase.SaleDate >= startDate.Date && purchase.SaleDate < endDate.Date.AddDays(1);
 
+            //var purchases = await _saleRepository.GetDataByDateRange(dateFilter);
+            var purchases = await _unitOfWork.Sales.GetDataByDateRange(dateFilter);
+            var result = new List<SaleFlatDTO>();
+
+            foreach (var purchase in purchases)
+            {
+                //var purchaseItems = await _saleItemRepository.GetByConditionAsync(pi => pi.SaleId == purchase.SaleId
+                var purchaseItems = await _unitOfWork.SaleItems.GetByConditionAsync(pi => pi.SaleId == purchase.SaleId
+
+                );
+
+                foreach (var item in purchaseItems)
+                {
+                    var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
+
+                    result.Add(new SaleFlatDTO
+                    {
+                        // Purchase info
+                        SaleId = purchase.SaleId,
+                        SaleDate = purchase.SaleDate,
+                        CustomerId = purchase.CustomerId,
+                        CustomerName = purchase.Customer?.Name,
+                        //UserId = purchase.UserId,
+                        //TvaAmount = purchase.TvaAmount,
+                        //TotalAmount = purchase.TotalAmount,
+                        //AmountPaid = purchase.AmountPaid,
+
+                        // Item info
+                        //PurchaseItemId = item.PurchaseItemId,
+                        SaleItemId = item.SaleItemId,
+                        Quantity = item.Quantity,
+                        Price = item.Price,
+                        Discount = item.Discount,
+                        TaxAmount = item.TaxAmount,
+
+                        // Product info
+                        ProductId = product.ProductId,
+                        ProductName = product.Name,
+                        PurchasePrice = product.PurchasePrice,
+                        SalePrice1 = product.SalePrice1,
+                        SalePrice2 = product.SalePrice2,
+                        SalePrice3 = product.SalePrice3,
+                        Barcode = product.Barcode,
+                        QuantityStock = product.QuantityStock,
+                        QuantityPack = product.QuantityPack
+                    });
+                }
+            }
+
+            return result;
+        }
         public async Task<List<SaleFlatDTO>> GetAllSaleFlatAsync(DateTime startDate, DateTime endDate)
         {
             // Define the filter using the entity type (Purchase)

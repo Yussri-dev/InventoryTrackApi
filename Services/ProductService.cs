@@ -114,7 +114,7 @@ namespace InventoryTrackApi.Services
             try
             {
                 bool exists = await _unitOfWork.Products.ExistsAsync(p =>
-                p.Barcode == product.Barcode || p.Name == product.Name);
+                    p.Barcode == product.Barcode || p.Name == product.Name);
 
                 if (product.SalePrice1 == 0 || product.PurchasePrice == 0)
                 {
@@ -127,17 +127,16 @@ namespace InventoryTrackApi.Services
 
                 await _unitOfWork.Products.CreateAsync(product);
                 await _unitOfWork.CommitAsync();
-                _cacheService.Remove($"Products_Lists");
+
+                _cacheService.RemoveByPrefix("Products_Lists");
             }
             catch (Exception)
             {
                 await _unitOfWork.RollbackAsync();
                 throw;
             }
-            
-
-
         }
+
 
         //Update an existing product
         public async Task UpdateProductAsync(Product product)
@@ -165,7 +164,9 @@ namespace InventoryTrackApi.Services
             existingProduct.ModifiedBy = product.ModifiedBy;
             existingProduct.DateModified = product.DateModified;
             existingProduct.IsActivate = product.IsActivate;
-
+            existingProduct.CategoryId = product.CategoryId;
+            existingProduct.LineId = product.LineId;
+            existingProduct.TaxId = product.TaxId;
             await _unitOfWork.Products.UpdateAsync(existingProduct);
         }
 

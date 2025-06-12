@@ -38,15 +38,15 @@ namespace InventoryTrackApi.Controllers.Suppliers
             return Ok(suppliers);
         }
 
-        [HttpGet("supplierUser")]
-        [MapToApiVersion("2.0")]
-        [HttpGet]
-        //[Authorize]
-        public async Task<ActionResult<IEnumerable<SupplierDTO>>> GetPagesSuppliersByUsers(string userId, int pageNumber = 1, int pageSize = 10)
-        {
-            var suppliers = await _supplierService.GetPagedCutomersAsync(pageNumber, pageSize);
-            return Ok(suppliers);
-        }
+        //[HttpGet("supplierUser")]
+        //[MapToApiVersion("2.0")]
+        //[HttpGet]
+        ////[Authorize]
+        //public async Task<ActionResult<IEnumerable<SupplierDTO>>> GetPagesSuppliersByUsers(string userId, int pageNumber = 1, int pageSize = 10)
+        //{
+        //    var suppliers = await _supplierService.GetPagedCutomersAsync(pageNumber, pageSize);
+        //    return Ok(suppliers);
+        //}
 
         //public IActionResult UserId()
         //{

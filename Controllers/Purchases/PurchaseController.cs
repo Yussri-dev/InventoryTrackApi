@@ -13,7 +13,8 @@ namespace InventoryTrackApi.Controllers.Purchases
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
+
     public class PurchaseController : ControllerBase
     {
         private readonly PurchaseService _purchaseService;

@@ -3,6 +3,7 @@ using InventoryTrackApi.DTOs;
 using InventoryTrackApi.Helpers;
 using InventoryTrackApi.Models;
 using InventoryTrackApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
@@ -16,6 +17,8 @@ namespace InventoryTrackApi.Controllers.Sales
     [Route("api/v{version:apiVersion}/[controller]")]
     //[Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
+
     public class SaleController : ControllerBase
     {
         private readonly SaleService _saleService;
@@ -32,14 +35,26 @@ namespace InventoryTrackApi.Controllers.Sales
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        //[HttpGet("new-feature")]
-        //[MapToApiVersion("2.0")]
-        //public IActionResult NewFeatureV2()
-        //{
-        //    return Ok("Nouvelle fonctionnalité v2");
-        //}
+        [Authorize(Roles = "Admin")]
+        [HttpGet("AllSale/{userId}")]
+        [MapToApiVersion("2.0")]
+        //[Authorize]
+        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedAllSales([FromQuery] string userId, [FromQuery] string startDate, string endDate)
+        {
+            if (!DateHelper.TryParseDate(startDate, out var startPurchasesDate))
+            {
+                return BadRequest("Invalid start date format. Use dd/MM/yyyy.");
+            }
 
+            if (!DateHelper.TryParseDate(endDate, out var endPurchasesDate))
+            {
+                return BadRequest("Invalid end date format. Use dd/MM/yyyy.");
+            }
+            var purchases = await _saleService.GetAllSaleFlatAsync(userId, startPurchasesDate, endPurchasesDate);
+            return Ok(purchases);
+        }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("AllSale")]
         //[Authorize]
         public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedAllSales([FromQuery] string startDate, string endDate)
@@ -57,6 +72,7 @@ namespace InventoryTrackApi.Controllers.Sales
             return Ok(purchases);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("monthly-summary")]
         public async Task<ActionResult<IEnumerable<MonthlySummaryDTO>>> GetMonthlySummary([FromQuery] string userId,
             [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
@@ -66,7 +82,7 @@ namespace InventoryTrackApi.Controllers.Sales
 
             try
             {
-                var monthlySummaries = await _saleService.GetMonthlySummaryAsync(userId,start, end);
+                var monthlySummaries = await _saleService.GetMonthlySummaryAsync(userId, start, end);
                 return Ok(monthlySummaries);
             }
             catch (Exception ex)
@@ -76,6 +92,7 @@ namespace InventoryTrackApi.Controllers.Sales
         }
 
         // Get paged sales
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedSales(int pageNumber = 1, int pageSize = 10)
         {
@@ -83,6 +100,7 @@ namespace InventoryTrackApi.Controllers.Sales
             return Ok(sales);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("SalesAmount")]
         public async Task<ActionResult<IEnumerable<SummaryDTO>>> GetSalesSummaryByPeriod(DateTime startDate, DateTime endDate)
         {
@@ -91,6 +109,7 @@ namespace InventoryTrackApi.Controllers.Sales
         }
 
         // Get sale by ID
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<SaleDTO>> GetSale(int id)
         {
@@ -103,6 +122,7 @@ namespace InventoryTrackApi.Controllers.Sales
         }
 
         // Create a new sale
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<SaleDTO>> CreateSale(SaleDTO saleDto)
         {
@@ -132,6 +152,7 @@ namespace InventoryTrackApi.Controllers.Sales
         }
 
         // Update a sale
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSale(int id, SaleDTO saleDto)
         {
@@ -165,6 +186,7 @@ namespace InventoryTrackApi.Controllers.Sales
         }
 
         // Delete a sale
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSale(int id)
         {
@@ -172,6 +194,7 @@ namespace InventoryTrackApi.Controllers.Sales
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("count")]
         public async Task<ActionResult<int>> GetSaleCount()
         {
@@ -186,6 +209,7 @@ namespace InventoryTrackApi.Controllers.Sales
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("SalesDateRange")]
         public async Task<ActionResult<IEnumerable<SaleDTO>>> GetPagedSalesByDateRangeAsync(
                 [FromQuery] string startDate, [FromQuery] string endDate)
@@ -206,6 +230,7 @@ namespace InventoryTrackApi.Controllers.Sales
             return Ok(sales);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("CustomerSales")]
         public async Task<ActionResult<IEnumerable<SaleDTO>>> GetCustomerSalesAsync(
                 [FromQuery] int saleId)
@@ -216,6 +241,7 @@ namespace InventoryTrackApi.Controllers.Sales
             return Ok(Salesales);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("apply-payment/{saleId}")]
         public async Task<IActionResult> ApplyPaymentToInvoices([FromRoute] int saleId, [FromQuery] decimal paymentAmount)
         {

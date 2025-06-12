@@ -163,7 +163,7 @@ namespace InventoryTrackApi.Identity
             }
             else
             {
-                await _userManager.AddToRoleAsync(user, "User");
+                await _userManager.AddToRoleAsync(user, "Admin");
             }
 
             var roles = await _userManager.GetRolesAsync(user);
