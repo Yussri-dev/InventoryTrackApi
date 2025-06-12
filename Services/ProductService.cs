@@ -30,7 +30,7 @@ namespace InventoryTrackApi.Services
         private const string TaxesCacheKey = "Taxes_All";
         private const string LinesCacheKey = "Lines_All";
 
-       
+
         //public ProductService(
         //    IGenericRepository<Product> productRepository,
         //    IGenericRepository<Shelf> shelfRepository,
@@ -79,7 +79,7 @@ namespace InventoryTrackApi.Services
             });
         }
 
-        // Get a product by ID
+        // Get a product by the ID
         public async Task<Product> GetProductByIdAsync(int id)
         {
             return await _unitOfWork.Products.GetByIdAsync(id);
